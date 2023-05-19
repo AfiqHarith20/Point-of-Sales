@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/screen/home_screen.dart';
+import 'package:pointofsales/widget/bottom_nav.dart';
 import 'package:sizer/sizer.dart';
 
 void main() {
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
               color: kSecondaryColor,
             ),
           ),
-          home: HomeScreen(),
+          home: BottomNav(),
         );
       },
     );
