@@ -67,6 +67,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         letterSpacing: 2.0,
                       ),
                     ),
+                    GestureDetector(
+                      onTap: () {},
+                      child: FaIcon(
+                        FontAwesomeIcons.chevronRight,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -101,6 +107,69 @@ class _HomeScreenState extends State<HomeScreen> {
                 childCount: transaction().length,
               ),
             ),
+            // SliverToBoxAdapter(
+            //   child: Padding(
+            //     padding:
+            //         const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+            //     child: Row(
+            //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //       children: [
+            //         // Divider(
+            //         //   color: Colors.blueAccent,
+            //         //   height: 10,
+            //         // ),
+            //         Text(
+            //           "You Items",
+            //           style: GoogleFonts.aubrey(
+            //             fontWeight: FontWeight.w600,
+            //             color: kTextColor,
+            //             fontSize: 16.sp,
+            //             letterSpacing: 2.0,
+            //           ),
+            //         ),
+            //         Text(
+            //           "Price",
+            //           style: GoogleFonts.aubrey(
+            //             fontWeight: FontWeight.w600,
+            //             color: kTextColor,
+            //             fontSize: 16.sp,
+            //             letterSpacing: 2.0,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+            // SliverList(
+            //   delegate: SliverChildBuilderDelegate(
+            //     (context, index) {
+            //       return ListTile(
+            //         leading: ClipRRect(
+            //           borderRadius: BorderRadius.circular(5),
+            //         ),
+            //         title: Text(
+            //           items()[index].itemnames,
+            //           style: GoogleFonts.breeSerif(
+            //             fontWeight: FontWeight.w600,
+            //             color: kTextColor,
+            //             fontSize: 12.sp,
+            //             letterSpacing: 2.0,
+            //           ),
+            //         ),
+            //         trailing: Text(
+            //           items()[index].price,
+            //           style: GoogleFonts.aubrey(
+            //             fontWeight: FontWeight.w500,
+            //             color: kTextColor,
+            //             fontSize: 12.sp,
+            //             letterSpacing: 2.0,
+            //           ),
+            //         ),
+            //       );
+            //     },
+            //     childCount: items().length,
+            //   ),
+            // ),
           ],
         ),
       ),

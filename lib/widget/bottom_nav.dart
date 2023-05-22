@@ -4,7 +4,11 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pointofsales/screen/history_screen.dart';
 import 'package:pointofsales/screen/home_screen.dart';
+import 'package:pointofsales/screen/invoice_screen.dart';
+import 'package:pointofsales/screen/report_screen.dart';
+import 'package:pointofsales/screen/setting_screen.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({Key? key}) : super(key: key);
@@ -17,6 +21,10 @@ class _BottomNavState extends State<BottomNav> {
   int index_color = 0;
   List Screen = [
     HomeScreen(),
+    InvoiceScreen(),
+    HistoryScreen(),
+    ReportScreen(),
+    SettingScreen(),
   ];
   @override
   Widget build(BuildContext context) {
