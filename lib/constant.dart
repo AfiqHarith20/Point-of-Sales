@@ -6,6 +6,7 @@ const Color kPrimaryColor = Color(0xFF4A84C7);
 const Color kSecondaryColor = Color(0xFF2BB1EA);
 const Color kTextColor = Color(0xFFFFFFFF);
 const Color kTextColorShade = Color.fromARGB(199, 187, 184, 184);
+const Color kLabel = Color.fromARGB(255, 58, 247, 203);
 
 final kMargin = EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h);
 final kPadding = EdgeInsets.all(2.h);

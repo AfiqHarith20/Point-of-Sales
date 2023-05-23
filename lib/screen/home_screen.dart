@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/data.dart';
+import 'package:pointofsales/screen/drawer_screen.dart';
 import 'package:pointofsales/widget/bottom_nav.dart';
 import 'package:sizer/sizer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -17,7 +18,21 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: DrawerScreen(),
       appBar: AppBar(
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: const FaIcon(
+                FontAwesomeIcons.bars,
+                color: kTextColor,
+              ),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
+        ),
         title: Text(
           "DASHBOARD",
           style: GoogleFonts.ubuntu(
@@ -29,8 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(
-              Icons.notifications,
+            icon: FaIcon(
+              FontAwesomeIcons.bell,
               color: Colors.white,
             ),
             onPressed: () {},
@@ -50,19 +65,15 @@ class _HomeScreenState extends State<HomeScreen> {
             SliverToBoxAdapter(
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Divider(
-                    //   color: Colors.blueAccent,
-                    //   height: 10,
-                    // ),
                     Text(
                       "Last Transaction",
                       style: GoogleFonts.aubrey(
                         fontWeight: FontWeight.w600,
-                        color: kTextColor,
+                        color: kLabel,
                         fontSize: 16.sp,
                         letterSpacing: 2.0,
                       ),
@@ -71,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () {},
                       child: FaIcon(
                         FontAwesomeIcons.chevronRight,
+                        color: kLabel,
                       ),
                     ),
                   ],
@@ -81,9 +93,6 @@ class _HomeScreenState extends State<HomeScreen> {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   return ListTile(
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
                     title: Text(
                       transaction()[index].transactionId,
                       style: GoogleFonts.breeSerif(
@@ -107,69 +116,68 @@ class _HomeScreenState extends State<HomeScreen> {
                 childCount: transaction().length,
               ),
             ),
-            // SliverToBoxAdapter(
-            //   child: Padding(
-            //     padding:
-            //         const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-            //     child: Row(
-            //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //       children: [
-            //         // Divider(
-            //         //   color: Colors.blueAccent,
-            //         //   height: 10,
-            //         // ),
-            //         Text(
-            //           "You Items",
-            //           style: GoogleFonts.aubrey(
-            //             fontWeight: FontWeight.w600,
-            //             color: kTextColor,
-            //             fontSize: 16.sp,
-            //             letterSpacing: 2.0,
-            //           ),
-            //         ),
-            //         Text(
-            //           "Price",
-            //           style: GoogleFonts.aubrey(
-            //             fontWeight: FontWeight.w600,
-            //             color: kTextColor,
-            //             fontSize: 16.sp,
-            //             letterSpacing: 2.0,
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-            // SliverList(
-            //   delegate: SliverChildBuilderDelegate(
-            //     (context, index) {
-            //       return ListTile(
-            //         leading: ClipRRect(
-            //           borderRadius: BorderRadius.circular(5),
-            //         ),
-            //         title: Text(
-            //           items()[index].itemnames,
-            //           style: GoogleFonts.breeSerif(
-            //             fontWeight: FontWeight.w600,
-            //             color: kTextColor,
-            //             fontSize: 12.sp,
-            //             letterSpacing: 2.0,
-            //           ),
-            //         ),
-            //         trailing: Text(
-            //           items()[index].price,
-            //           style: GoogleFonts.aubrey(
-            //             fontWeight: FontWeight.w500,
-            //             color: kTextColor,
-            //             fontSize: 12.sp,
-            //             letterSpacing: 2.0,
-            //           ),
-            //         ),
-            //       );
-            //     },
-            //     childCount: items().length,
-            //   ),
-            // ),
+            SliverToBoxAdapter(
+              child: Divider(
+                color: Colors.redAccent,
+                thickness: 1.0,
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Your Items",
+                      style: GoogleFonts.aubrey(
+                        fontWeight: FontWeight.w600,
+                        color: kLabel,
+                        fontSize: 16.sp,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    Text(
+                      "Price",
+                      style: GoogleFonts.aubrey(
+                        fontWeight: FontWeight.w600,
+                        color: kLabel,
+                        fontSize: 16.sp,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  return ListTile(
+                    title: Text(
+                      invoice()[index].prodname ?? "",
+                      style: GoogleFonts.breeSerif(
+                        fontWeight: FontWeight.w600,
+                        color: kTextColor,
+                        fontSize: 12.sp,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    trailing: Text(
+                      invoice()[index].price ?? "",
+                      style: GoogleFonts.aubrey(
+                        fontWeight: FontWeight.w500,
+                        color: kTextColor,
+                        fontSize: 12.sp,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                  );
+                },
+                childCount: invoice().length,
+              ),
+            ),
           ],
         ),
       ),
