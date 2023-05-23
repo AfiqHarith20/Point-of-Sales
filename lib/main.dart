@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
               color: kSecondaryColor,
             ),
           ),
-          home: BottomNav(),
+          home: HomeScreen(),
         );
       },
     );
