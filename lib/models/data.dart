@@ -35,18 +35,18 @@ List<Invoice> invoice() {
   invoice.date = "16/07/2020";
   invoice.custusr = "Azim";
   invoice.prodname = "Arabic Bean 100g";
-  invoice.price = "100.00";
+  invoice.price = "75.00";
   invoice.quantity = "2";
-  invoice.subtotal = "200.00";
+  // invoice.subtotal = "200.00";
   Invoice invoice1 = Invoice();
   invoice1.prodname = "Italian Bean 100g";
-  invoice1.price = "50.00";
+  invoice1.price = "80.00";
   invoice1.quantity = "3";
-  invoice1.subtotal = "150.00";
+  // invoice1.subtotal = "150.00";
   Invoice invoice2 = Invoice();
   invoice2.prodname = "Vietnam Bean 100g";
   invoice2.price = "70.00";
   invoice2.quantity = "3";
-  invoice2.subtotal = "210.00";
+  // invoice2.subtotal = "210.00";
   return [invoice, invoice1, invoice2];
 }
