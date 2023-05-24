@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/data.dart';
 import 'package:pointofsales/screen/home_screen.dart';
+import 'package:pointofsales/screen/product_screen.dart';
 import 'package:sizer/sizer.dart';
 
 class InvoiceScreen extends StatefulWidget {
@@ -17,6 +18,45 @@ class InvoiceScreen extends StatefulWidget {
 }
 
 class _InvoiceScreenState extends State<InvoiceScreen> {
+  double discountPercentage = 10;
+  double taxPercentage = 3;
+
+  double calculateDiscount() {
+    double total = calculateSubtotal();
+    return (total * discountPercentage) / 100;
+  }
+
+  double calculateTax() {
+    double total = calculateSubtotal();
+    return (total * taxPercentage) / 100;
+  }
+
+  double calculateSubtotal() {
+    double subtotal = 0;
+    for (int index = 0; index < invoice().length; index++) {
+      double price = double.parse(invoice()[index].price ?? "0");
+      double quantity = double.parse(invoice()[index].quantity ?? "0");
+      subtotal += price * quantity;
+    }
+    return subtotal;
+  }
+
+  double calculateTotal() {
+    double subtotal = calculateSubtotal();
+    double discount = calculateDiscount();
+    double tax = calculateTax();
+    return subtotal - discount + tax;
+  }
+
+  String selectedPayment = "Cash";
+  List<String> paymentOptions = [
+    "Cash",
+    "Credit Card",
+    "Debit Card",
+    "TNG",
+    "Online Payment",
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -270,7 +310,10 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(6.0),
                               child: Text(
-                                invoice()[index].subtotal ?? "",
+                                (double.parse(invoice()[index].price ?? "0") *
+                                        double.parse(
+                                            invoice()[index].quantity ?? "0"))
+                                    .toStringAsFixed(2),
                                 style: GoogleFonts.breeSerif(
                                   fontWeight: FontWeight.w500,
                                   color: kTextColor,
@@ -285,9 +328,187 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               ),
             ),
             SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ProductScreen(), // Replace ProductPage with the actual product page widget
+                      ),
+                    );
+                  },
+                  child: Text(
+                    "Add Product",
+                    style: GoogleFonts.aubrey(
+                      fontWeight: FontWeight.w600,
+                      color: Color.fromARGB(255, 231, 96, 96),
+                      fontSize: 14.sp,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
               child: Divider(
                 color: Colors.redAccent,
                 thickness: 1.0,
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Discount",
+                      style: GoogleFonts.aubrey(
+                        fontWeight: FontWeight.w600,
+                        color: kLabel,
+                        fontSize: 14.sp,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    Text(
+                      "\RM${calculateDiscount().toStringAsFixed(2)}",
+                      style: GoogleFonts.breeSerif(
+                        fontWeight: FontWeight.w500,
+                        color: kTextColor,
+                        fontSize: 12.sp,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Tax",
+                      style: GoogleFonts.aubrey(
+                        fontWeight: FontWeight.w600,
+                        color: kLabel,
+                        fontSize: 14.sp,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    Text(
+                      "\RM${calculateTax().toStringAsFixed(2)}",
+                      style: GoogleFonts.breeSerif(
+                        fontWeight: FontWeight.w500,
+                        color: kTextColor,
+                        fontSize: 12.sp,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Total",
+                      style: GoogleFonts.aubrey(
+                        fontWeight: FontWeight.w600,
+                        color: kLabel,
+                        fontSize: 14.sp,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    Text(
+                      "\RM${calculateTotal().toStringAsFixed(2)}",
+                      style: GoogleFonts.breeSerif(
+                        fontWeight: FontWeight.w500,
+                        color: kTextColor,
+                        fontSize: 12.sp,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Payment",
+                      style: GoogleFonts.aubrey(
+                        fontWeight: FontWeight.w600,
+                        color: kLabel,
+                        fontSize: 14.sp,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    DropdownButton<String>(
+                      dropdownColor: kPrimaryColor,
+                      iconEnabledColor: kLabel,
+                      value: selectedPayment,
+                      items: paymentOptions
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          child: Text(
+                            value,
+                            style: GoogleFonts.breeSerif(
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                              fontSize: 12.sp,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                          value: value,
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedPayment = newValue!;
+                        });
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: kPrimaryColor,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  child: Text(
+                    "CHECKOUT",
+                    style: GoogleFonts.ubuntu(
+                      fontSize: 16.sp,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
