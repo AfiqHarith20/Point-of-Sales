@@ -50,3 +50,10 @@ List<Invoice> invoice() {
   // invoice2.subtotal = "210.00";
   return [invoice, invoice1, invoice2];
 }
+
+class Product {
+  String? prodId;
+  String? prodName;
+  String? prodImage;
+  String? prodPrice;
+}
