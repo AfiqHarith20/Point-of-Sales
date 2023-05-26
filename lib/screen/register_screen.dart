@@ -7,56 +7,50 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/user_model.dart';
-import 'package:pointofsales/screen/register_screen.dart';
+import 'package:pointofsales/screen/login_screen.dart';
 import 'package:pointofsales/widget/login/login_button.dart';
 import 'package:pointofsales/widget/login/login_textfield.dart';
 import 'package:pointofsales/widget/login/square_tile.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
+
 import 'package:http/http.dart' as http;
 import 'dart:convert' as JSON;
 
-class LoginScreen extends StatefulWidget {
+class RegisterScreen extends StatefulWidget {
   final Function()? onTap;
-  LoginScreen({
-    Key? key,
-    this.onTap,
-  }) : super(key: key);
+  const RegisterScreen({Key? key, this.onTap}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  //text editing controllers
+class _RegisterScreenState extends State<RegisterScreen> {
   final emailController = TextEditingController();
+  final nameController = TextEditingController();
   final passwordController = TextEditingController();
 
-  Future<Login> userLogin() async {
+  Future<Register> userRegister() async {
     print(emailController.text);
+    print(nameController.text);
     print(passwordController.text);
     final http.Response response = await http.post(
-      Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/login"),
+      Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/register"),
       body: ({
         'email': emailController.text,
+        'name': nameController.text,
         'password': passwordController.text,
       }),
     );
-    final Map<String, dynamic> responseData = JSON.jsonDecode(response.body);
-    print(responseData);
 
     if (response.statusCode == 200) {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('token', responseData['data']['token']);
-      prefs.setString('email', responseData['data']['email']);
       print(response);
+      print("SUCCESS REGISTER!!!!!!!!!!!!!!!!!!!!!!!!!!");
     } else {
       print(response.reasonPhrase);
     }
-    return userLogin();
+    return userRegister();
   }
 
-  //Sign in user
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,14 +64,14 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             FaIcon(
               FontAwesomeIcons.shopLock,
-              size: 100,
+              size: 40,
               color: kScaffoldColor,
             ),
             SizedBox(
               height: 5.h,
             ),
             Text(
-              "Welcome back you\'ve been missed!",
+              "Let\'s create an account for you!",
               style: GoogleFonts.ubuntu(
                 fontSize: 14.sp,
                 letterSpacing: 1.0,
@@ -86,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             SizedBox(
-              height: 5.h,
+              height: 3.h,
             ),
             Padding(
               padding: const EdgeInsets.only(right: 338),
@@ -109,7 +103,27 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 1.h,
             ),
             Padding(
-              padding: const EdgeInsets.only(right: 300),
+              padding: const EdgeInsets.only(right: 335),
+              child: Text(
+                "Name:",
+                style: GoogleFonts.ubuntu(
+                  fontSize: 14.sp,
+                  letterSpacing: 1.0,
+                  fontWeight: FontWeight.w500,
+                  color: kScaffoldColor,
+                ),
+              ),
+            ),
+            LoginTextfield(
+              controller: nameController,
+              hintText: 'Please Enter Name',
+              obscureText: true,
+            ),
+            SizedBox(
+              height: 1.h,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 299),
               child: Text(
                 "Password:",
                 style: GoogleFonts.ubuntu(
@@ -122,34 +136,17 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             LoginTextfield(
               controller: passwordController,
-              hintText: 'Please Enter Password',
+              hintText: 'Please Confirm Your Password',
               obscureText: true,
             ),
             SizedBox(
               height: 1.h,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    "Forgot Password?",
-                    style: GoogleFonts.ubuntu(
-                      fontSize: 10.sp,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w500,
-                      color: kScaffoldColor,
-                    ),
-                  )
-                ],
-              ),
-            ),
             SizedBox(
               height: 1.h,
             ),
-            LoginButton(
-              onTap: userLogin,
+            RegisterButton(
+              onTap: userRegister,
             ),
             SizedBox(
               height: 5.h,
@@ -167,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: Text(
-                      "Or Continue With",
+                      "Or Register With",
                       style: GoogleFonts.ubuntu(
                         fontSize: 10.sp,
                         letterSpacing: 1.0,
@@ -209,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Not a member?",
+                  "Already Members?",
                   style: GoogleFonts.ubuntu(
                     fontSize: 14.sp,
                     letterSpacing: 1.0,
@@ -225,12 +222,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RegisterScreen(),
+                        builder: (context) => LoginScreen(),
                       ),
                     ),
                   },
                   child: Text(
-                    "Register now",
+                    "Login now",
                     style: GoogleFonts.ubuntu(
                       fontSize: 14.sp,
                       letterSpacing: 1.0,
