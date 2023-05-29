@@ -8,7 +8,7 @@ import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/login_screen.dart';
-import 'package:pointofsales/widget/login/login_button.dart';
+import 'package:pointofsales/widget/login/sign_in_up_button.dart';
 import 'package:pointofsales/widget/login/login_textfield.dart';
 import 'package:pointofsales/widget/login/square_tile.dart';
 import 'package:sizer/sizer.dart';
@@ -29,7 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final nameController = TextEditingController();
   final passwordController = TextEditingController();
 
-  Future<Register> userRegister() async {
+  Future<void> userRegister() async {
     print(emailController.text);
     print(nameController.text);
     print(passwordController.text);
@@ -117,7 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             LoginTextfield(
               controller: nameController,
               hintText: 'Please Enter Name',
-              obscureText: true,
+              obscureText: false,
             ),
             SizedBox(
               height: 1.h,

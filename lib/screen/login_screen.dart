@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -7,10 +9,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/user_model.dart';
+import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/register_screen.dart';
-import 'package:pointofsales/widget/login/login_button.dart';
+import 'package:pointofsales/widget/login/sign_in_up_button.dart';
 import 'package:pointofsales/widget/login/login_textfield.dart';
 import 'package:pointofsales/widget/login/square_tile.dart';
+import 'package:pointofsales/widget/progressIndicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:http/http.dart' as http;
@@ -32,28 +36,50 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  Future<Login> userLogin() async {
-    print(emailController.text);
-    print(passwordController.text);
-    final http.Response response = await http.post(
-      Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/login"),
-      body: ({
-        'email': emailController.text,
-        'password': passwordController.text,
-      }),
-    );
-    final Map<String, dynamic> responseData = JSON.jsonDecode(response.body);
-    print(responseData);
+  final GlobalKey<FormState> _formKeyForLogin = GlobalKey<FormState>();
+  bool _isLoader = false;
 
-    if (response.statusCode == 200) {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('token', responseData['data']['token']);
-      prefs.setString('email', responseData['data']['email']);
-      print(response);
-    } else {
-      print(response.reasonPhrase);
+  Future<void> userLogin() async {
+    try {
+      print(emailController.text);
+      print(passwordController.text);
+      final http.Response response = await http.post(
+        Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/login"),
+        body: ({
+          'email': emailController.text,
+          'password': passwordController.text,
+        }),
+      );
+      final Map<String, dynamic> responseData = JSON.jsonDecode(response.body);
+      print(responseData);
+
+      if (response.statusCode == 200) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', responseData['data']['token']);
+        prefs.setString('email', responseData['data']['email']);
+        print(response);
+
+        emailController.clear();
+        passwordController.clear();
+      } else {
+        throw jsonDecode(response.body)["Message"] ?? "Unknown error occured";
+      }
+    } catch (e) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return SimpleDialog(
+            title: Text("Error"),
+            contentPadding: EdgeInsets.all(20),
+            children: [
+              Text(
+                e.toString(),
+              )
+            ],
+          );
+        },
+      );
     }
-    return userLogin();
   }
 
   //Sign in user
@@ -148,9 +174,10 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               height: 1.h,
             ),
-            LoginButton(
-              onTap: userLogin,
-            ),
+            _loginButton(context),
+            // LoginButton(
+            //   onTap: userLogin,
+            // ),
             SizedBox(
               height: 5.h,
             ),
@@ -244,6 +271,30 @@ class _LoginScreenState extends State<LoginScreen> {
           ]),
         ),
       )),
+    );
+  }
+
+  Widget _loginButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _isLoader ? buildCircularProgressIndicator() : userLogin(),
+      child: Container(
+        padding: EdgeInsets.all(25),
+        margin: EdgeInsets.symmetric(horizontal: 25),
+        decoration: BoxDecoration(
+          color: kScaffoldColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+            child: Text(
+          "Sign In",
+          style: GoogleFonts.ubuntu(
+            fontSize: 14.sp,
+            letterSpacing: 1.0,
+            fontWeight: FontWeight.w500,
+            color: kTextColor,
+          ),
+        )),
+      ),
     );
   }
 }
