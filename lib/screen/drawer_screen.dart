@@ -11,11 +11,17 @@ import 'package:pointofsales/screen/invoice_screen.dart';
 import 'package:pointofsales/screen/product_screen.dart';
 import 'package:pointofsales/screen/report_screen.dart';
 import 'package:pointofsales/screen/setting_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
-class DrawerScreen extends StatelessWidget {
+class DrawerScreen extends StatefulWidget {
   const DrawerScreen({Key? key}) : super(key: key);
 
+  @override
+  State<DrawerScreen> createState() => _DrawerScreenState();
+}
+
+class _DrawerScreenState extends State<DrawerScreen> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -127,7 +133,11 @@ class DrawerScreen extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
-            onTap: () => {Navigator.of(context).pop()},
+            onTap: () async {
+              final SharedPreferences prefs =
+                  await SharedPreferences.getInstance();
+              prefs.clear();
+            },
           ),
         ],
       ),
