@@ -11,7 +11,7 @@ import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/register_screen.dart';
-import 'package:pointofsales/widget/login/sign_in_up_button.dart';
+import 'package:pointofsales/widget/login/register_button.dart';
 import 'package:pointofsales/widget/login/login_textfield.dart';
 import 'package:pointofsales/widget/login/square_tile.dart';
 import 'package:pointofsales/widget/progressIndicator.dart';
@@ -41,8 +41,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> userLogin() async {
     try {
-      print(emailController.text);
-      print(passwordController.text);
       final http.Response response = await http.post(
         Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/login"),
         body: ({
@@ -57,12 +55,26 @@ class _LoginScreenState extends State<LoginScreen> {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('token', responseData['data']['token']);
         prefs.setString('email', responseData['data']['email']);
+        prefs.setString('fullname', responseData['data']['fullname']);
+        prefs.setInt('role_id', responseData['data']['role_id']);
+        prefs.setString('role_name', responseData['data']['role_name']);
         print(response);
 
         emailController.clear();
         passwordController.clear();
+
+        setState(() {
+          _isLoader = true;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(),
+            ),
+          );
+        });
       } else {
-        throw jsonDecode(response.body)["Message"] ?? "Unknown error occured";
+        throw jsonDecode(response.body)["Message"] ??
+            "Sorry Wrong Email or Password!";
       }
     } catch (e) {
       showDialog(

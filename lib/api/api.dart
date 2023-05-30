@@ -4,23 +4,35 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pointofsales/models/user_model.dart';
+import 'package:pointofsales/screen/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<void> logout() async {
+bool _isLoader = false;
+
+Future<void> logout(BuildContext context) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
   Uri uri =
       Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/logout");
   var response = await http.post(uri,
       headers: ({
-        'Authorization': 'Bearer<token>',
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
         'Content-Type': 'application/json',
       }));
+
   print(response.statusCode);
+  prefs.remove('token');
 
   if (response.statusCode == 200) {
     print(response);
-    print("SUCCESS REGISTER!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    print("Logout!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(),
+      ),
+    );
   } else {
     print(response.reasonPhrase);
   }
-  return logout();
+  return logout(context);
 }

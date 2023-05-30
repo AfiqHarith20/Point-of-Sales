@@ -8,7 +8,7 @@ import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/login_screen.dart';
-import 'package:pointofsales/widget/login/sign_in_up_button.dart';
+import 'package:pointofsales/widget/login/register_button.dart';
 import 'package:pointofsales/widget/login/login_textfield.dart';
 import 'package:pointofsales/widget/login/square_tile.dart';
 import 'package:sizer/sizer.dart';
