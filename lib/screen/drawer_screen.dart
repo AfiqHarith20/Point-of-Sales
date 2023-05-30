@@ -4,10 +4,12 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/screen/history_screen.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/invoice_screen.dart';
+import 'package:pointofsales/screen/merchant_screen.dart';
 import 'package:pointofsales/screen/product_screen.dart';
 import 'package:pointofsales/screen/report_screen.dart';
 import 'package:pointofsales/screen/setting_screen.dart';
@@ -30,7 +32,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
         children: <Widget>[
           DrawerHeader(
             child: Text(
-              'Welcome Afiq Harith',
+              'Welcome Afiq harith',
               style: GoogleFonts.aBeeZee(
                 fontSize: 14.sp,
                 color: kTextColor,
@@ -56,6 +58,20 @@ class _DrawerScreenState extends State<DrawerScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => HomeScreen(),
+                ),
+              ),
+            },
+          ),
+          ListTile(
+            leading: FaIcon(
+              FontAwesomeIcons.building,
+            ),
+            title: Text('Merchant'),
+            onTap: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MerchantScreen(),
                 ),
               ),
             },
@@ -137,6 +153,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
               final SharedPreferences prefs =
                   await SharedPreferences.getInstance();
               prefs.clear();
+              logout(context);
             },
           ),
         ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/data.dart';
+import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/drawer_screen.dart';
 import 'package:pointofsales/widget/bottom_nav.dart';
 import 'package:sizer/sizer.dart';
@@ -15,6 +16,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  UserModel? user;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -219,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         Text(
-                          "Afiq Harith",
+                          "${user?.data.fullname ?? ""}",
                           style: GoogleFonts.breeSerif(
                             fontWeight: FontWeight.w600,
                             color: kTextColor,
@@ -249,24 +260,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
                 color: kPrimaryColor,
                 borderRadius: kRadius,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text(
-                    "Expense",
-                    style: GoogleFonts.abel(
-                      fontSize: 14.sp,
-                      color: kTextColor,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_downward_sharp,
-                    color: kTextColor,
-                  ),
-                ],
               ),
             ),
           ],
