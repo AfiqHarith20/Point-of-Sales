@@ -17,3 +17,25 @@ class Merchant {
     required this.city,
   });
 }
+
+class StateComp {
+  String message;
+  List<StateComp> data;
+
+  StateComp({
+    required this.message,
+    required this.data,
+  });
+}
+
+class Datum {
+  int id;
+  String stateName;
+  dynamic countryId;
+
+  Datum({
+    required this.id,
+    required this.stateName,
+    this.countryId,
+  });
+}
