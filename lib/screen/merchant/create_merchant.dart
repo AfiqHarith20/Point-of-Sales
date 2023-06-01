@@ -39,7 +39,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
   List citiesList = [];
 
   bool _isLoader = false;
-  late String _state;
+
   late String _city;
 
   // Future<void> createMerchant() async {
@@ -79,17 +79,19 @@ class _CreateMerchantState extends State<CreateMerchant> {
       var data = json.decode(response.body);
       setState(() {
         statesList = data;
+        print(statesList);
+        print("State List");
       });
     }).catchError((e) {
       debugPrint(e);
     });
+    return _getStateList();
   }
 
   Future<void> _getCityList() async {
     await http
         .get(Uri.parse(
-            "http://template.gosini.xyz:8880/cspos/public/api/lookup/city/" +
-                _state))
+            "http://template.gosini.xyz:8880/cspos/public/api/lookup/city/"))
         .then((response) {
       var data = json.decode(response.body);
       setState(() {
@@ -98,7 +100,6 @@ class _CreateMerchantState extends State<CreateMerchant> {
     }).catchError((e) {
       debugPrint(e);
     });
-    ;
   }
 
   void _submitForm() async {
@@ -123,7 +124,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
         "contact_email": contactEmailController.text,
         "office_address": officeAddressController.text,
         "postcode": postcodeController.text,
-        "state": _state.toString(),
+        "state": statesList.toString(),
         "city": _city.toString(),
       }),
       headers: {
@@ -137,7 +138,9 @@ class _CreateMerchantState extends State<CreateMerchant> {
     } else {
       print(response.reasonPhrase);
     }
-    return;
+    setState(() {
+      _isLoader = false;
+    });
   }
 
   @override
@@ -303,30 +306,57 @@ class _CreateMerchantState extends State<CreateMerchant> {
                   SizedBox(
                     height: 1.h,
                   ),
-                  GSField.spinner(
-                    errorMessage: 'Please select state',
-                    hint: 'Select State',
-                    // helpMessage: 'help message',
-                    tag: 'state',
-                    required: true,
-                    weight: 12,
-                    title: 'State',
-                    items: [
-                      SpinnerDataModel(
-                        name: 'None',
-                        id: 0,
-                        isSelected: true,
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "State",
+                      style: TextStyle(
+                        color: kTextColor,
+                        fontSize: 14.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
                       ),
-                      SpinnerDataModel(
-                        name: 'Selangor',
-                        id: 1,
-                      ),
-                      SpinnerDataModel(
-                        name: 'Johor',
-                        id: 2,
-                      ),
-                    ],
+                    ),
                   ),
+                  Container(
+                    child: ButtonTheme(
+                      alignedDropdown: true,
+                      child: new DropdownButtonFormField(
+                        isExpanded: true,
+                        icon: FaIcon(
+                          FontAwesomeIcons.chevronDown,
+                        ),
+                        items: statesList.map((item) {
+                          return new DropdownMenuItem(
+                            child: new Text(item['stateName']),
+                            value: item['id'].toString(),
+                          );
+                        }).toList(),
+                        onChanged: (newVal) {
+                          setState(() {
+                            _city = null ?? "";
+                            statesList = newVal as List<dynamic>;
+                            _getCityList();
+                          });
+                          print('State: ' + statesList.toString());
+                        },
+                        validator: (value) =>
+                            value == null ? 'Field required.' : null,
+                        value: statesList,
+                        hint: Text('Select a state'),
+                      ),
+                    ),
+                  ),
+                  // GSField.spinner(
+                  //   errorMessage: 'Please select state',
+                  //   hint: 'Select State',
+                  //   // helpMessage: 'help message',
+                  //   tag: 'state',
+                  //   required: true,
+                  //   weight: 12,
+                  //   title: 'State',
+                  //   items: [],
+                  // ),
                   SizedBox(
                     height: 1.h,
                   ),
