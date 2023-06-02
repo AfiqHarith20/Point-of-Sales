@@ -1,3 +1,5 @@
+// ignore_for_file: cast_from_null_always_fails
+
 import 'dart:convert' as JSON;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -14,6 +16,7 @@ import 'package:gsform/gs_form/model/data_model/spinner_data_model.dart';
 import 'package:gsform/gs_form/widget/field.dart';
 import 'package:gsform/gs_form/widget/form.dart';
 import 'package:pointofsales/constant.dart';
+import 'package:pointofsales/models/merchant_model.dart';
 
 import 'package:pointofsales/screen/merchant_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,71 +38,34 @@ class _CreateMerchantState extends State<CreateMerchant> {
   final officeAddressController = TextEditingController();
   final postcodeController = TextEditingController();
 
-  List statesList = [];
-  List citiesList = [];
+  late Future<List<CompanyState>> _state;
+  late Future<List<CompanyCity>> _city;
+  CompanyState? _selectedState;
+  CompanyCity? _selectedCity;
 
+  // late dynamic selectedState;
+  late StateComp state = StateComp(data: []);
+  late CityComp city = CityComp(data: []);
+  String errorMessage = '';
   bool _isLoader = false;
 
-  late String _city;
-
-  // Future<void> createMerchant() async {
-  //   final http.Response response = await http.post(
-  //     Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/merchant"),
-  //     body: JSON.jsonEncode({
-  //       "company_name": companyNameController.text,
-  //       "contact_no": contactNoController.text,
-  //       "contact_email": contactEmailController.text,
-  //       "office_address": officeAddressController.text,
-  //       "postcode": postcodeController.text,
-  //       "state": _state.toString(),
-  //       "city": _city.toString(),
-  //     }),
-  //     headers: {
-  //       'Authorization': 'Bearer ' + prefs.getString('token'),
-  //       'Content-Type': 'application/json'
-  //     },
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //     print(response);
-  //     print("Success Register Merchant");
-  //   } else {
-  //     print(response.reasonPhrase);
-  //   }
-  //   return createMerchant();
-  // }
-
-  Future<void> _getStateList() async {
-    await http
-        .get(
-      Uri.parse(
-          "http://template.gosini.xyz:8880/cspos/public/api/lookup/state"),
-    )
-        .then((response) {
-      var data = json.decode(response.body);
-      setState(() {
-        statesList = data;
-        print(statesList);
-        print("State List");
-      });
-    }).catchError((e) {
-      debugPrint(e);
-    });
-    return _getStateList();
+  Future<List<CompanyState>> _getStateList() async {
+    Uri uri = Uri.parse(
+        "http://template.gosini.xyz:8880/cspos/public/api/lookup/state");
+    var response = await http.get(uri);
+    Map<String, dynamic> json = jsonDecode(response.body);
+    final stateComp = StateComp.fromJson(json);
+    return stateComp.data;
   }
 
-  Future<void> _getCityList() async {
-    await http
-        .get(Uri.parse(
-            "http://template.gosini.xyz:8880/cspos/public/api/lookup/city/"))
-        .then((response) {
-      var data = json.decode(response.body);
-      setState(() {
-        citiesList = data;
-      });
-    }).catchError((e) {
-      debugPrint(e);
-    });
+  Future<List<CompanyCity>> _getCityList({required int stateId}) async {
+    Uri uri = Uri.parse(
+        "http://template.gosini.xyz:8880/cspos/public/api/lookup/city/$stateId");
+    var response = await http.get(uri);
+    print(response.body);
+    Map<String, dynamic> json = jsonDecode(response.body);
+    final cityComp = CityComp.fromJson(json);
+    return cityComp.data;
   }
 
   void _submitForm() async {
@@ -124,8 +90,8 @@ class _CreateMerchantState extends State<CreateMerchant> {
         "contact_email": contactEmailController.text,
         "office_address": officeAddressController.text,
         "postcode": postcodeController.text,
-        "state": statesList.toString(),
-        "city": _city.toString(),
+        "state": state.toString(),
+        "city": city.toString(),
       }),
       headers: {
         'Authorization': 'Bearer ' + prefs.getString('token').toString(),
@@ -141,13 +107,37 @@ class _CreateMerchantState extends State<CreateMerchant> {
     setState(() {
       _isLoader = false;
     });
+    if (response.statusCode == 201) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => MerchantScreen(),
+        ),
+      );
+    } else {
+      setState(() {
+        errorMessage =
+            'Failed to create merchant: ${response.statusCode}: ${response.body}';
+      });
+    }
   }
 
   @override
   void initState() {
     _getStateList();
+    // callAPIandAssignData();
     super.initState();
+    _state = _getStateList();
+    _city = _getCityList(stateId: int.fromEnvironment("defaultState"));
   }
+
+  // callAPIandAssignData() async {
+  //   final data = await _getStateList();
+  //   setState(() {
+  //     state = data;
+  //     statesList = data.data;
+  //     isDataLoaded = true;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +232,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                     // prefixWidget: widget,
                   ),
                   SizedBox(
-                    height: 1.h,
+                    height: .5.h,
                   ),
                   GSField.mobile(
                     tag: 'contactNo',
@@ -258,7 +248,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                     required: true,
                   ),
                   SizedBox(
-                    height: 1.h,
+                    height: .5.h,
                   ),
                   GSField.email(
                     tag: 'contactEmail',
@@ -274,7 +264,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                     required: true,
                   ),
                   SizedBox(
-                    height: 1.h,
+                    height: .5.h,
                   ),
                   GSField.textPlain(
                     tag: 'officeAddress',
@@ -291,7 +281,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                     // prefixWidget: widget,
                   ),
                   SizedBox(
-                    height: 1.h,
+                    height: .5.h,
                   ),
                   GSField.number(
                     tag: 'postcode',
@@ -304,7 +294,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                     // helpMessage: 'help message',
                   ),
                   SizedBox(
-                    height: 1.h,
+                    height: 0.5.h,
                   ),
                   Container(
                     alignment: Alignment.centerLeft,
@@ -318,72 +308,148 @@ class _CreateMerchantState extends State<CreateMerchant> {
                       ),
                     ),
                   ),
+                  SizedBox(
+                    height: 0.5.h,
+                  ),
                   Container(
-                    child: ButtonTheme(
-                      alignedDropdown: true,
-                      child: new DropdownButtonFormField(
-                        isExpanded: true,
-                        icon: FaIcon(
-                          FontAwesomeIcons.chevronDown,
-                        ),
-                        items: statesList.map((item) {
-                          return new DropdownMenuItem(
-                            child: new Text(item['stateName']),
-                            value: item['id'].toString(),
-                          );
-                        }).toList(),
-                        onChanged: (newVal) {
-                          setState(() {
-                            _city = null ?? "";
-                            statesList = newVal as List<dynamic>;
-                            _getCityList();
-                          });
-                          print('State: ' + statesList.toString());
-                        },
-                        validator: (value) =>
-                            value == null ? 'Field required.' : null,
-                        value: statesList,
-                        hint: Text('Select a state'),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: kTextColor,
+                    ),
+                    width: double.infinity,
+                    height: 50,
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 15),
+                    child: FutureBuilder<List<CompanyState>>(
+                        future: _state,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          }
+
+                          if (snapshot.data == null) {
+                            return const CircularProgressIndicator();
+                          }
+                          return DropdownButton<CompanyState>(
+                              icon: FaIcon(
+                                FontAwesomeIcons.chevronDown,
+                                size: 15,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              isExpanded: true,
+                              hint: Text(
+                                "Select State",
+                                style: TextStyle(
+                                  color: kHint,
+                                  fontSize: 10.sp,
+                                  letterSpacing: 0.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              onChanged: (state) {
+                                setState(() {
+                                  _selectedState = state;
+                                  _getCityList(
+                                      stateId:
+                                          int.fromEnvironment("defaultState"));
+                                });
+                              },
+                              value: _selectedState,
+                              items: [
+                                ...snapshot.data!.map(
+                                  (state) => DropdownMenuItem(
+                                    value: state,
+                                    child: Row(children: [
+                                      Text('${state.stateName}',
+                                          style: TextStyle(
+                                            color: kForm,
+                                            fontSize: 12.sp,
+                                            letterSpacing: 1.0,
+                                            fontWeight: FontWeight.w600,
+                                          )),
+                                    ]),
+                                  ),
+                                ),
+                              ]);
+                        }),
+                  ),
+                  SizedBox(
+                    height: 2.h,
+                  ),
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "City",
+                      style: TextStyle(
+                        color: kTextColor,
+                        fontSize: 14.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  // GSField.spinner(
-                  //   errorMessage: 'Please select state',
-                  //   hint: 'Select State',
-                  //   // helpMessage: 'help message',
-                  //   tag: 'state',
-                  //   required: true,
-                  //   weight: 12,
-                  //   title: 'State',
-                  //   items: [],
-                  // ),
                   SizedBox(
-                    height: 1.h,
+                    height: 0.5.h,
                   ),
-                  GSField.spinner(
-                    errorMessage: 'Please select city',
-                    hint: 'Select City',
-                    // helpMessage: 'help message',
-                    tag: 'city',
-                    required: true,
-                    weight: 12,
-                    title: 'City',
-                    items: [
-                      SpinnerDataModel(
-                        name: 'None',
-                        id: 0,
-                        isSelected: true,
-                      ),
-                      SpinnerDataModel(
-                        name: 'Kuala Lumpur',
-                        id: 1,
-                      ),
-                      SpinnerDataModel(
-                        name: 'Johor Bharu',
-                        id: 2,
-                      ),
-                    ],
-                  )
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: kTextColor,
+                    ),
+                    width: double.infinity,
+                    height: 50,
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 15),
+                    child: FutureBuilder<List<CompanyCity>>(
+                        future: _city,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          }
+
+                          if (snapshot.data == null) {
+                            return const CircularProgressIndicator();
+                          }
+                          return DropdownButton<CompanyCity>(
+                              icon: FaIcon(
+                                FontAwesomeIcons.chevronDown,
+                                size: 15,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              isExpanded: true,
+                              hint: Text(
+                                "Select City",
+                                style: TextStyle(
+                                  color: kHint,
+                                  fontSize: 10.sp,
+                                  letterSpacing: 0.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              onChanged: (city) => setState(
+                                    () => _selectedCity = city,
+                                  ),
+                              value: _selectedCity,
+                              items: [
+                                ...snapshot.data!.map(
+                                  (city) => DropdownMenuItem(
+                                    value: city,
+                                    child: Row(children: [
+                                      Text('${city.cityName}',
+                                          style: TextStyle(
+                                            color: kForm,
+                                            fontSize: 12.sp,
+                                            letterSpacing: 1.0,
+                                            fontWeight: FontWeight.w600,
+                                          )),
+                                    ]),
+                                  ),
+                                ),
+                              ]);
+                        }),
+                  ),
                 ]),
           ),
         ),
