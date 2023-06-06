@@ -1,24 +1,24 @@
-// ignore_for_file: cast_from_null_always_fails
+// ignore_for_file: cast_from_null_always_fails, deprecated_member_use
 
 import 'dart:convert' as JSON;
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:http_parser/http_parser.dart';
 
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:mime/mime.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gsform/gs_form/core/form_style.dart';
-import 'package:gsform/gs_form/enums/field_status.dart';
-import 'package:gsform/gs_form/model/data_model/spinner_data_model.dart';
 import 'package:gsform/gs_form/widget/field.dart';
 import 'package:gsform/gs_form/widget/form.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/merchant_model.dart';
 
 import 'package:pointofsales/screen/merchant_screen.dart';
+import 'package:pointofsales/widget/progressIndicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
@@ -40,6 +40,8 @@ class _CreateMerchantState extends State<CreateMerchant> {
 
   late Future<List<CompanyState>> _state;
   late Future<List<CompanyCity>> _city;
+  File? _selectedLogo;
+  int? _selectedStateId;
   CompanyState? _selectedState;
   CompanyCity? _selectedCity;
 
@@ -49,6 +51,8 @@ class _CreateMerchantState extends State<CreateMerchant> {
   String errorMessage = '';
   bool _isLoader = false;
 
+  //State List//
+
   Future<List<CompanyState>> _getStateList() async {
     Uri uri = Uri.parse(
         "http://template.gosini.xyz:8880/cspos/public/api/lookup/state");
@@ -57,6 +61,8 @@ class _CreateMerchantState extends State<CreateMerchant> {
     final stateComp = StateComp.fromJson(json);
     return stateComp.data;
   }
+
+  //City List//
 
   Future<List<CompanyCity>> _getCityList({required int stateId}) async {
     Uri uri = Uri.parse(
@@ -68,6 +74,38 @@ class _CreateMerchantState extends State<CreateMerchant> {
     return cityComp.data;
   }
 
+  //Logo/Image Upload//
+
+  Future<String> _postUploadLogo(File imageFile) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    Uri uri = Uri.parse(
+        "http://template.gosini.xyz:8880/cspos/public/api/merchant/logo/upload");
+    var req = http.MultipartRequest(
+      'POST',
+      uri,
+    );
+    req.headers['Authorization'] =
+        'Bearer ' + prefs.getString('token').toString();
+    req.headers['Content-Type'] = 'multipart/form-data';
+
+    var mimeType = lookupMimeType(imageFile.path);
+    var multipartFile = await http.MultipartFile.fromPath(
+        'logo', imageFile.path,
+        contentType: MediaType.parse(mimeType!));
+    req.files.add(multipartFile);
+
+    var response = await req.send();
+    if (response.statusCode == 200) {
+      // Image upload successful
+      return _postUploadLogo(imageFile);
+    } else {
+      // Image upload failed
+      throw Exception('Failed to upload image');
+    }
+  }
+
+  //Submit Button//
+
   void _submitForm() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -78,6 +116,14 @@ class _CreateMerchantState extends State<CreateMerchant> {
         _isLoader = false;
       });
       return;
+    }
+
+    if (_selectedLogo != null) {
+      try {
+        String logoUrl = await _postUploadLogo(_selectedLogo!);
+      } catch (e) {
+        print('Error uploading logo: $e');
+      }
     }
 
     _formKey.currentState!.save();
@@ -92,6 +138,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
         "postcode": postcodeController.text,
         "state": state.toString(),
         "city": city.toString(),
+        "logo": _selectedLogo,
       }),
       headers: {
         'Authorization': 'Bearer ' + prefs.getString('token').toString(),
@@ -124,20 +171,10 @@ class _CreateMerchantState extends State<CreateMerchant> {
   @override
   void initState() {
     _getStateList();
-    // callAPIandAssignData();
     super.initState();
     _state = _getStateList();
-    _city = _getCityList(stateId: int.fromEnvironment("defaultState"));
+    _city = _getCityList(stateId: _selectedStateId as int);
   }
-
-  // callAPIandAssignData() async {
-  //   final data = await _getStateList();
-  //   setState(() {
-  //     state = data;
-  //     statesList = data.data;
-  //     isDataLoaded = true;
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -176,14 +213,8 @@ class _CreateMerchantState extends State<CreateMerchant> {
               FontAwesomeIcons.floppyDisk,
               color: Colors.white,
             ),
-            onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => CreateMerchant(),
-              //   ),
-              // );
-            },
+            onPressed: () =>
+                _isLoader ? buildCircularProgressIndicator() : _submitForm(),
             tooltip: "Add Merchant",
           ),
         ],
@@ -217,7 +248,7 @@ class _CreateMerchantState extends State<CreateMerchant> {
                 ),
                 fields: [
                   GSField.text(
-                    tag: 'companyName',
+                    tag: companyNameController.text,
                     title: 'Company Name',
                     minLine: 2,
                     maxLine: 2,
@@ -226,24 +257,16 @@ class _CreateMerchantState extends State<CreateMerchant> {
                     maxLength: 100,
                     errorMessage: 'The fill is empty',
                     hint: 'Digital Dagang',
-                    // helpMessage: 'help message',
-                    // validateRegEx: regX,
-                    // postfixWidget: widget,
-                    // prefixWidget: widget,
                   ),
                   SizedBox(
                     height: .5.h,
                   ),
                   GSField.mobile(
-                    tag: 'contactNo',
+                    tag: contactNoController.text,
                     title: 'Contact Number',
                     hint: '03-2394284',
-                    // helpMessage: 'help message',
                     errorMessage: 'Do not use space',
                     maxLength: 11,
-                    // postfixWidget: widget,
-                    // prefixWidget: widget,
-                    // validateRegEx: regex,
                     weight: 12,
                     required: true,
                   ),
@@ -251,10 +274,10 @@ class _CreateMerchantState extends State<CreateMerchant> {
                     height: .5.h,
                   ),
                   GSField.email(
-                    tag: 'contactEmail',
+                    tag: contactEmailController.text,
                     title: 'Email',
                     hint: 'afiq@digitaldagang.com',
-                    errorMessage: 'Email does not valid',
+                    errorMessage: 'Please enter your email address',
                     // helpMessage: 'help message',
                     maxLength: 11,
                     // postfixWidget: widget,
@@ -267,11 +290,11 @@ class _CreateMerchantState extends State<CreateMerchant> {
                     height: .5.h,
                   ),
                   GSField.textPlain(
-                    tag: 'officeAddress',
+                    tag: officeAddressController.text,
                     title: 'Office Address',
                     weight: 12,
                     required: true,
-                    errorMessage: 'error message',
+                    errorMessage: 'Please enter your address',
                     hint: 'D-07 Business Suite, Setiawangsa',
                     // helpMessage: 'help message',
                     maxLength: 100,
@@ -284,14 +307,13 @@ class _CreateMerchantState extends State<CreateMerchant> {
                     height: .5.h,
                   ),
                   GSField.number(
-                    tag: 'postcode',
+                    tag: postcodeController.text,
                     title: 'PostCode',
                     hint: '335500',
                     weight: 12,
                     maxLength: 11,
                     required: true,
-                    errorMessage: 'Wrong post code',
-                    // helpMessage: 'help message',
+                    errorMessage: 'Please enter your postcode',
                   ),
                   SizedBox(
                     height: 0.5.h,
@@ -350,9 +372,10 @@ class _CreateMerchantState extends State<CreateMerchant> {
                               onChanged: (state) {
                                 setState(() {
                                   _selectedState = state;
-                                  _getCityList(
-                                      stateId:
-                                          int.fromEnvironment("defaultState"));
+                                  _selectedStateId = state!.id;
+                                  _selectedCity = null;
+                                  _city =
+                                      _getCityList(stateId: _selectedStateId!);
                                 });
                               },
                               value: _selectedState,
@@ -412,43 +435,111 @@ class _CreateMerchantState extends State<CreateMerchant> {
                           if (snapshot.data == null) {
                             return const CircularProgressIndicator();
                           }
-                          return DropdownButton<CompanyCity>(
-                              icon: FaIcon(
-                                FontAwesomeIcons.chevronDown,
-                                size: 15,
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              isExpanded: true,
-                              hint: Text(
-                                "Select City",
-                                style: TextStyle(
-                                  color: kHint,
-                                  fontSize: 10.sp,
-                                  letterSpacing: 0.5,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              onChanged: (city) => setState(
-                                    () => _selectedCity = city,
+                          return IgnorePointer(
+                            ignoring: _selectedState == null,
+                            child: Opacity(
+                              opacity: _selectedState == null ? 0.5 : 1.0,
+                              child: DropdownButton<CompanyCity>(
+                                  icon: FaIcon(
+                                    FontAwesomeIcons.chevronDown,
+                                    size: 15,
                                   ),
-                              value: _selectedCity,
-                              items: [
-                                ...snapshot.data!.map(
-                                  (city) => DropdownMenuItem(
-                                    value: city,
-                                    child: Row(children: [
-                                      Text('${city.cityName}',
-                                          style: TextStyle(
-                                            color: kForm,
-                                            fontSize: 12.sp,
-                                            letterSpacing: 1.0,
-                                            fontWeight: FontWeight.w600,
-                                          )),
-                                    ]),
+                                  borderRadius: BorderRadius.circular(20),
+                                  isExpanded: true,
+                                  hint: Text(
+                                    "Select City",
+                                    style: TextStyle(
+                                      color: kHint,
+                                      fontSize: 10.sp,
+                                      letterSpacing: 0.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
-                                ),
-                              ]);
+                                  onChanged: (city) => setState(
+                                        () => _selectedCity = city,
+                                      ),
+                                  value: _selectedCity,
+                                  items: [
+                                    ...snapshot.data!.map(
+                                      (city) => DropdownMenuItem(
+                                        value: city,
+                                        child: Row(children: [
+                                          Text(
+                                            '${city.cityName}',
+                                            style: TextStyle(
+                                              color: kForm,
+                                              fontSize: 12.sp,
+                                              letterSpacing: 1.0,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ]),
+                                      ),
+                                    ),
+                                  ]),
+                            ),
+                          );
                         }),
+                  ),
+                  SizedBox(
+                    height: 2.h,
+                  ),
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Logo",
+                      style: TextStyle(
+                        color: kTextColor,
+                        fontSize: 14.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: .5.h,
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      final pickedFile = await ImagePicker()
+                          .getImage(source: ImageSource.gallery);
+                      if (pickedFile != null) {
+                        setState(() {
+                          _selectedLogo = File(pickedFile.path);
+                        });
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: kTextColor,
+                      ),
+                      width: double.infinity,
+                      height: 50,
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 15),
+                      child: Row(children: [
+                        FaIcon(
+                          FontAwesomeIcons.upload,
+                          color: kForm,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          _selectedLogo != null
+                              ? "Logo Selected"
+                              : "Select Logo",
+                          style: TextStyle(
+                            color: kForm,
+                            fontSize: 12.sp,
+                            letterSpacing: 1.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ]),
+                    ),
                   ),
                 ]),
           ),
