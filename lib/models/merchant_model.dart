@@ -119,3 +119,15 @@ class CompanyCity {
 CityComp cityModelFromJson(String str) => CityComp.fromJson(json.decode(str));
 
 String cityModelToJson(CityComp data) => json.encode(data.toJson());
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///
+
+class UploadLogo {
+  int merchantId;
+  String merchantLogo;
+
+  UploadLogo({
+    required this.merchantId,
+    required this.merchantLogo,
+  });
+}

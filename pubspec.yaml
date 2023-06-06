@@ -35,6 +35,8 @@ dependencies:
   font_awesome_flutter: ^10.4.0
   shared_preferences: ^2.1.1
   gsform: ^0.2.5
+  mime: ^1.0.4
+  image_picker: ^0.8.7+5
 
 dev_dependencies:
   flutter_test:
