@@ -5,7 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/screen/home_screen.dart';
-import 'package:pointofsales/screen/register_screen.dart';
+import 'package:pointofsales/screen/log%20n%20reg/register_screen.dart';
 import 'package:pointofsales/widget/login/login_textfield.dart';
 import 'package:pointofsales/widget/login/square_tile.dart';
 import 'package:pointofsales/widget/progressIndicator.dart';

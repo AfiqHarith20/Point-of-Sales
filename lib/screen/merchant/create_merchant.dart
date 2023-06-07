@@ -74,36 +74,6 @@ class _CreateMerchantState extends State<CreateMerchant> {
     return cityComp.data;
   }
 
-  //Logo/Image Upload//
-
-  Future<String> _postUploadLogo(File imageFile) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    Uri uri = Uri.parse(
-        "http://template.gosini.xyz:8880/cspos/public/api/merchant/logo/upload");
-    var req = http.MultipartRequest(
-      'POST',
-      uri,
-    );
-    req.headers['Authorization'] =
-        'Bearer ' + prefs.getString('token').toString();
-    req.headers['Content-Type'] = 'multipart/form-data';
-
-    var mimeType = lookupMimeType(imageFile.path);
-    var multipartFile = await http.MultipartFile.fromPath(
-        'logo', imageFile.path,
-        contentType: MediaType.parse(mimeType!));
-    req.files.add(multipartFile);
-
-    var response = await req.send();
-    if (response.statusCode == 200) {
-      // Image upload successful
-      return _postUploadLogo(imageFile);
-    } else {
-      // Image upload failed
-      throw Exception('Failed to upload image');
-    }
-  }
-
   //Submit Button//
 
   void _submitForm() async {
@@ -116,14 +86,6 @@ class _CreateMerchantState extends State<CreateMerchant> {
         _isLoader = false;
       });
       return;
-    }
-
-    if (_selectedLogo != null) {
-      try {
-        String logoUrl = await _postUploadLogo(_selectedLogo!);
-      } catch (e) {
-        print('Error uploading logo: $e');
-      }
     }
 
     _formKey.currentState!.save();
@@ -483,63 +445,6 @@ class _CreateMerchantState extends State<CreateMerchant> {
                   ),
                   SizedBox(
                     height: 2.h,
-                  ),
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Logo",
-                      style: TextStyle(
-                        color: kTextColor,
-                        fontSize: 14.sp,
-                        letterSpacing: 1.0,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: .5.h,
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      final pickedFile = await ImagePicker()
-                          .getImage(source: ImageSource.gallery);
-                      if (pickedFile != null) {
-                        setState(() {
-                          _selectedLogo = File(pickedFile.path);
-                        });
-                      }
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: kTextColor,
-                      ),
-                      width: double.infinity,
-                      height: 50,
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 15),
-                      child: Row(children: [
-                        FaIcon(
-                          FontAwesomeIcons.upload,
-                          color: kForm,
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          _selectedLogo != null
-                              ? "Logo Selected"
-                              : "Select Logo",
-                          style: TextStyle(
-                            color: kForm,
-                            fontSize: 12.sp,
-                            letterSpacing: 1.0,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ]),
-                    ),
                   ),
                 ]),
           ),
