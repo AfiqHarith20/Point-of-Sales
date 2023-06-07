@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/user_model.dart';
-import 'package:pointofsales/screen/login_screen.dart';
+import 'package:pointofsales/screen/log%20n%20reg/login_screen.dart';
 import 'package:pointofsales/widget/login/register_button.dart';
 import 'package:pointofsales/widget/login/login_textfield.dart';
 import 'package:pointofsales/widget/login/square_tile.dart';
