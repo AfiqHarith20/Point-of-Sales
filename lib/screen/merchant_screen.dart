@@ -1,5 +1,6 @@
 // ignore_for_file: unused_label, unnecessary_statements
 
+import 'dart:convert' as JSON;
 import 'dart:convert';
 import 'dart:io';
 
@@ -27,11 +28,19 @@ class MerchantScreen extends StatefulWidget {
 
 class _MerchantScreenState extends State<MerchantScreen> {
   bool isMerchantCreated = false;
+  bool isLoader = false;
   bool isLoading = true;
+
+  final companyNoController = TextEditingController();
+  final contactNoController = TextEditingController();
+  final contactEmailController = TextEditingController();
+  final officeAddressController = TextEditingController();
+  final postcodeController = TextEditingController();
+  final websiteController = TextEditingController();
 
   late int userId, state, city;
   late String companyName, contactNo, contactEmail, officeAddress, postcode;
-  // late dynamic companyNo,
+  late dynamic companyNo, website;
   //     businessOwnership,
   //     gstNo,
   //     businessDuration,
@@ -40,7 +49,6 @@ class _MerchantScreenState extends State<MerchantScreen> {
   //     brandName,
   //     businessNature,
   //     contactName,
-  //     website,
   //     facebook,
   //     instagram,
   //     referrer,
@@ -92,7 +100,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
       final Map<String, dynamic> res = json.decode(response.body);
       if (response.statusCode == 200) {
         print("MERCHANT DETAILS!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        print(prefs.getString('token').toString());
+        // print(prefs.getString('token').toString());
 
         setState(() {
           isLoading = false;
@@ -111,13 +119,14 @@ class _MerchantScreenState extends State<MerchantScreen> {
               postcode: res['data']['postcode'].toString(),
               state: res['data']['state'],
               city: res['data']['city'],
+              website: res['data']['website'].toString(),
               // businessOwnership: res['data']['businessOwnership'],
               // businessDuration: res['data']['businessDuration'],
               // brandName: res['data']['brandName'],
               // businessNature: res['data']['businessNature'],
               // contactName: res['data']['contactName'].toString(),
 
-              // website: res['data']['website'],
+              
               // facebook: res['data']['facebook'],
               // instagram: res['data']['instagram'],
               // referrer: res['data']['referrer'],
@@ -138,12 +147,13 @@ class _MerchantScreenState extends State<MerchantScreen> {
             postcode = data.postcode;
             state = data.state;
             city = data.city;
-            // companyNo = data.companyNo;
+            website = data.website;
+            companyNo = data.companyNo;
             // businessOwnership = data.businessOwnership;
             // brandName = data.brandName;
             // businessNature = data.businessNature;
             // contactName = data.contactName;
-            // website = data.website;
+            
             // facebook = data.facebook;
             // instagram = data.instagram;
             // referrer = data.referrer;
@@ -167,6 +177,40 @@ class _MerchantScreenState extends State<MerchantScreen> {
     }
   }
 
+  ///////////////////////////////////////////////// Update Merchant ///////////////////////////////////////////////////////////////////////////////
+
+  Future<void> _updateMerchant({required int userId}) async {
+    try{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final http.Response response = await http.put(Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/merchant/$userId"),
+      headers: ({
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json'
+      }),
+      body: JSON.jsonEncode({
+        "company_no": companyNoController.text,
+          "contact_no": contactNoController.text,
+          "contact_email": contactEmailController.text,
+          "office_address": officeAddressController.text,
+          "postcode": postcodeController.text,
+          "state": state.toString(),
+          "city": city.toString(),
+          "website": websiteController.text,
+      })
+      );
+      if (response.statusCode == 200) {
+        print(response);
+        print("Success Update Merchant");
+      } else {
+        print(response.reasonPhrase);
+      }
+    }catch (e) {
+      print(e);
+    }
+  }
+  
+  ///////////////////////////// Initialize ///////////////////////////////////////////////////////////////////////////////////////////
+
   @override
   void initState() {
     // TODO: implement initState
@@ -180,6 +224,8 @@ class _MerchantScreenState extends State<MerchantScreen> {
     super.dispose();
   }
 
+/////////////////////////////////////////// build /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -281,186 +327,295 @@ class _MerchantScreenState extends State<MerchantScreen> {
               ),
             ],
           ),
-          body: Container(
-            width: 100.w,
-            height: 84.h,
-            margin: kMargin,
-            padding: kPadding,
-            decoration: BoxDecoration(
-              color: kPrimaryColor,
-              borderRadius: kRadius,
-            ),
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      final pickedFile = await ImagePicker()
-                          .getImage(source: ImageSource.gallery);
-                      if (pickedFile != null) {
-                        setState(() {
-                          // _selectedLogo = File(pickedFile.path);
-                        });
-                      }
-                    },
-                    child: CircleAvatar(
-                      radius: 70.0,
-                      child: FaIcon(
-                        FontAwesomeIcons.buildingUser,
-                        size: 60,
+          body: Form(
+            child: Container(
+              width: 100.w,
+              height: 84.h,
+              margin: kMargin,
+              padding: kPadding,
+              decoration: BoxDecoration(
+                color: kPrimaryColor,
+                borderRadius: kRadius,
+              ),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        final pickedFile = await ImagePicker()
+                            .getImage(source: ImageSource.gallery);
+                        if (pickedFile != null) {
+                          setState(() {
+                            // _selectedLogo = File(pickedFile.path);
+                          });
+                        }
+                      },
+                      child: CircleAvatar(
+                        radius: 70.0,
+                        child: FaIcon(
+                          FontAwesomeIcons.buildingUser,
+                          size: 60,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: "Company Name",
-                      labelStyle: GoogleFonts.abel(
+                    SizedBox(
+                      height: 10,
+                    ),
+                    TextFormField(
+                      enabled: false,
+                      decoration: InputDecoration(
+                        labelText: "Company Name",
+                        labelStyle: GoogleFonts.abel(
+                          fontSize: 14.sp,
+                          color: kTextColor,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      initialValue: companyName,
+                      style: GoogleFonts.atma(
                         fontSize: 14.sp,
                         color: kTextColor,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.0,
                       ),
                     ),
-                    initialValue: companyName,
-                    style: GoogleFonts.atma(
-                      fontSize: 14.sp,
-                      color: kTextColor,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: "Contact Number",
-                      labelStyle: GoogleFonts.abel(
+                    TextFormField(
+                      onTap: (){
+                        _viewForm(1,"Edit Company Number");
+                      },
+                      decoration: InputDecoration(
+                        labelText: "Company Number",
+                        labelStyle: GoogleFonts.abel(
+                          fontSize: 14.sp,
+                          color: kTextColor,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      initialValue: companyNo,
+                     
+                      style: GoogleFonts.atma(
                         fontSize: 14.sp,
                         color: kTextColor,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.0,
                       ),
                     ),
-                    initialValue: contactNo,
-                    style: GoogleFonts.atma(
-                      fontSize: 14.sp,
-                      color: kTextColor,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: "Contact Email",
-                      labelStyle: GoogleFonts.abel(
+                    TextFormField(
+                      // enabled: false,
+                      decoration: InputDecoration(
+                        labelText: "Contact Number",
+                        labelStyle: GoogleFonts.abel(
+                          fontSize: 14.sp,
+                          color: kTextColor,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      initialValue: contactNo,
+                      style: GoogleFonts.atma(
                         fontSize: 14.sp,
                         color: kTextColor,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.0,
                       ),
                     ),
-                    initialValue: contactEmail,
-                    style: GoogleFonts.atma(
-                      fontSize: 14.sp,
-                      color: kTextColor,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  TextFormField(
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: "Office Address",
-                      labelStyle: GoogleFonts.abel(
+                    TextFormField(
+                      // enabled: false,
+                      decoration: InputDecoration(
+                        labelText: "Contact Email",
+                        labelStyle: GoogleFonts.abel(
+                          fontSize: 14.sp,
+                          color: kTextColor,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      initialValue: contactEmail,
+                      style: GoogleFonts.atma(
                         fontSize: 14.sp,
                         color: kTextColor,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.0,
                       ),
                     ),
-                    initialValue: officeAddress,
-                    style: GoogleFonts.atma(
-                      fontSize: 14.sp,
-                      color: kTextColor,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: "PostCode",
-                      labelStyle: GoogleFonts.abel(
+                    TextFormField(
+                      // enabled: false,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: "Office Address",
+                        labelStyle: GoogleFonts.abel(
+                          fontSize: 14.sp,
+                          color: kTextColor,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      initialValue: officeAddress,
+                      style: GoogleFonts.atma(
                         fontSize: 14.sp,
                         color: kTextColor,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.0,
                       ),
                     ),
-                    initialValue: postcode,
-                    style: GoogleFonts.atma(
-                      fontSize: 14.sp,
-                      color: kTextColor,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: "State",
-                      labelStyle: GoogleFonts.abel(
+                    TextFormField(
+                      // enabled: false,
+                      decoration: InputDecoration(
+                        labelText: "PostCode",
+                        labelStyle: GoogleFonts.abel(
+                          fontSize: 14.sp,
+                          color: kTextColor,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      initialValue: postcode,
+                      style: GoogleFonts.atma(
                         fontSize: 14.sp,
                         color: kTextColor,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.0,
                       ),
                     ),
-                    initialValue: state.toString(),
-                    style: GoogleFonts.atma(
-                      fontSize: 14.sp,
-                      color: kTextColor,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: "City",
-                      labelStyle: GoogleFonts.abel(
+                    TextFormField(
+                      // enabled: false,
+                      decoration: InputDecoration(
+                        labelText: "State",
+                        labelStyle: GoogleFonts.abel(
+                          fontSize: 14.sp,
+                          color: kTextColor,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      initialValue: state.toString(),
+                      style: GoogleFonts.atma(
                         fontSize: 14.sp,
                         color: kTextColor,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.0,
                       ),
                     ),
-                    initialValue: city.toString(),
-                    style: GoogleFonts.atma(
-                      fontSize: 14.sp,
-                      color: kTextColor,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.0,
+                    TextFormField(
+                      // enabled: false,
+                      decoration: InputDecoration(
+                        labelText: "City",
+                        labelStyle: GoogleFonts.abel(
+                          fontSize: 14.sp,
+                          color: kTextColor,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      initialValue: city.toString(),
+                      style: GoogleFonts.atma(
+                        fontSize: 14.sp,
+                        color: kTextColor,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 1.0,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  // ElevatedButton(
-                  //   onPressed: (){}
-
-                  // ),
-                ],
+                    TextFormField(
+                      // enabled: false,
+                      decoration: InputDecoration(
+                        labelText: "Website",
+                        labelStyle: GoogleFonts.abel(
+                          fontSize: 14.sp,
+                          color: kTextColor,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      initialValue: website,
+                      style: GoogleFonts.atma(
+                        fontSize: 14.sp,
+                        color: kTextColor,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    // ElevatedButton(
+                    //   onPressed: (){}
+          
+                    // ),
+                  ],
+                ),
               ),
             ),
           ),
         );
+        
       } else {
         return buildNoMerchantText();
       }
     }
   }
+
+  _viewForm(int type, String title) {
+    return showModalBottomSheet<void>(
+      context: context, 
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          color: kScaffoldColor,
+          child: GestureDetector(onTap: () {
+            Navigator.pop(context);
+            
+          },
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.55,
+            minChildSize: 0.25,
+            maxChildSize: 0.55,
+            builder: (context, scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(15.0),
+                      topRight: const Radius.circular(15.0),
+                    ),
+                  ),
+                  child: Stack(children: <Widget>[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(padding: EdgeInsets.all(16),
+                          child: Text(
+                            title, 
+                            style: 
+                              GoogleFonts.ubuntu(
+                                fontSize: 16.sp,
+                                letterSpacing: 1.0,
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                height: 1.5,
+                            ),
+                          ),
+                          ),
+                          
+                          ],
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: SingleChildScrollView(),
+                    )
+                  ]),
+                );
+              },
+          ),),
+          
+        );
+  },);
+}
 
   Widget buildNoMerchantText() {
     return Center(
@@ -476,3 +631,5 @@ class _MerchantScreenState extends State<MerchantScreen> {
     );
   }
 }
+
+

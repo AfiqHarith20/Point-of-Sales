@@ -190,33 +190,55 @@ class MerchantDetail {
     this.logoUrl,
   });
 
-  // factory MerchantDetail.fromJson(Map<String, dynamic> json) {
-  //   return MerchantDetail(
-  //     id: json['id'],
-  //     userId: json['user_id'],
-  //     companyName: json['company_name'],
-  //     companyNo: json['company_no'],
-  //     businessOwnership: json['business_ownership'],
-  //     businessDuration: json['business_duration'],
-  //     brandName: json['brand_name'],
-  //     businessNature: json['business_nature'],
-  //     contactName: json['contact_name'],
-  //     contactNo: json['contact_no'],
-  //     contactEmail: json['contact_email'],
-  //     officeAddress: json['office_address'],
-  //     postcode: json['postcode'],
-  //     state: json['state'],
-  //     city: json['city'],
-  //     website: json['website'],
-  //     facebook: json['facebook'],
-  //     instagram: json['instagram'],
-  //     referrer: json['referrer'],
-  //     shopUrl: json['shop_url'],
-  //     status: json['status'],
-  //     gstNo: json['gst_no'],
-  //     feePercentage: json['fee_percentage'],
-  //     feeMinimum: json['fee_minimum'],
-  //     logoUrl: json['logo_url'],
-  //   );
-  // }
+}
+
+//////////////////////////////// Update Merchant //////////////////////////////////////////////////////////////////
+
+UpdateMerchant updateMerchantFromJson(String str) =>
+    UpdateMerchant.fromJson(json.decode(str));
+
+String updateMerchantToJson(UpdateMerchant data) => json.encode(data.toJson());
+
+class UpdateMerchant {
+  final String companyNo;
+  final String contactNo;
+  final String contactEmail;
+  final String officeAddress;
+  final String postcode;
+  final String state;
+  final String city;
+  final String website;
+
+  UpdateMerchant({
+    required this.companyNo,
+    required this.contactNo,
+    required this.contactEmail,
+    required this.officeAddress,
+    required this.postcode,
+    required this.state,
+    required this.city,
+    required this.website,
+  });
+
+  factory UpdateMerchant.fromJson(Map<String, dynamic> json) => UpdateMerchant(
+        companyNo: json["company_no"],
+        contactNo: json["contact_no"],
+        contactEmail: json["contact_email"],
+        officeAddress: json["office_address"],
+        postcode: json["postcode"],
+        state: json["state"],
+        city: json["city"],
+        website: json["website"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "company_no": companyNo,
+        "contact_no": contactNo,
+        "contact_email": contactEmail,
+        "office_address": officeAddress,
+        "postcode": postcode,
+        "state": state,
+        "city": city,
+        "website": website,
+      };
 }
