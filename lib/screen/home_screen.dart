@@ -4,7 +4,6 @@ import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/data.dart';
 import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/drawer_screen.dart';
-import 'package:pointofsales/widget/bottom_nav.dart';
 import 'package:sizer/sizer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -17,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   UserModel? user;
-  bool _isLoading = false;
+  // bool _isLoading = false;
 
   @override
   void initState() {

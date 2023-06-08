@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
-import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/log%20n%20reg/login_screen.dart';
 import 'package:pointofsales/widget/login/register_button.dart';
 import 'package:pointofsales/widget/login/login_textfield.dart';
@@ -14,7 +9,6 @@ import 'package:pointofsales/widget/login/square_tile.dart';
 import 'package:sizer/sizer.dart';
 
 import 'package:http/http.dart' as http;
-import 'dart:convert' as JSON;
 
 class RegisterScreen extends StatefulWidget {
   final Function()? onTap;
