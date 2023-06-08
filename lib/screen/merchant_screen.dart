@@ -26,7 +26,6 @@ class MerchantScreen extends StatefulWidget {
 }
 
 class _MerchantScreenState extends State<MerchantScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   bool isMerchantCreated = false;
   bool isLoading = true;
 
@@ -82,7 +81,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
   Future<void> _getIndexCompany() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String token = prefs.getString('token') ?? '';
+
       final http.Response response = await http.get(
         Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/merchant"),
         headers: ({

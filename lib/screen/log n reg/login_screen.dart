@@ -30,7 +30,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  final GlobalKey<FormState> _formKeyForLogin = GlobalKey<FormState>();
   bool _isLoader = false;
 
   Future<void> userLogin() async {
