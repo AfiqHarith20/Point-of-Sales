@@ -31,13 +31,6 @@ class _MerchantScreenState extends State<MerchantScreen> {
   bool isLoader = false;
   bool isLoading = true;
 
-  final companyNoController = TextEditingController();
-  final contactNoController = TextEditingController();
-  final contactEmailController = TextEditingController();
-  final officeAddressController = TextEditingController();
-  final postcodeController = TextEditingController();
-  final websiteController = TextEditingController();
-
   late int userId, state, city;
   late String companyName, contactNo, contactEmail, officeAddress, postcode;
   late dynamic companyNo, website;
@@ -53,6 +46,14 @@ class _MerchantScreenState extends State<MerchantScreen> {
   //     instagram,
   //     referrer,
   //     shopUrl;
+  int getState() {return state;}
+  int getCity() {return city;}
+
+  String getCompanyNo() {return companyNo;}
+  String getContactNo() {return contactNo;}
+  String getContactEmail() {return contactEmail;}
+  String getOfficeAddress() {return officeAddress;}
+  String getPostcode() {return postcode;}
 
   //////////////////// Logo/Image Upload ////////////////////////////////////////////////////////////////
 
@@ -177,37 +178,8 @@ class _MerchantScreenState extends State<MerchantScreen> {
     }
   }
 
-  ///////////////////////////////////////////////// Update Merchant ///////////////////////////////////////////////////////////////////////////////
+  
 
-  Future<void> _updateMerchant({required int userId}) async {
-    try{
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final http.Response response = await http.put(Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/merchant/$userId"),
-      headers: ({
-        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-        'Content-Type': 'application/json'
-      }),
-      body: JSON.jsonEncode({
-        "company_no": companyNoController.text,
-          "contact_no": contactNoController.text,
-          "contact_email": contactEmailController.text,
-          "office_address": officeAddressController.text,
-          "postcode": postcodeController.text,
-          "state": state.toString(),
-          "city": city.toString(),
-          "website": websiteController.text,
-      })
-      );
-      if (response.statusCode == 200) {
-        print(response);
-        print("Success Update Merchant");
-      } else {
-        print(response.reasonPhrase);
-      }
-    }catch (e) {
-      print(e);
-    }
-  }
   
   ///////////////////////////// Initialize ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -216,6 +188,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
     // TODO: implement initState
     super.initState();
     _getIndexCompany();
+    
   }
 
   @override
@@ -406,6 +379,9 @@ class _MerchantScreenState extends State<MerchantScreen> {
                     ),
                     TextFormField(
                       // enabled: false,
+                      onTap: () {
+                        _viewForm(2, "Edit Contact Number");
+                      },
                       decoration: InputDecoration(
                         labelText: "Contact Number",
                         labelStyle: GoogleFonts.abel(
@@ -425,6 +401,9 @@ class _MerchantScreenState extends State<MerchantScreen> {
                     ),
                     TextFormField(
                       // enabled: false,
+                      onTap: () {
+                        _viewForm(3, "Edit Contact Email");
+                      },
                       decoration: InputDecoration(
                         labelText: "Contact Email",
                         labelStyle: GoogleFonts.abel(
@@ -444,6 +423,9 @@ class _MerchantScreenState extends State<MerchantScreen> {
                     ),
                     TextFormField(
                       // enabled: false,
+                      onTap: () {
+                        _viewForm(4, "Edit Office Address");
+                      },
                       maxLines: 3,
                       decoration: InputDecoration(
                         labelText: "Office Address",
@@ -464,6 +446,9 @@ class _MerchantScreenState extends State<MerchantScreen> {
                     ),
                     TextFormField(
                       // enabled: false,
+                      onTap: () {
+                        _viewForm(5, "Edit Postcode");
+                      },
                       decoration: InputDecoration(
                         labelText: "PostCode",
                         labelStyle: GoogleFonts.abel(
@@ -483,6 +468,9 @@ class _MerchantScreenState extends State<MerchantScreen> {
                     ),
                     TextFormField(
                       // enabled: false,
+                      onTap: () {
+                        _viewForm(6, "Edit State");
+                      },
                       decoration: InputDecoration(
                         labelText: "State",
                         labelStyle: GoogleFonts.abel(
@@ -502,6 +490,9 @@ class _MerchantScreenState extends State<MerchantScreen> {
                     ),
                     TextFormField(
                       // enabled: false,
+                      onTap: () {
+                        _viewForm(7, "Edit City");
+                      },
                       decoration: InputDecoration(
                         labelText: "City",
                         labelStyle: GoogleFonts.abel(
@@ -521,6 +512,9 @@ class _MerchantScreenState extends State<MerchantScreen> {
                     ),
                     TextFormField(
                       // enabled: false,
+                      onTap: () {
+                        _viewForm(8, "Edit Website");
+                      },
                       decoration: InputDecoration(
                         labelText: "Website",
                         labelStyle: GoogleFonts.abel(
@@ -565,7 +559,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          color: kScaffoldColor,
+          color: Colors.transparent,
           child: GestureDetector(onTap: () {
             Navigator.pop(context);
             
@@ -596,18 +590,26 @@ class _MerchantScreenState extends State<MerchantScreen> {
                                 fontSize: 16.sp,
                                 letterSpacing: 1.0,
                                 fontWeight: FontWeight.w500,
-                                color: kTextColor,
+                                color: kPrimaryColor,
                                 height: 1.5,
                             ),
                           ),
                           ),
-                          
-                          ],
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: SingleChildScrollView(),
+                          Padding(padding: EdgeInsets.all(16),),
+                      ]),
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        //padding: EdgeInsets.only(left: 16, bottom: 5),
+                        child: FaIcon(
+                          FontAwesomeIcons.arrowLeft,
+                          color: Colors.red[600],
+                        ),
+                      ),
                     )
+                    
                   ]),
                 );
               },
@@ -629,6 +631,238 @@ class _MerchantScreenState extends State<MerchantScreen> {
         ),
       ),
     );
+  }
+}
+
+class MyCustomFormState extends StatefulWidget {
+  int ftype, state, city;
+  String contcNo, contcEmail, officeAddrs, postcode;
+  dynamic website, compNo;
+  MyCustomFormState({
+    required this.ftype,
+    required this.state, 
+    required this.city,
+    required this.compNo,
+    required this.contcEmail,
+    required this.contcNo,
+    required this.officeAddrs,
+    required this.postcode,
+    required this.website,
+    });
+
+  @override
+  State<MyCustomFormState> createState() => _MyCustomFormStateState();
+}
+
+class _MyCustomFormStateState extends State<MyCustomFormState> {
+  bool isLoading = false;
+  bool _displayNameValid = true;
+
+  TextEditingController companyNoController = TextEditingController();
+  TextEditingController contactNoController = TextEditingController();
+  TextEditingController contactEmailController = TextEditingController();
+  TextEditingController officeAddressController = TextEditingController();
+  TextEditingController postcodeController = TextEditingController();
+  TextEditingController websiteController = TextEditingController();
+
+  
+
+  CompanyState? _selectedState;
+  CompanyCity? _selectedCity;
+
+  late int _userId;
+
+  // late dynamic selectedState;
+  late StateComp state = StateComp(data: []);
+  late CityComp city = CityComp(data: []);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    companyNoController = TextEditingController(text: widget.compNo ?? '');
+    contactNoController = TextEditingController(text: widget.contcNo);
+    contactEmailController = TextEditingController(text: widget.contcEmail);
+    officeAddressController = TextEditingController(text: widget.officeAddrs);
+    postcodeController = TextEditingController(text: widget.postcode);
+    websiteController = TextEditingController(text: widget.website ?? '');
+
+    _userId = _submitForm(userId: _userId);
+  }
+
+  ///////////////////////////////////////////////// Update Merchant ///////////////////////////////////////////////////////////////////////////////
+
+  _submitForm({required int userId,}) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final http.Response response = await http.put(
+          Uri.parse(
+              "http://template.gosini.xyz:8880/cspos/public/api/merchant/$userId"),
+          headers: ({
+            'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+            'Content-Type': 'application/json'
+          }),
+          body: JSON.jsonEncode({
+            "company_no": companyNoController.text,
+            "contact_no": contactNoController.text,
+            "contact_email": contactEmailController.text,
+            "office_address": officeAddressController.text,
+            "postcode": postcodeController.text,
+            "state": state.toString(),
+            "city": city.toString(),
+            "website": websiteController.text,
+          }));
+
+          print(response.statusCode.toString());
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        String message = "Something went wrong!";
+        bool hasError = true;
+        print(responseData);
+        if(responseData['message'] == 'success') {
+          print('success >>>>>'+responseData['data']['company_no']);
+          message = 'Update merchant successfully.';
+        }else{
+          message = responseData['message'];
+          print('failed >>>>' + responseData['message']);
+        }
+        final Map<String, dynamic> successInformation = {
+          'success': !hasError,
+          'message': message
+        };
+        if (successInformation['success']) {
+          // model._getIndexCompany();
+          Navigator.pop(context, true);
+          print("Profile info successfuly updated.");
+        } else {
+          print("Failed to update profile info.");
+        }
+      } else {
+        print('Server error code >>>>' + response.statusCode.toString());
+      }
+    } catch (e) {
+      print(e);
+    }
+    //////////////////////////////////////////////////////////////// Update State //////////////////////////////////////////////////////////////////
+    Future<List<CompanyState>> _getUpdateStateList() async {
+      Uri uri = Uri.parse(
+          "http://template.gosini.xyz:8880/cspos/public/api/lookup/state");
+      var response = await http.get(uri);
+      Map<String, dynamic> json = jsonDecode(response.body);
+      final stateComp = StateComp.fromJson(json);
+      return stateComp.data;
+    }
+
+    ///////////////////////////////////////////////////////////////// Update City ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    Future<List<CompanyCity>> _getUpdateCityList({required int stateId}) async {
+      Uri uri = Uri.parse(
+          "http://template.gosini.xyz:8880/cspos/public/api/lookup/city/$stateId");
+      var response = await http.get(uri);
+      print(response.body);
+      Map<String, dynamic> json = jsonDecode(response.body);
+      final cityComp = CityComp.fromJson(json);
+      return cityComp.data;
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+
+    
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      child: Container(
+        height: MediaQuery.of(context).size.height / 2.35, 
+        child: Stack(children: <Widget>[
+          Column(crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            widget.ftype == 1 ? buildCompanyNoField(): 
+            widget.ftype == 2 ? buildContactNoField() : 
+            widget.ftype == 3 ? buildContactEmailField() : 
+            widget.ftype == 4 ? buildOfficeAddressField() : 
+            widget.ftype == 5 ? buildPostCode() : 
+            widget.ftype == 6 ? buildState() : 
+            widget.ftype == 7 ? buildCity() : buildWebsite(),],),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            left: 0,
+            child: Container(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  primary: Colors.white,
+                  backgroundColor: Color(0xffcb3124),
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(4),),),
+                ),
+                onPressed: () =>  _submitForm(userId: _userId), 
+                child: Container(
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.only(top: 5, bottom: 5),
+                  child: Text("Submit", 
+                  style: GoogleFonts.abel(
+                      fontSize: 14.sp,
+                      color: kTextColor,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1.0,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),),
+            ),)
+        ]),
+        ),
+    );
+  }
+
+  TextFormField buildCompanyNoField() {
+    return TextFormField(
+      validator: (value) {
+        if(value == null || value.isEmpty) {
+          return "Please enter new Company Number";
+        }
+        return null;
+      },
+      controller: companyNoController,
+      decoration: InputDecoration(labelText: "Company Number", 
+      labelStyle: GoogleFonts.abel(
+          fontSize: 14.sp,
+          color: kTextColor,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 1.0,
+        ),
+        errorText: _displayNameValid ? null : "Company Number missing.",
+      ),
+    );
+  }
+
+  TextFormField buildContactNoField() {
+    return TextFormField();
+  }
+
+  TextFormField buildContactEmailField() {
+    return TextFormField();
+  }
+  TextFormField buildOfficeAddressField() {
+    return TextFormField();
+  }
+  TextFormField buildPostCode() {
+    return TextFormField();
+  }
+  TextFormField buildState() {
+    return TextFormField();
+  }
+  TextFormField buildCity() {
+    return TextFormField();
+  }
+  TextFormField buildWebsite() {
+    return TextFormField();
   }
 }
 
