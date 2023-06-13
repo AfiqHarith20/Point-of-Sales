@@ -595,7 +595,22 @@ class _MerchantScreenState extends State<MerchantScreen> {
                             ),
                           ),
                           ),
-                          Padding(padding: EdgeInsets.all(16),),
+                          Padding(
+                            padding: EdgeInsets.all(16),
+                            child: SingleChildScrollView(
+                              child: MyCustomFormState(
+                                ftype: type,
+                                state: state,
+                                city: city,
+                                compNo: companyNo,
+                                contcEmail: contactEmail,
+                                contcNo: contactNo,
+                                officeAddrs: officeAddress,
+                                postcode: postcode,
+                                website: website,
+                              ),
+                            ),
+                            ),
                       ]),
                     Positioned(
                       top: 16,
@@ -666,11 +681,12 @@ class _MyCustomFormStateState extends State<MyCustomFormState> {
   TextEditingController websiteController = TextEditingController();
 
   
-
+  late Future<List<CompanyState>> _state;
+  late Future<List<CompanyCity>> _city;
+  int? _selectedStateId;
   CompanyState? _selectedState;
   CompanyCity? _selectedCity;
 
-  late int _userId;
 
   // late dynamic selectedState;
   late StateComp state = StateComp(data: []);
@@ -687,31 +703,44 @@ class _MyCustomFormStateState extends State<MyCustomFormState> {
     postcodeController = TextEditingController(text: widget.postcode);
     websiteController = TextEditingController(text: widget.website ?? '');
 
-    _userId = _submitForm(userId: _userId);
+    ValueNotifier<CompanyState?> _selectedStateNotifier =
+        ValueNotifier<CompanyState?>(null);
+
+    _state = _getUpdateStateList();
+    _state.then((states) {
+      if(states.isNotEmpty) {
+        _selectedState = states.first;
+        _selectedStateId = _selectedState!.id;
+        _city = _getUpdateCityList(stateId: _selectedStateId!);
+      }
+    },);
+    _city = _getUpdateCityList(stateId: _selectedStateId ?? 0);
   }
 
   ///////////////////////////////////////////////// Update Merchant ///////////////////////////////////////////////////////////////////////////////
 
-  _submitForm({required int userId,}) async {
+  _submitForm() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      
+
       final http.Response response = await http.put(
           Uri.parse(
-              "http://template.gosini.xyz:8880/cspos/public/api/merchant/$userId"),
-          headers: ({
+              "http://template.gosini.xyz:8880/cspos/public/api/merchant/3"),
+          headers: {
             'Authorization': 'Bearer ' + prefs.getString('token').toString(),
             'Content-Type': 'application/json'
-          }),
+          },
           body: JSON.jsonEncode({
             "company_no": companyNoController.text,
             "contact_no": contactNoController.text,
             "contact_email": contactEmailController.text,
             "office_address": officeAddressController.text,
             "postcode": postcodeController.text,
-            "state": state.toString(),
-            "city": city.toString(),
+            "state": _selectedStateId,
+            "city": _selectedCity!.id,
             "website": websiteController.text,
-          }));
+          }),);
 
           print(response.statusCode.toString());
 
@@ -744,33 +773,32 @@ class _MyCustomFormStateState extends State<MyCustomFormState> {
     } catch (e) {
       print(e);
     }
-    //////////////////////////////////////////////////////////////// Update State //////////////////////////////////////////////////////////////////
-    Future<List<CompanyState>> _getUpdateStateList() async {
-      Uri uri = Uri.parse(
-          "http://template.gosini.xyz:8880/cspos/public/api/lookup/state");
-      var response = await http.get(uri);
-      Map<String, dynamic> json = jsonDecode(response.body);
-      final stateComp = StateComp.fromJson(json);
-      return stateComp.data;
-    }
-
-    ///////////////////////////////////////////////////////////////// Update City ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    Future<List<CompanyCity>> _getUpdateCityList({required int stateId}) async {
-      Uri uri = Uri.parse(
-          "http://template.gosini.xyz:8880/cspos/public/api/lookup/city/$stateId");
-      var response = await http.get(uri);
-      print(response.body);
-      Map<String, dynamic> json = jsonDecode(response.body);
-      final cityComp = CityComp.fromJson(json);
-      return cityComp.data;
-    }
 
     setState(() {
       isLoading = false;
     });
+  }
 
-    
+  //////////////////////////////////////////////////////////////// Update State //////////////////////////////////////////////////////////////////
+  Future<List<CompanyState>> _getUpdateStateList() async {
+    Uri uri = Uri.parse(
+        "http://template.gosini.xyz:8880/cspos/public/api/lookup/state");
+    var response = await http.get(uri);
+    Map<String, dynamic> json = jsonDecode(response.body);
+    final stateComp = StateComp.fromJson(json);
+    return stateComp.data;
+  }
+
+  ///////////////////////////////////////////////////////////////// Update City ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  Future<List<CompanyCity>> _getUpdateCityList({required int stateId}) async {
+    Uri uri = Uri.parse(
+        "http://template.gosini.xyz:8880/cspos/public/api/lookup/city/$stateId");
+    var response = await http.get(uri);
+    print(response.body);
+    Map<String, dynamic> json = jsonDecode(response.body);
+    final cityComp = CityComp.fromJson(json);
+    return cityComp.data;
   }
 
   @override
@@ -787,7 +815,10 @@ class _MyCustomFormStateState extends State<MyCustomFormState> {
             widget.ftype == 4 ? buildOfficeAddressField() : 
             widget.ftype == 5 ? buildPostCode() : 
             widget.ftype == 6 ? buildState() : 
-            widget.ftype == 7 ? buildCity() : buildWebsite(),],),
+            widget.ftype == 7 ? buildCity() : 
+            buildWebsite(),
+            ],
+            ),
           Positioned(
             bottom: 0,
             right: 0,
@@ -800,7 +831,7 @@ class _MyCustomFormStateState extends State<MyCustomFormState> {
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(4),),),
                 ),
-                onPressed: () =>  _submitForm(userId: _userId), 
+                onPressed: () =>  _submitForm(), 
                 child: Container(
                   width: double.infinity,
                   alignment: Alignment.center,
@@ -830,40 +861,291 @@ class _MyCustomFormStateState extends State<MyCustomFormState> {
         return null;
       },
       controller: companyNoController,
-      decoration: InputDecoration(labelText: "Company Number", 
-      labelStyle: GoogleFonts.abel(
+      decoration: InputDecoration(
+        labelText: "Company Number", 
+        labelStyle: GoogleFonts.abel(
           fontSize: 14.sp,
           color: kTextColor,
           fontWeight: FontWeight.w500,
           letterSpacing: 1.0,
         ),
-        errorText: _displayNameValid ? null : "Company Number missing.",
+        focusColor: Colors.grey.shade500,
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(width: 1, color: Colors.grey.shade500),
+        ),
+        errorText: _displayNameValid ? null : "Company Number is missing.",
       ),
     );
   }
 
   TextFormField buildContactNoField() {
-    return TextFormField();
+    return TextFormField(
+      validator: (value) {
+        if(value == null || value.isEmpty) {
+          return "Please enter a company number.";
+        }
+        return null;
+      },
+      keyboardType: TextInputType.phone,
+      controller: contactNoController,
+      decoration: InputDecoration(
+        labelText: "Mobile Number", 
+        labelStyle: GoogleFonts.abel(
+          fontSize: 14.sp,
+          color: kTextColor,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 1.0,
+        ),
+        focusColor: Colors.grey.shade500,
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(width: 1, color: Colors.grey.shade500),
+          ),
+        errorText: _displayNameValid ? null : "Mobile number is missing."
+      ),
+    );
   }
 
   TextFormField buildContactEmailField() {
-    return TextFormField();
+    return TextFormField(
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Please enter a company email address.";
+        }
+        return null;
+      },
+      keyboardType: TextInputType.emailAddress,
+      controller: contactEmailController,
+      decoration: InputDecoration(
+          labelText: "E-mail",
+          labelStyle: GoogleFonts.abel(
+            fontSize: 14.sp,
+            color: kTextColor,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 1.0,
+          ),
+          focusColor: Colors.grey.shade500,
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(width: 1, color: Colors.grey.shade500),
+          ),
+          errorText: _displayNameValid ? null : "Email address is missing."),
+    );
   }
   TextFormField buildOfficeAddressField() {
-    return TextFormField();
+    return TextFormField(
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Please enter a office address.";
+        }
+        return null;
+      },
+      controller: officeAddressController,
+      decoration: InputDecoration(
+          labelText: "Office Address",
+          labelStyle: GoogleFonts.abel(
+            fontSize: 14.sp,
+            color: kTextColor,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 1.0,
+          ),
+          focusColor: Colors.grey.shade500,
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(width: 1, color: Colors.grey.shade500),
+          ),
+          errorText: _displayNameValid ? null : "Office Address is missing."),
+    );
   }
   TextFormField buildPostCode() {
-    return TextFormField();
+    return TextFormField(
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Please enter a postcode office.";
+        }
+        return null;
+      },
+      keyboardType: TextInputType.phone,
+      controller: postcodeController,
+      decoration: InputDecoration(
+          labelText: "Postcode",
+          labelStyle: GoogleFonts.abel(
+            fontSize: 14.sp,
+            color: kTextColor,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 1.0,
+          ),
+          focusColor: Colors.grey.shade500,
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(width: 1, color: Colors.grey.shade500),
+          ),
+          errorText: _displayNameValid ? null : "Postcode is missing."),
+    );
   }
-  TextFormField buildState() {
-    return TextFormField();
+  Container buildState() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: kTextColor,
+      ),
+      width: double.infinity,
+      height: 50,
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+      child: FutureBuilder<List<CompanyState>>(
+          future: _state,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+
+            if (snapshot.data == null) {
+              return const CircularProgressIndicator();
+            }
+            return DropdownButton<CompanyState>(
+                icon: FaIcon(
+                  FontAwesomeIcons.chevronDown,
+                  size: 15,
+                  color: kLabel,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                isExpanded: true,
+                hint: Text(
+                  "Select State",
+                  style: TextStyle(
+                    color: kHint,
+                    fontSize: 10.sp,
+                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onChanged: (state) {
+                  setState(() {
+                    _selectedState = state;
+                    _selectedStateId = state!.id;
+                    _selectedCity = null;
+                    _city = _getUpdateCityList(
+                      stateId: _selectedStateId!);
+                  });
+                  
+                },
+                value: _selectedState,
+                items: [
+                  ...snapshot.data!.map(
+                    (state) => DropdownMenuItem(
+                      value: state,
+                      child: Row(children: [
+                        Text('${state.stateName}',
+                            style: TextStyle(
+                              color: kForm,
+                              fontSize: 12.sp,
+                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w600,
+                            )),
+                      ]),
+                    ),
+                  ),
+                ]);
+          }),
+    );
+    
   }
-  TextFormField buildCity() {
-    return TextFormField();
+  Container buildCity() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: kTextColor,
+      ),
+      width: double.infinity,
+      height: 50,
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 15, 
+        vertical: 15,
+        ),
+      child: FutureBuilder<List<CompanyCity>>(
+        future: _city,
+        builder: (context, snapshot) {
+          // if (snapshot.hasError) {
+          //   return Text('Error: ${snapshot.error}');
+          // }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Text('No cities available');
+          }
+          print('City data: ${snapshot.data}');
+          return IgnorePointer(
+            ignoring: _selectedState == null,
+            child: Opacity(
+              opacity: _selectedState == null ? 0.5 : 1.0,
+              child: DropdownButton<CompanyCity>(
+                icon: FaIcon(
+                  FontAwesomeIcons.chevronDown,
+                  size: 15,
+                  color: kLabel,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                isExpanded: true,
+                hint: Text(
+                  "Select City",
+                  style: TextStyle(
+                    color: kHint,
+                    fontSize: 10.sp,
+                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onChanged: (city) {
+                  setState(() {
+                    _selectedCity = city;
+                  });
+                },
+                value: _selectedCity,
+                items: snapshot.data!.map((city) {
+                  return DropdownMenuItem<CompanyCity>(
+                    value: city,
+                    child: Text(
+                      '${city.cityName}', // Display the city name
+                      style: TextStyle(
+                        color: kForm,
+                        fontSize: 12.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
   TextFormField buildWebsite() {
-    return TextFormField();
+    return TextFormField(
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Please enter new Website Link";
+        }
+        return null;
+      },
+      controller: websiteController,
+      decoration: InputDecoration(
+        labelText: "Website",
+        labelStyle: GoogleFonts.abel(
+          fontSize: 14.sp,
+          color: kTextColor,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 1.0,
+        ),
+        focusColor: Colors.grey.shade500,
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(width: 1, color: Colors.grey.shade500),
+        ),
+        errorText: _displayNameValid ? null : "Website link is missing.",
+      ),
+    );
   }
 }
-
-

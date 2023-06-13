@@ -334,7 +334,8 @@ class _CreateMerchantState extends State<CreateMerchant> {
                                   _selectedStateId = state!.id;
                                   _selectedCity = null;
                                   _city =
-                                      _getCityList(stateId: _selectedStateId!);
+                                      _getCityList(
+                                        stateId: _selectedStateId!);
                                 });
                               },
                               value: _selectedState,
