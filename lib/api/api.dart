@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:pointofsales/screen/log%20n%20reg/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-bool _isLoader = false;
 
 Future<void> logout(BuildContext context) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
