@@ -150,7 +150,9 @@ class MerchantDetail {
   final String officeAddress;
   final String postcode;
   final int state;
+  final String stateName;
   final int city;
+  final String cityName;
   final dynamic website;
   final dynamic facebook;
   final dynamic instagram;
@@ -172,6 +174,8 @@ class MerchantDetail {
     this.brandName,
     this.businessNature,
     this.contactName,
+    required this.stateName,
+    required this.cityName,
     required this.contactNo,
     required this.contactEmail,
     required this.officeAddress,
