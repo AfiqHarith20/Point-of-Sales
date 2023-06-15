@@ -1,9 +1,12 @@
+import 'package:http/http.dart' as http;
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/invoice_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 class ProductScreen extends StatefulWidget {
@@ -14,6 +17,24 @@ class ProductScreen extends StatefulWidget {
 }
 
 class _ProductScreenState extends State<ProductScreen> {
+  bool isLoading = true;
+
+  String? name, imageUrl, sku, price;
+
+  Future<dynamic> _getProduct() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var response = await http.get(Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/product"),
+    headers: {
+          'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+          'Content-Type': 'application/json'
+        }
+    );
+    print(response.body);
+    if (response.statusCode == 200) {
+      print("PRODUCT LIST >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

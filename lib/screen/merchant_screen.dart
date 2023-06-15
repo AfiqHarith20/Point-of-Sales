@@ -32,35 +32,45 @@ class _MerchantScreenState extends State<MerchantScreen> {
   bool isLoader = false;
   bool isLoading = true;
 
-  late int userId, state, city;
-  late String companyName, contactNo, contactEmail, officeAddress, postcode;
-  late dynamic companyNo, website;
+  int? userId, state, city;
+  String? companyName,
+      contactNo,
+      contactEmail,
+      officeAddress,
+      postcode,
+      companyNo,
+      website,
+      stateName,
+      cityName;
 
-  int getState() {
+  int? getState() {
     return state;
   }
 
-  int getCity() {
+  int? getCity() {
     return city;
   }
-
-  String getCompanyNo() {
-    return companyNo;
+  String? getCompanyName() {
+    return companyName;
   }
 
-  String getContactNo() {
+  String? getCompanyNo() {
+    return companyNo.toString();
+  }
+
+  String? getContactNo() {
     return contactNo;
   }
 
-  String getContactEmail() {
+  String? getContactEmail() {
     return contactEmail;
   }
 
-  String getOfficeAddress() {
+  String? getOfficeAddress() {
     return officeAddress;
   }
 
-  String getPostcode() {
+  String? getPostcode() {
     return postcode;
   }
 
@@ -127,8 +137,10 @@ class _MerchantScreenState extends State<MerchantScreen> {
               contactNo: res['data']['contact_no'].toString(),
               officeAddress: res['data']['office_address'].toString(),
               postcode: res['data']['postcode'].toString(),
-              state: res['data']['state'],
-              city: res['data']['city'],
+              state: res['data']['state']['id'],
+              stateName: res['data']['state']['state_name'],
+              city: res['data']['city']['id'],
+              cityName: res['data']['city']['city_name'],
               website: res['data']['website'].toString(),
               
               status: res['data']['status'],
@@ -146,7 +158,9 @@ class _MerchantScreenState extends State<MerchantScreen> {
             officeAddress = data.officeAddress;
             postcode = data.postcode;
             state = data.state;
+            stateName = data.stateName;
             city = data.city;
+            cityName = data.cityName;
             website = data.website;
             companyNo = data.companyNo;
             
@@ -471,7 +485,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
                             letterSpacing: 1.0,
                           ),
                         ),
-                        initialValue: state.toString(),
+                        initialValue: stateName,
                         style: GoogleFonts.atma(
                           fontSize: 14.sp,
                           color: kTextColor,
@@ -490,7 +504,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
                             letterSpacing: 1.0,
                           ),
                         ),
-                        initialValue: city.toString(),
+                        initialValue: cityName,
                         style: GoogleFonts.atma(
                           fontSize: 14.sp,
                           color: kTextColor,
@@ -594,14 +608,14 @@ class _MerchantScreenState extends State<MerchantScreen> {
                             child: SingleChildScrollView(
                               child: MyCustomFormState(
                                 ftype: type,
-                                state: state,
-                                city: city,
-                                compNo: companyNo,
-                                contcEmail: contactEmail,
-                                contcNo: contactNo,
-                                officeAddrs: officeAddress,
-                                postcode: postcode,
-                                website: website,
+                                state: state!,
+                                city: city!,
+                                companyNo: companyNo!,
+                                contactEmail: contactEmail!,
+                                contactNo: contactNo!,
+                                officeAddress: officeAddress!,
+                                postcode: postcode!,
+                                website: website!,
                               ),
                             ),
                           ),
@@ -645,16 +659,16 @@ class _MerchantScreenState extends State<MerchantScreen> {
 
 class MyCustomFormState extends StatefulWidget {
   int ftype, state, city;
-  String contcNo, contcEmail, officeAddrs, postcode;
-  dynamic website, compNo;
+  String contactNo, contactEmail, officeAddress, postcode,  website, companyNo;
+  
   MyCustomFormState({
     required this.ftype,
     required this.state,
     required this.city,
-    required this.compNo,
-    required this.contcEmail,
-    required this.contcNo,
-    required this.officeAddrs,
+    required this.companyNo,
+    required this.contactEmail,
+    required this.contactNo,
+    required this.officeAddress,
     required this.postcode,
     required this.website,
   });
@@ -690,14 +704,14 @@ class _MyCustomFormStateState extends State<MyCustomFormState> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    companyNoController = TextEditingController(text: widget.compNo ?? '');
-    contactNoController = TextEditingController(text: widget.contcNo ?? '');
+    companyNoController = TextEditingController(text: widget.companyNo);
+    contactNoController = TextEditingController(text: widget.contactNo);
     contactEmailController =
-        TextEditingController(text: widget.contcEmail ?? '');
+        TextEditingController(text: widget.contactEmail);
     officeAddressController =
-        TextEditingController(text: widget.officeAddrs ?? '');
-    postcodeController = TextEditingController(text: widget.postcode ?? '');
-    websiteController = TextEditingController(text: widget.website ?? '');
+        TextEditingController(text: widget.officeAddress);
+    postcodeController = TextEditingController(text: widget.postcode);
+    websiteController = TextEditingController(text: widget.website);
 
     _state = _getUpdateStateList();
     _state.then(
@@ -904,7 +918,7 @@ class _MyCustomFormStateState extends State<MyCustomFormState> {
                   ),
                 ),
                 onPressed: () {
-                  _submitForm;
+                  _submitForm();
                   
                 },
                 child: Container(
@@ -1184,7 +1198,7 @@ class _MyCustomFormStateState extends State<MyCustomFormState> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Text('No cities available');
                 }
-                print('City data: ${snapshot.data}');
+                // print('City data: ${snapshot.data}');
                 return IgnorePointer(
                   ignoring: _selectedState == null,
                   child: Opacity(
