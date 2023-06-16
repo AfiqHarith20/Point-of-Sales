@@ -102,428 +102,292 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 36.h,
-                child: _head(),
-              ),
-            ),
-            
-            SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Your Items",
-                      style: GoogleFonts.aubrey(
-                        fontWeight: FontWeight.w600,
-                        color: kLabel,
-                        fontSize: 16.sp,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    // Text(
-                    //   "Price",
-                    //   style: GoogleFonts.aubrey(
-                    //     fontWeight: FontWeight.w600,
-                    //     color: kLabel,
-                    //     fontSize: 16.sp,
-                    //     letterSpacing: 2.0,
-                    //   ),
-                    // ),
-                  ],
+      body: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Form(
+              child: Container(
+                height: 60.h,
+                margin: kMargin,
+                padding: kPadding,
+                decoration: BoxDecoration(
+                  color: kPrimaryColor,
+                  borderRadius: kRadius,
                 ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15),
-                child: Table(
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    border: TableBorder.all(color: Colors.transparent),
-                    columnWidths: {
-                      0: FlexColumnWidth(3),
-                      1: FlexColumnWidth(2),
-                      2: FlexColumnWidth(2),
-                      3: FlexColumnWidth(2),
-                    },
-                    children: [
-                      TableRow(
-                        children: [
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Text(
-                                "Product Name",
-                                style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w600,
-                                  color: kLabel,
-                                  fontSize: 14.sp,
-                                  letterSpacing: 2.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Text(
-                                "Price (MYR)",
-                                style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w600,
-                                  color: kLabel,
-                                  fontSize: 14.sp,
-                                  letterSpacing: 2.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Text(
-                                "Quantity",
-                                style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w600,
-                                  color: kLabel,
-                                  fontSize: 14.sp,
-                                  letterSpacing: 2.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Text(
-                                "Subtotal (MYR)",
-                                style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w600,
-                                  color: kLabel,
-                                  fontSize: 14.sp,
-                                  letterSpacing: 2.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      for (int index = 0; index < invoice().length; index++)
-                        TableRow(children: [
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Text(
-                                invoice()[index].prodname ?? "",
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Text(
-                                invoice()[index].price ?? "",
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Text(
-                                invoice()[index].quantity ?? "",
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Text(
-                                (double.parse(invoice()[index].price ?? "0") *
-                                        double.parse(
-                                            invoice()[index].quantity ?? "0"))
-                                    .toStringAsFixed(2),
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ]),
-                    ]),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ProductScreen(), // Replace ProductPage with the actual product page widget
-                      ),
-                    );
-                  },
-                  child: Text(
-                    "Add Product",
-                    style: GoogleFonts.aubrey(
-                      fontWeight: FontWeight.w600,
-                      color: Color.fromARGB(255, 231, 96, 96),
-                      fontSize: 14.sp,
-                      letterSpacing: 2.0,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Divider(
-                color: Colors.redAccent,
-                thickness: 1.0,
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
                   children: [
-                    Text(
-                      "Discount",
-                      style: GoogleFonts.aubrey(
-                        fontWeight: FontWeight.w600,
-                        color: kLabel,
-                        fontSize: 14.sp,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    Text(
-                      "\RM${calculateDiscount().toStringAsFixed(2)}",
-                      style: GoogleFonts.breeSerif(
-                        fontWeight: FontWeight.w500,
-                        color: kTextColor,
-                        fontSize: 12.sp,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Tax",
-                      style: GoogleFonts.aubrey(
-                        fontWeight: FontWeight.w600,
-                        color: kLabel,
-                        fontSize: 14.sp,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    Text(
-                      "\RM${calculateTax().toStringAsFixed(2)}",
-                      style: GoogleFonts.breeSerif(
-                        fontWeight: FontWeight.w500,
-                        color: kTextColor,
-                        fontSize: 12.sp,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Total",
-                      style: GoogleFonts.aubrey(
-                        fontWeight: FontWeight.w600,
-                        color: kLabel,
-                        fontSize: 14.sp,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    Text(
-                      "\RM${calculateTotal().toStringAsFixed(2)}",
-                      style: GoogleFonts.breeSerif(
-                        fontWeight: FontWeight.w500,
-                        color: kTextColor,
-                        fontSize: 12.sp,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Payment",
-                      style: GoogleFonts.aubrey(
-                        fontWeight: FontWeight.w600,
-                        color: kLabel,
-                        fontSize: 14.sp,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    DropdownButton<String>(
-                      dropdownColor: kPrimaryColor,
-                      iconEnabledColor: kLabel,
-                      value: selectedPayment,
-                      items: paymentOptions
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          child: Text(
-                            value,
-                            style: GoogleFonts.breeSerif(
+                    SingleChildScrollView(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                      child: Column(children: [
+                        Text(
+                          "Welcome Afiq Harith",
+                          style: GoogleFonts.rubik(
+                            fontSize: 14.sp,
+                            color: kTextColor,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 1.h,
+                        ),
+                        Text(
+                          "Product Code (SKU)",
+                          style: GoogleFonts.abel(
+                            fontSize: 10.sp,
+                            color: kTextColor,
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 4.h,
+                          child: TextField(
+                            // controller: ,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: kTextColor,
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                                borderSide: BorderSide(
+                                    width: 3, color: Colors.greenAccent),
+                              ),
+                            ),
+                            style: GoogleFonts.abel(
+                              fontSize: 11.sp,
+                              color: kScaffoldColor,
                               fontWeight: FontWeight.w500,
-                              color: kTextColor,
-                              fontSize: 12.sp,
                               letterSpacing: 1.0,
                             ),
                           ),
-                          value: value,
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedPayment = newValue!;
-                        });
-                      },
-                    )
+                        ),
+                        SizedBox(
+                          height: 1.h,
+                        ),
+                        Text(
+                          "Quantity",
+                          style: GoogleFonts.abel(
+                            fontSize: 10.sp,
+                            color: kTextColor,
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 4.h,
+                          child: TextField(
+                            // controller: ,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: kTextColor,
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                                borderSide: BorderSide(
+                                    width: 3, color: Colors.greenAccent),
+                              ),
+                            ),
+                            style: GoogleFonts.abel(
+                              fontSize: 11.sp,
+                              color: kScaffoldColor,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: .5.h,
+                        ),
+                        Row(
+                          children: [
+                            ElevatedButton(
+                              style: ButtonStyle(
+                                overlayColor:
+                                    MaterialStateProperty.resolveWith<Color?>(
+                                  (Set<MaterialState> states) {
+                                    if (states.contains(MaterialState.pressed))
+                                      return Colors.greenAccent;
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              onPressed: () {},
+                              child: Text(
+                                "Add",
+                                style: GoogleFonts.manrope(
+                                  fontSize: 8.sp,
+                                  color: kTextColor,
+                                  fontWeight: FontWeight.w400,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 2.w,
+                            ),
+                            ElevatedButton(
+                              style: ButtonStyle(
+                                overlayColor:
+                                    MaterialStateProperty.resolveWith<Color?>(
+                                  (Set<MaterialState> states) {
+                                    if (states.contains(MaterialState.pressed))
+                                      return Colors.purpleAccent;
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              onPressed: () {},
+                              child: Text(
+                                "Edit",
+                                style: GoogleFonts.manrope(
+                                  fontSize: 8.sp,
+                                  color: kTextColor,
+                                  fontWeight: FontWeight.w400,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 2.h,
+                            ),
+                          ],
+                        ),
+                        Divider(
+                          color: Colors.red,
+                          thickness: 2.0,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Discount",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            Text(
+                              "\RM${calculateDiscount().toStringAsFixed(2)}",
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Tax",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            Text(
+                              "\RM${calculateTax().toStringAsFixed(2)}",
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Total",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            Text(
+                              "\RM${calculateTotal().toStringAsFixed(2)}",
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Payment",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            DropdownButton<String>(
+                              dropdownColor: kPrimaryColor,
+                              iconEnabledColor: kLabel,
+                              value: selectedPayment,
+                              items: paymentOptions
+                                  .map<DropdownMenuItem<String>>(
+                                      (String value) {
+                                return DropdownMenuItem<String>(
+                                  child: Text(
+                                    value,
+                                    style: GoogleFonts.breeSerif(
+                                      fontWeight: FontWeight.w500,
+                                      color: kTextColor,
+                                      fontSize: 10.sp,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                  value: value,
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedPayment = newValue!;
+                                });
+                              },
+                            )
+                          ],
+                        ),
+                      ]),
+                    ),
                   ],
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 15),
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: kPrimaryColor,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                  ),
-                  child: Text(
-                    "CHECKOUT",
-                    style: GoogleFonts.ubuntu(
-                      fontSize: 16.sp,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _head() {
-    return Stack(
-      children: [
-        Column(
-          children: [
-            Container(
-              width: double.infinity,
-              height: 35.h,
+          ),
+          Expanded(
+            flex: 3,
+            child: Container(
+              height: 60.h,
+              margin: kMargin,
+              padding: kPadding,
               decoration: BoxDecoration(
-                color: Color(0xFF4A84C7),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
+                color: kPrimaryColor,
+                borderRadius: kRadius,
               ),
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 20,
-                      left: 10,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Welcome Back!",
-                          style: GoogleFonts.aubrey(
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
-                            fontSize: 12.sp,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                        Text(
-                          "Afiq Harith",
-                          style: GoogleFonts.breeSerif(
-                            fontWeight: FontWeight.w600,
-                            color: kTextColor,
-                            fontSize: 16.sp,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              child: SingleChildScrollView(),
             ),
-            
-          ],
-        ),
-        
-      ],
+          ),
+        ],
+      ),
     );
   }
 }
