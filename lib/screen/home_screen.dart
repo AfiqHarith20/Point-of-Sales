@@ -1,10 +1,16 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/data.dart';
+import 'package:pointofsales/models/pos_model.dart';
 import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/drawer_screen.dart';
 import 'package:pointofsales/screen/product_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -17,7 +23,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   UserModel? user;
-  // bool _isLoading = false;
+  int? merchantId, userId;
+  String? userName, userEmail, companyName;
+  late List<dynamic> products;
+  late List<PaymentType> paymentType, paymentTypeName;
+  late List<PaymentTax> paymentTax, paymentTaxPercent, paymentTaxName;
+  bool isLoading = true;
   double discountPercentage = 10;
   double taxPercentage = 3;
 
@@ -56,6 +67,47 @@ class _HomeScreenState extends State<HomeScreen> {
     "TNG",
     "Online Payment",
   ];
+
+  Future<void> _getIndexPos() async {
+    try{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final http.Response response = await http.get(
+        Uri.parse(Constants.apiPosIndex),
+        headers: ({
+          'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+          'Content-Type': 'application/json'
+        }),
+      );
+      final Map<String, dynamic> pos = json.decode(response.body);
+      if(response.statusCode == 200) {
+        print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
+        setState(() {
+          isLoading = false;
+
+          if(pos["data"] == null) {
+            var data = Pos (
+              merchantId: pos["data"]["merchant_id"],
+              userId: pos["data"]["user_id"],
+              userName: pos["data"]["user"]["name"].toString(),
+              userEmail: pos["data"]["user"]["email"].toString(),
+              companyName: pos["data"]["merchant"]["company_name"].toString(),
+              products: pos["data"]["products"],
+              paymentType:  pos["data"]["payment_type"]["id"],
+              paymentTypeName:  pos["data"]["payment_type"]["name"],
+              paymentTax: pos["data"]["payment_tax"]["id"],
+              paymentTaxName: pos["data"]["payment_tax"]["name"],
+              paymentTaxPercent: pos["data"]["payment_tax"]["tax_percentage"]
+            );
+
+            merchantId = data.merchantId;
+          }
+        });
+      }
+
+    }catch (e) {
+
+    }
+  }
 
   @override
   void initState() {
@@ -124,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text(
                           "Welcome Afiq Harith",
                           style: GoogleFonts.rubik(
-                            fontSize: 14.sp,
+                            fontSize: 12.sp,
                             color: kTextColor,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.0,
@@ -265,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: GoogleFonts.aubrey(
                                 fontWeight: FontWeight.w600,
                                 color: kLabel,
-                                fontSize: 12.sp,
+                                fontSize: 11.sp,
                                 letterSpacing: 1.0,
                               ),
                             ),
@@ -274,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
-                                fontSize: 12.sp,
+                                fontSize: 11.sp,
                                 letterSpacing: 1.0,
                               ),
                             ),
@@ -288,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: GoogleFonts.aubrey(
                                 fontWeight: FontWeight.w600,
                                 color: kLabel,
-                                fontSize: 12.sp,
+                                fontSize: 11.sp,
                                 letterSpacing: 1.0,
                               ),
                             ),
@@ -297,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
-                                fontSize: 12.sp,
+                                fontSize: 11.sp,
                                 letterSpacing: 1.0,
                               ),
                             ),
@@ -311,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: GoogleFonts.aubrey(
                                 fontWeight: FontWeight.w600,
                                 color: kLabel,
-                                fontSize: 12.sp,
+                                fontSize: 11.sp,
                                 letterSpacing: 1.0,
                               ),
                             ),
@@ -320,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
-                                fontSize: 12.sp,
+                                fontSize: 11.sp,
                                 letterSpacing: 1.0,
                               ),
                             ),
@@ -334,7 +386,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: GoogleFonts.aubrey(
                                 fontWeight: FontWeight.w600,
                                 color: kLabel,
-                                fontSize: 12.sp,
+                                fontSize: 11.sp,
                                 letterSpacing: 1.0,
                               ),
                             ),
@@ -363,9 +415,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                   selectedPayment = newValue!;
                                 });
                               },
-                            )
+                            ),
+                            
                           ],
                         ),
+                        SizedBox(height: 1.h,),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: kPrimaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                          ),
+                          child: Text(
+                            "CHECKOUT",
+                            style: GoogleFonts.ubuntu(
+                              fontSize: 14.sp,
+                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        )
                       ]),
                     ),
                   ],
@@ -383,7 +453,145 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: kPrimaryColor,
                 borderRadius: kRadius,
               ),
-              child: SingleChildScrollView(),
+              child: SingleChildScrollView(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                child: Table(
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  border: TableBorder.all(color: Colors.transparent),
+                  columnWidths: {
+                    0: FlexColumnWidth(3),
+                    1: FlexColumnWidth(2),
+                    2: FlexColumnWidth(2),
+                    3: FlexColumnWidth(2),
+                  },
+                  children: [
+                    TableRow(
+                      children: [
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Text(
+                                "Product Name",
+                                style: GoogleFonts.aubrey(
+                                  fontWeight: FontWeight.w600,
+                                  color: kLabel,
+                                  fontSize: 12.sp,
+                                  letterSpacing: 1.0,
+                                ),
+                            ),
+                          ),
+                          ),
+                          TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Text(
+                              "Price (MYR)",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Text(
+                              "Quantity",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Text(
+                              "Subtotal (MYR)",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    for (int index = 0; index < invoice().length; index++)
+                      TableRow(children: [
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              invoice()[index].prodname ?? "",
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              invoice()[index].price ?? "",
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              invoice()[index].quantity ?? "",
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              (double.parse(invoice()[index].price ?? "0") *
+                                      double.parse(
+                                          invoice()[index].quantity ?? "0"))
+                                  .toStringAsFixed(2),
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ]
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],

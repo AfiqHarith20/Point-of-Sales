@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/log%20n%20reg/register_screen.dart';
@@ -35,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> userLogin() async {
     try {
       final http.Response response = await http.post(
-        Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/login"),
+        Uri.parse(Constants.apiLogin),
         body: ({
           'email': emailController.text,
           'password': passwordController.text,

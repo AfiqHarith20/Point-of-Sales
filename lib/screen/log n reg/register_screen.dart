@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/screen/log%20n%20reg/login_screen.dart';
 import 'package:pointofsales/widget/login/register_button.dart';
@@ -28,7 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     print(nameController.text);
     print(passwordController.text);
     final http.Response response = await http.post(
-      Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/register"),
+      Uri.parse(Constants.apiRegister),
       body: ({
         'email': emailController.text,
         'name': nameController.text,
