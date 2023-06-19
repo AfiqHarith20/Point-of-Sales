@@ -1,3 +1,4 @@
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,7 @@ import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/screen/history_screen.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/invoice_screen.dart';
+import 'package:pointofsales/screen/log%20n%20reg/login_screen.dart';
 import 'package:pointofsales/screen/merchant_screen.dart';
 import 'package:pointofsales/screen/product_screen.dart';
 import 'package:pointofsales/screen/report_screen.dart';
@@ -21,6 +23,35 @@ class DrawerScreen extends StatefulWidget {
 }
 
 class _DrawerScreenState extends State<DrawerScreen> {
+
+  Future<void> logout(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    Uri uri =
+        Uri.parse(Constants.apiLogout);
+    var response = await http.post(uri,
+        headers: ({
+          'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+          'Content-Type': 'application/json',
+        }));
+
+    print(response.statusCode);
+    prefs.remove('token');
+
+    if (response.statusCode == 200) {
+      print(response);
+      print("Logout!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(),
+        ),
+      );
+    } else {
+      print(response.reasonPhrase);
+    }
+    return logout(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
