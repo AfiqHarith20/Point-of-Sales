@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   double discountPercentage = 10;
   double taxPercentage = 3;
+  
 
   double calculateDiscount() {
     double total = calculateSubtotal();
@@ -68,6 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
     "Online Payment",
   ];
 
+  //////////////////////////////////////// Index POS ////////////////////////////////////////////////////////////////////////////////////////
+
   Future<void> _getIndexPos() async {
     try{
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -100,12 +103,58 @@ class _HomeScreenState extends State<HomeScreen> {
             );
 
             merchantId = data.merchantId;
+            userId = data.userId;
+            userName = data.userName;
+            userEmail = data.userEmail;
+            companyName = data.companyName;
+            products = data.products;
+            paymentType = data.paymentType;
+            paymentTypeName = data.paymentTypeName;
+            paymentTax = data.paymentTax;
+            paymentTaxName = data.paymentTaxName;
+            paymentTaxPercent = data.paymentTaxPercent;
           }
         });
       }
-
     }catch (e) {
+      print(e);
+      isLoading = false;
+    }
+  }
 
+  ////////////////////////////////////////////////// Save Pos Transaction //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  Future<void> _postSavePosTransaction() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final http.Response response = await http.post(
+        Uri.parse(Constants.apiPosIndex),
+      body: ({
+        'items_array' : ItemsArray,
+      }),
+      );
+
+      var dataFromResponse = json.decode(response.body);
+      dataFromResponse["data"]["items_array"].forEach((newItems){
+        List<ItemsArray> itemsArray = [];
+        newItems['items_array'].forEach((newItems) {
+          itemsArray.add(
+            new ItemsArray(
+              productId: newItems['product_id'].toString(),
+              quantity: newItems['quantity'],
+              price: newItems['price'].toDouble(),
+            ),
+          );
+        });
+      });
+
+      if(response.statusCode == 200) {
+        print("POS TRANSACTION SUCCESSFULLY SAVED");
+      }else{
+        print(response.reasonPhrase);
+      }
+    }catch (e) {
+      print(e);
     }
   }
 
@@ -157,10 +206,10 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Row(
         children: [
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Form(
               child: Container(
-                height: 60.h,
+                height: 65.h,
                 margin: kMargin,
                 padding: kPadding,
                 decoration: BoxDecoration(
@@ -444,9 +493,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Container(
-              height: 60.h,
+              height: 65.h,
               margin: kMargin,
               padding: kPadding,
               decoration: BoxDecoration(

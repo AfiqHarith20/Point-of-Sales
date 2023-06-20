@@ -68,3 +68,81 @@ class PaymentType {
     required this.name,
   });
 }
+
+class Customer {
+  final int merchantId;
+  final String customerId;
+  final String posTxnNo;
+  final String grossPrice;
+  final dynamic taxId;
+  final dynamic taxAmount;
+  final dynamic discId;
+  final dynamic discAmount;
+  final String netPrice;
+  final String paymentType;
+  final String remarks;
+  final DateTime updatedAt;
+  final DateTime createdAt;
+  final int id;
+  final int status;
+  final int createdBy;
+  final int updatedBy;
+
+  Customer({
+    required this.merchantId,
+    required this.customerId,
+    required this.posTxnNo,
+    required this.grossPrice,
+    this.taxId,
+    this.taxAmount,
+    this.discId,
+    this.discAmount,
+    required this.netPrice,
+    required this.paymentType,
+    required this.remarks,
+    required this.updatedAt,
+    required this.createdAt,
+    required this.id,
+    required this.status,
+    required this.createdBy,
+    required this.updatedBy,
+  });
+}
+
+class Items {
+  final String customerId;
+  final String grossPrice;
+  final String taxId;
+  final String taxAmount;
+  final String discId;
+  final String discAmount;
+  final String netPrice;
+  final String paymentType;
+  final String remarks;
+  final List<ItemsArray> itemsArray;
+
+  Items({
+    required this.customerId,
+    required this.grossPrice,
+    required this.taxId,
+    required this.taxAmount,
+    required this.discId,
+    required this.discAmount,
+    required this.netPrice,
+    required this.paymentType,
+    required this.remarks,
+    required this.itemsArray,
+  });
+}
+
+class ItemsArray {
+  final String productId;
+  final String quantity;
+  final String price;
+
+  ItemsArray({
+    required this.productId,
+    required this.quantity,
+    required this.price,
+  });
+}

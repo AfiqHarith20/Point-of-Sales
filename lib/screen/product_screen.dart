@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/invoice_screen.dart';
@@ -23,7 +24,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Future<dynamic> _getProduct() async{
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var response = await http.get(Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/product"),
+    var response = await http.get(Uri.parse(Constants.apiProductIndex),
     headers: {
           'Authorization': 'Bearer ' + prefs.getString('token').toString(),
           'Content-Type': 'application/json'
