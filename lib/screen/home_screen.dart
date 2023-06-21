@@ -23,12 +23,21 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   UserModel? user;
-  int? merchantId, userId;
-  String? userName, userEmail, companyName;
+  int? merchantId, userId, id, status;
+  String? userName,
+      userEmail,
+      companyName,
+      customerId,
+      posTxnNo,
+      grossPrice,
+      netPrice,
+      remarks,
+      paymentTypes;
+  dynamic taxId, taxAmount, discId, discAmount;
   late List<dynamic> products;
   late List<PaymentType> paymentType, paymentTypeName;
   late List<PaymentTax> paymentTax, paymentTaxPercent, paymentTaxName;
-  bool isLoading = true;
+  bool isLoading = false;
   double discountPercentage = 10;
   double taxPercentage = 3;
   
@@ -81,11 +90,12 @@ class _HomeScreenState extends State<HomeScreen> {
           'Content-Type': 'application/json'
         }),
       );
+      print(response.body);
       final Map<String, dynamic> pos = json.decode(response.body);
       if(response.statusCode == 200) {
         print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
         setState(() {
-          isLoading = false;
+          isLoading = true;
 
           if(pos["data"] == null) {
             var data = Pos (
@@ -124,32 +134,64 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ////////////////////////////////////////////////// Save Pos Transaction //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  Future<void> _postSavePosTransaction() async {
+  Future<dynamic> _postSavePosTransaction() async {
+    
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final http.Response response = await http.post(
         Uri.parse(Constants.apiPosIndex),
       body: ({
+        'customer_id': prefs.getString('customer_id'),
+        'gross_price': prefs.getString('gross_price'),
+        'tax_id': prefs.getString('tax_id'),
+        'tax_amount': prefs.getString('tax_amount'),
+        'disc_id': prefs.getString('disc_id'),
+        'disc_amount': prefs.getString('disc_amount'),
+        'net_price': prefs.getDouble('net_price'),
+        'payment_type': prefs.getString('payment_type'),
+        'remarks': prefs.getString('remarks'),
         'items_array' : ItemsArray,
       }),
       );
-
-      var dataFromResponse = json.decode(response.body);
-      dataFromResponse["data"]["items_array"].forEach((newItems){
-        List<ItemsArray> itemsArray = [];
-        newItems['items_array'].forEach((newItems) {
-          itemsArray.add(
-            new ItemsArray(
-              productId: newItems['product_id'].toString(),
-              quantity: newItems['quantity'],
-              price: newItems['price'].toDouble(),
-            ),
-          );
-        });
-      });
-
+      
+      final Map<String, dynamic> customer = json.decode(response.body);
+      
       if(response.statusCode == 200) {
         print("POS TRANSACTION SUCCESSFULLY SAVED");
+        setState(() {
+          isLoading = true;
+          if(customer['data']['customer'] == null) {
+            var data = Customer(
+              id: customer['data']['custom']['id'],
+              merchantId: customer['data']['customer']['merchant_id'],
+              customerId: customer['data']['customer']['customer_id'],
+              posTxnNo: customer['data']['customer']['pos_txn_no'],
+              grossPrice: customer['data']['customer']['gross_price'],
+              taxId: customer['data']['customer']['tax_id'],
+              taxAmount: customer['data']['customer']['tax_amount'],
+              discId: customer['data']['customer']['disc_id'],
+              discAmount: customer['data']['customer']['disc_amount'],
+              netPrice: customer['data']['customer']['net_price'].toDouble(),
+              paymentTypes: customer['data']['customer']['payment_type'],
+              remarks: customer['data']['customer']['remarks'],
+              status: customer['data']['customer']['status'],
+            );
+
+            id = data.id;
+            merchantId = data.merchantId;
+            customerId = data.customerId;
+            posTxnNo = data.posTxnNo;
+            grossPrice = data.grossPrice;
+            taxId = data.taxId;
+            taxAmount = data.taxAmount;
+            discId = data.discId;
+            discAmount = data.discAmount;
+            netPrice = data.netPrice;
+            paymentTypes = data.paymentTypes;
+            remarks = data.remarks;
+          }
+        });
+        
       }else{
         print(response.reasonPhrase);
       }
@@ -157,6 +199,25 @@ class _HomeScreenState extends State<HomeScreen> {
       print(e);
     }
   }
+
+  Future fetchSavePostTransaction() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    isLoading = true;
+    
+    var dataFromResponse = await _postSavePosTransaction();
+    dataFromResponse['data']['items_array'].forEach((newItems) {
+      List<ItemsArray> itemsArray = [];
+      itemsArray.add(
+        new ItemsArray(
+        productId: newItems['product_id'].toString(),
+        quantity: newItems['quantity'],
+        price: newItems['price'],
+      )
+      );
+    });
+    
+  }
+
 
   @override
   void initState() {

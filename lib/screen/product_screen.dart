@@ -33,6 +33,9 @@ class _ProductScreenState extends State<ProductScreen> {
     print(response.body);
     if (response.statusCode == 200) {
       print("PRODUCT LIST >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+      setState(() {
+        
+      });
     }
   }
 
