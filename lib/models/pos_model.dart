@@ -79,14 +79,14 @@ class Customer {
   final dynamic discId;
   final dynamic discAmount;
   final String netPrice;
-  final String paymentType;
+  final String paymentTypes;
   final String remarks;
-  final DateTime updatedAt;
-  final DateTime createdAt;
+  // final DateTime updatedAt;
+  // final DateTime createdAt;
   final int id;
   final int status;
-  final int createdBy;
-  final int updatedBy;
+  // final int createdBy;
+  // final int updatedBy;
 
   Customer({
     required this.merchantId,
@@ -98,14 +98,14 @@ class Customer {
     this.discId,
     this.discAmount,
     required this.netPrice,
-    required this.paymentType,
+    required this.paymentTypes,
     required this.remarks,
-    required this.updatedAt,
-    required this.createdAt,
+    // required this.updatedAt,
+    // required this.createdAt,
     required this.id,
     required this.status,
-    required this.createdBy,
-    required this.updatedBy,
+    // required this.createdBy,
+    // required this.updatedBy,
   });
 }
 
