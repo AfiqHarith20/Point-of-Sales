@@ -57,6 +57,38 @@ class PaymentTax {
     required this.name,
     required this.taxPercentage,
   });
+
+  factory PaymentTax.fromJson(Map<String, dynamic> json) => PaymentTax(
+        id: json["id"],
+        name: json["name"],
+        taxPercentage: json["tax_percentage"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "tax_percentage": taxPercentage,
+      };
+}
+
+class PayType {
+  List<PaymentType> data;
+
+  PayType({
+    required this.data,
+  });
+
+  factory PayType.fromJson(Map<String, dynamic> json) => PayType(
+        data: List<PaymentType>.from(
+          json["data"].map((x) => PaymentType.fromJson(x)),
+        ),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "data": List<dynamic>.from(
+          data.map((x) => x.toJson()),
+        ),
+      };
 }
 
 class PaymentType {
@@ -67,6 +99,16 @@ class PaymentType {
     required this.id,
     required this.name,
   });
+
+  factory PaymentType.fromJson(Map<String, dynamic> json) => PaymentType(
+        id: json["id"],
+        name: json["name"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+      };
 }
 
 class Customer {
