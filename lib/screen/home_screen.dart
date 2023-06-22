@@ -37,6 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
   late List<dynamic> products;
   late List<PaymentType> paymentType, paymentTypeName;
   late List<PaymentTax> paymentTax, paymentTaxPercent, paymentTaxName;
+  PaymentType? _selectedPaymentType;
+
+  late PayType _paymentType = PayType(data: []);
   bool isLoading = false;
   double discountPercentage = 10;
   double taxPercentage = 3;
@@ -78,19 +81,20 @@ class _HomeScreenState extends State<HomeScreen> {
     "Online Payment",
   ];
 
-  //////////////////////////////////////// Index POS ////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////// fetch Get and Post //////////////////////////
+  
+  void fetchPos() async {
+    final url = Uri.parse(Constants.apiPosIndex);
 
-  Future<void> _getIndexPos() async {
-    try{
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final http.Response response = await http.get(
-        Uri.parse(Constants.apiPosIndex),
-        headers: ({
-          'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-          'Content-Type': 'application/json'
-        }),
-      );
-      print(response.body);
+    //GET Request
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final http.Response response = await http.get((url),
+    headers: ({
+      'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+      'Content-Type': 'application/json'
+    }),
+    );
+    print(response.statusCode);
       final Map<String, dynamic> pos = json.decode(response.body);
       if(response.statusCode == 200) {
         print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
@@ -126,20 +130,13 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         });
       }
-    }catch (e) {
-      print(e);
-      isLoading = false;
-    }
-  }
+      else {
+        print(response.reasonPhrase);
+      }
 
-  ////////////////////////////////////////////////// Save Pos Transaction //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
-  Future<dynamic> _postSavePosTransaction() async {
-    
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final http.Response response = await http.post(
-        Uri.parse(Constants.apiPosIndex),
+      //POST Request
+      SharedPreferences prefern = await SharedPreferences.getInstance();
+      final http.Response res = await http.post((url),
       body: ({
         'customer_id': prefs.getString('customer_id'),
         'gross_price': prefs.getString('gross_price'),
@@ -148,75 +145,71 @@ class _HomeScreenState extends State<HomeScreen> {
         'disc_id': prefs.getString('disc_id'),
         'disc_amount': prefs.getString('disc_amount'),
         'net_price': prefs.getDouble('net_price'),
-        'payment_type': prefs.getString('payment_type'),
+        'payment_type': _paymentType.toString(),
         'remarks': prefs.getString('remarks'),
-        'items_array' : ItemsArray,
+        'items_array': ItemsArray,
       }),
       );
-      
-      final Map<String, dynamic> customer = json.decode(response.body);
-      
-      if(response.statusCode == 200) {
-        print("POS TRANSACTION SUCCESSFULLY SAVED");
-        setState(() {
-          isLoading = true;
-          if(customer['data']['customer'] == null) {
-            var data = Customer(
-              id: customer['data']['custom']['id'],
-              merchantId: customer['data']['customer']['merchant_id'],
-              customerId: customer['data']['customer']['customer_id'],
-              posTxnNo: customer['data']['customer']['pos_txn_no'],
-              grossPrice: customer['data']['customer']['gross_price'],
-              taxId: customer['data']['customer']['tax_id'],
-              taxAmount: customer['data']['customer']['tax_amount'],
-              discId: customer['data']['customer']['disc_id'],
-              discAmount: customer['data']['customer']['disc_amount'],
-              netPrice: customer['data']['customer']['net_price'].toDouble(),
-              paymentTypes: customer['data']['customer']['payment_type'],
-              remarks: customer['data']['customer']['remarks'],
-              status: customer['data']['customer']['status'],
-            );
 
-            id = data.id;
-            merchantId = data.merchantId;
-            customerId = data.customerId;
-            posTxnNo = data.posTxnNo;
-            grossPrice = data.grossPrice;
-            taxId = data.taxId;
-            taxAmount = data.taxAmount;
-            discId = data.discId;
-            discAmount = data.discAmount;
-            netPrice = data.netPrice;
-            paymentTypes = data.paymentTypes;
-            remarks = data.remarks;
-          }
-        });
-        
-      }else{
-        print(response.reasonPhrase);
-      }
-    }catch (e) {
-      print(e);
+      final Map<String, dynamic> customer = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+      print("POS TRANSACTION SUCCESSFULLY SAVED");
+      setState(() {
+        isLoading = true;
+        if (customer['data']['customer'] == null) {
+          var data = Customer(
+            id: customer['data']['custom']['id'],
+            merchantId: customer['data']['customer']['merchant_id'],
+            customerId: customer['data']['customer']['customer_id'],
+            posTxnNo: customer['data']['customer']['pos_txn_no'],
+            grossPrice: customer['data']['customer']['gross_price'],
+            taxId: customer['data']['customer']['tax_id'],
+            taxAmount: customer['data']['customer']['tax_amount'],
+            discId: customer['data']['customer']['disc_id'],
+            discAmount: customer['data']['customer']['disc_amount'],
+            netPrice: customer['data']['customer']['net_price'].toDouble(),
+            paymentTypes: customer['data']['customer']['payment_type'],
+            remarks: customer['data']['customer']['remarks'],
+            status: customer['data']['customer']['status'],
+          );
+
+          id = data.id;
+          merchantId = data.merchantId;
+          customerId = data.customerId;
+          posTxnNo = data.posTxnNo;
+          grossPrice = data.grossPrice;
+          taxId = data.taxId;
+          taxAmount = data.taxAmount;
+          discId = data.discId;
+          discAmount = data.discAmount;
+          netPrice = data.netPrice;
+          paymentTypes = data.paymentTypes;
+          remarks = data.remarks;
+        }
+      });
+    } else {
+      print(response.reasonPhrase);
     }
   }
 
-  Future fetchSavePostTransaction() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    isLoading = true;
+  // Future fetchSavePostTransaction() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   isLoading = true;
     
-    var dataFromResponse = await _postSavePosTransaction();
-    dataFromResponse['data']['items_array'].forEach((newItems) {
-      List<ItemsArray> itemsArray = [];
-      itemsArray.add(
-        new ItemsArray(
-        productId: newItems['product_id'].toString(),
-        quantity: newItems['quantity'],
-        price: newItems['price'],
-      )
-      );
-    });
+  //   var dataFromResponse = await _postSavePosTransaction();
+  //   dataFromResponse['data']['items_array'].forEach((newItems) {
+  //     List<ItemsArray> itemsArray = [];
+  //     itemsArray.add(
+  //       new ItemsArray(
+  //       productId: newItems['product_id'].toString(),
+  //       quantity: newItems['quantity'],
+  //       price: newItems['price'],
+  //     )
+  //     );
+  //   });
     
-  }
+  // }
 
 
   @override
@@ -224,6 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
 
     super.initState();
+    fetchPos();
   }
 
   @override
@@ -500,30 +494,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 letterSpacing: 1.0,
                               ),
                             ),
-                            DropdownButton<String>(
+                            DropdownButton<PaymentType>(
                               dropdownColor: kPrimaryColor,
                               iconEnabledColor: kLabel,
-                              value: selectedPayment,
-                              items: paymentOptions
-                                  .map<DropdownMenuItem<String>>(
-                                      (String value) {
-                                return DropdownMenuItem<String>(
-                                  child: Text(
-                                    value,
-                                    style: GoogleFonts.breeSerif(
-                                      fontWeight: FontWeight.w500,
-                                      color: kTextColor,
-                                      fontSize: 10.sp,
-                                      letterSpacing: 1.0,
-                                    ),
-                                  ),
-                                  value: value,
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  selectedPayment = newValue!;
-                                });
+                              value: _selectedPaymentType,
+                              items: [],
+                              onChanged: (payType) {
+                                _selectedPaymentType = payType;
                               },
                             ),
                             

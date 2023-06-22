@@ -142,15 +142,12 @@ class _MerchantScreenState extends State<MerchantScreen> {
               city: res['data']['city']['id'],
               cityName: res['data']['city']['city_name'],
               website: res['data']['website'].toString(),
-              
               status: res['data']['status'],
-              
               feePercentage: res['data']['feePercentage'],
               feeMinimum: res['data']['feeMinimum'],
               
             );
 
-            
             userId = data.userId;
             companyName = data.companyName.toUpperCase();
             contactNo = data.contactNo;
