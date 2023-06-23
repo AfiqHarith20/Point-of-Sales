@@ -35,12 +35,12 @@ class _HomeScreenState extends State<HomeScreen> {
       paymentTypes;
   dynamic taxId, taxAmount, discId, discAmount;
   late List<dynamic> products;
-  late List<PaymentType> paymentType, paymentTypeName;
+  late List<PaymentType> paymentTypeName;
   late List<PaymentTax> paymentTax, paymentTaxPercent, paymentTaxName;
   PaymentType? _selectedPaymentType;
 
-  late PayType _paymentType = PayType(data: []);
-  bool isLoading = false;
+  List<PaymentType> paymentType = [];
+  bool isLoading = true;
   double discountPercentage = 10;
   double taxPercentage = 3;
   
@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     //GET Request
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final http.Response response = await http.get((url),
+    final http.Response response = await http.get(Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/pos"),
     headers: ({
       'Authorization': 'Bearer ' + prefs.getString('token').toString(),
       'Content-Type': 'application/json'
@@ -99,34 +99,41 @@ class _HomeScreenState extends State<HomeScreen> {
       if(response.statusCode == 200) {
         print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
         setState(() {
-          isLoading = true;
+          isLoading = false;
 
           if(pos["data"] == null) {
-            var data = Pos (
+            paymentType = List<PaymentType>.from(pos["data"]["payment_type"].map(
+              (type) => PaymentType(
+                    id: type['id'],
+                    name: type['name'],
+                  ),
+            ));
+            print(paymentType);
+          } else {
+            var data = Pos(
               merchantId: pos["data"]["merchant_id"],
-              userId: pos["data"]["user_id"],
+              userId: int.parse(pos["data"]["user_id"]),
               userName: pos["data"]["user"]["name"].toString(),
               userEmail: pos["data"]["user"]["email"].toString(),
               companyName: pos["data"]["merchant"]["company_name"].toString(),
               products: pos["data"]["products"],
-              paymentType:  pos["data"]["payment_type"]["id"],
-              paymentTypeName:  pos["data"]["payment_type"]["name"],
+              paymentType: pos["data"]["payment_type"]["id"],
+              paymentTypeName: pos["data"]["payment_type"]["name"],
               paymentTax: pos["data"]["payment_tax"]["id"],
               paymentTaxName: pos["data"]["payment_tax"]["name"],
-              paymentTaxPercent: pos["data"]["payment_tax"]["tax_percentage"]
-            );
+              paymentTaxPercent: pos["data"]["payment_tax"]["tax_percentage"]);
 
-            merchantId = data.merchantId;
-            userId = data.userId;
-            userName = data.userName;
-            userEmail = data.userEmail;
-            companyName = data.companyName;
-            products = data.products;
-            paymentType = data.paymentType;
-            paymentTypeName = data.paymentTypeName;
-            paymentTax = data.paymentTax;
-            paymentTaxName = data.paymentTaxName;
-            paymentTaxPercent = data.paymentTaxPercent;
+          merchantId = data.merchantId;
+          userId = data.userId;
+          userName = data.userName;
+          userEmail = data.userEmail;
+          companyName = data.companyName;
+          products = data.products;
+          paymentType = data.paymentType;
+          paymentTypeName = data.paymentTypeName;
+          paymentTax = data.paymentTax;
+          paymentTaxName = data.paymentTaxName;
+          paymentTaxPercent = data.paymentTaxPercent;
           }
         });
       }
@@ -145,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'disc_id': prefs.getString('disc_id'),
         'disc_amount': prefs.getString('disc_amount'),
         'net_price': prefs.getDouble('net_price'),
-        'payment_type': _paymentType.toString(),
+        'payment_type': paymentType.toString(),
         'remarks': prefs.getString('remarks'),
         'items_array': ItemsArray,
       }),
@@ -156,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
       print("POS TRANSACTION SUCCESSFULLY SAVED");
       setState(() {
-        isLoading = true;
+        isLoading = false;
         if (customer['data']['customer'] == null) {
           var data = Customer(
             id: customer['data']['custom']['id'],
@@ -498,9 +505,33 @@ class _HomeScreenState extends State<HomeScreen> {
                               dropdownColor: kPrimaryColor,
                               iconEnabledColor: kLabel,
                               value: _selectedPaymentType,
-                              items: [],
+                              hint: Text(
+                                "Select Payment Type",
+                                style: GoogleFonts.aubrey(
+                                  fontWeight: FontWeight.w500,
+                                  color: kTextColor,
+                                  fontSize: 11.sp,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                              items: paymentType.map((PaymentType type) {
+                                return DropdownMenuItem(
+                                    value: type,
+                                    child: Text(
+                                      type.name,
+                                      style: GoogleFonts.aubrey(
+                                  fontWeight: FontWeight.w500,
+                                  color: kTextColor,
+                                  fontSize: 11.sp,
+                                  letterSpacing: 1.0,
+                                ),
+                                    ));
+                              }).toList(),
                               onChanged: (payType) {
-                                _selectedPaymentType = payType;
+                                setState(() {
+                                  _selectedPaymentType = payType;
+                                });
+                               
                               },
                             ),
                             
