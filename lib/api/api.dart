@@ -17,11 +17,11 @@ class Constants {
   static String apiLogin = pos_baseurl + "/login";
   static String apiLogout = pos_baseurl + "/logout";
 
-  static String apiPosIndex = "/pos";
-  static String apiSearchPosTransaction = "/search/item";
+  static String apiPosIndex = pos_baseurl + "/pos";
+  static String apiSearchPosTransaction = pos_baseurl + "/search/item";
 
-  static String apiProductIndex = "/product";
-  static String apiSearchProduct = "/product/search/item";
+  static String apiProductIndex = pos_baseurl + "/product";
+  static String apiSearchProduct = pos_baseurl + "/product/search/item";
 
 
 }
