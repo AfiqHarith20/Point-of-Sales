@@ -23,7 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   UserModel? user;
-  int? merchantId, userId, id, status;
+  int? merchantId, userId, payid, status;
   String? userName,
       userEmail,
       companyName,
@@ -32,18 +32,26 @@ class _HomeScreenState extends State<HomeScreen> {
       grossPrice,
       netPrice,
       remarks,
+      payname,
       paymentTypes;
   dynamic taxId, taxAmount, discId, discAmount;
   late List<dynamic> products;
-  late List<PaymentType> paymentTypeName;
-  late List<PaymentTax> paymentTax, paymentTaxPercent, paymentTaxName;
+  // late List<PaymentType> paymentTypeName;
+  // late List<PaymentTax> paymentTax, paymentTaxPercent, paymentTaxName;
   PaymentType? _selectedPaymentType;
+  PaymentTax? _selectedPaymentTax;
+
+  late Future<List<PaymentType>> _paymentType;
+  late Payment type = Payment(
+    paymentType: [],
+    paymentTax: [],
+  );
+  late Future<List<PaymentTax>> _paymentTax;
 
   List<PaymentType> paymentType = [];
   bool isLoading = true;
   double discountPercentage = 10;
   double taxPercentage = 3;
-  
 
   double calculateDiscount() {
     double total = calculateSubtotal();
@@ -81,129 +89,168 @@ class _HomeScreenState extends State<HomeScreen> {
     "Online Payment",
   ];
 
+  Future<List<PaymentType>> fetchPaymentTypes() async {
+    final url = Uri.parse(Constants.apiPosIndex);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final http.Response response = await http.get(
+      url,
+      headers: ({
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json'
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> json = jsonDecode(response.body);
+      final payType = Payment.fromJson(json);
+      return payType.paymentType;
+
+    } else {
+      throw Exception('Failed to fetch payment types');
+    }
+  }
+
+  Future<List<PaymentTax>> fetchPaymentTax() async {
+    final url = Uri.parse(Constants.apiPosIndex);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final http.Response response = await http.get(
+      url,
+      headers: ({
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json'
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> json = jsonDecode(response.body);
+      final payTax = Payment.fromJson(json);
+      return payTax.paymentTax;
+    } else {
+      throw Exception('Failed to fetch payment types');
+    }
+  }
+
   /////////////////////////// fetch Get and Post //////////////////////////
-  
+
   void fetchPos() async {
     final url = Uri.parse(Constants.apiPosIndex);
 
     //GET Request
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final http.Response response = await http.get(Uri.parse("http://template.gosini.xyz:8880/cspos/public/api/pos"),
-    headers: ({
-      'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-      'Content-Type': 'application/json'
-    }),
+    final http.Response response = await http.get(
+      url,
+      headers: ({
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json'
+      }),
     );
     print(response.statusCode);
-      final Map<String, dynamic> pos = json.decode(response.body);
-      if(response.statusCode == 200) {
-        print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
-        setState(() {
-          isLoading = false;
-
-          if(pos["data"] == null) {
-            paymentType = List<PaymentType>.from(pos["data"]["payment_type"].map(
-              (type) => PaymentType(
-                    id: type['id'],
-                    name: type['name'],
-                  ),
-            ));
-            print(paymentType);
-          } else {
-            var data = Pos(
-              merchantId: pos["data"]["merchant_id"],
-              userId: int.parse(pos["data"]["user_id"]),
-              userName: pos["data"]["user"]["name"].toString(),
-              userEmail: pos["data"]["user"]["email"].toString(),
-              companyName: pos["data"]["merchant"]["company_name"].toString(),
-              products: pos["data"]["products"],
-              paymentType: pos["data"]["payment_type"]["id"],
-              paymentTypeName: pos["data"]["payment_type"]["name"],
-              paymentTax: pos["data"]["payment_tax"]["id"],
-              paymentTaxName: pos["data"]["payment_tax"]["name"],
-              paymentTaxPercent: pos["data"]["payment_tax"]["tax_percentage"]);
-
-          merchantId = data.merchantId;
-          userId = data.userId;
-          userName = data.userName;
-          userEmail = data.userEmail;
-          companyName = data.companyName;
-          products = data.products;
-          paymentType = data.paymentType;
-          paymentTypeName = data.paymentTypeName;
-          paymentTax = data.paymentTax;
-          paymentTaxName = data.paymentTaxName;
-          paymentTaxPercent = data.paymentTaxPercent;
-          }
-        });
-      }
-      else {
-        print(response.reasonPhrase);
-      }
-
-      //POST Request
-      SharedPreferences prefern = await SharedPreferences.getInstance();
-      final http.Response res = await http.post((url),
-      body: ({
-        'customer_id': prefs.getString('customer_id'),
-        'gross_price': prefs.getString('gross_price'),
-        'tax_id': prefs.getString('tax_id'),
-        'tax_amount': prefs.getString('tax_amount'),
-        'disc_id': prefs.getString('disc_id'),
-        'disc_amount': prefs.getString('disc_amount'),
-        'net_price': prefs.getDouble('net_price'),
-        'payment_type': paymentType.toString(),
-        'remarks': prefs.getString('remarks'),
-        'items_array': ItemsArray,
-      }),
-      );
-
-      final Map<String, dynamic> customer = json.decode(response.body);
-
-      if (response.statusCode == 200) {
-      print("POS TRANSACTION SUCCESSFULLY SAVED");
+    final Map<String, dynamic> pos = json.decode(response.body);
+    final List<dynamic> paymentTypesData = pos['payment_type'];
+    final List<dynamic> paymentTaxData = pos['payment_tax'];
+    if (response.statusCode == 200) {
+      print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
       setState(() {
         isLoading = false;
-        if (customer['data']['customer'] == null) {
-          var data = Customer(
-            id: customer['data']['custom']['id'],
-            merchantId: customer['data']['customer']['merchant_id'],
-            customerId: customer['data']['customer']['customer_id'],
-            posTxnNo: customer['data']['customer']['pos_txn_no'],
-            grossPrice: customer['data']['customer']['gross_price'],
-            taxId: customer['data']['customer']['tax_id'],
-            taxAmount: customer['data']['customer']['tax_amount'],
-            discId: customer['data']['customer']['disc_id'],
-            discAmount: customer['data']['customer']['disc_amount'],
-            netPrice: customer['data']['customer']['net_price'].toDouble(),
-            paymentTypes: customer['data']['customer']['payment_type'],
-            remarks: customer['data']['customer']['remarks'],
-            status: customer['data']['customer']['status'],
-          );
 
-          id = data.id;
-          merchantId = data.merchantId;
-          customerId = data.customerId;
-          posTxnNo = data.posTxnNo;
-          grossPrice = data.grossPrice;
-          taxId = data.taxId;
-          taxAmount = data.taxAmount;
-          discId = data.discId;
-          discAmount = data.discAmount;
-          netPrice = data.netPrice;
-          paymentTypes = data.paymentTypes;
-          remarks = data.remarks;
+        if (pos["data"] == null) {
+          Future<List<PaymentType>> _paymentType = fetchPaymentTypes();
+          Future<List<PaymentTax>> _paymentTax = fetchPaymentTax();
+
+          _paymentTax.then((paymentTax) {
+            var data = PaymentTax(
+              id: pos['payment_tax']['id'],
+              name: pos['payment_tax']['name'],
+              taxPercentage: pos['payment_tax']['tax_percentage'],
+            );
+          });
+
+          _paymentType.then((paymentTypes) {
+            var data = PaymentType(
+              id: pos["payment_type"]["id"],
+              name: pos["payment_type"]["name"],
+            );
+            payid = data.id;
+            payname = data.name;
+
+            setState(() {
+              _paymentType = Future.value(paymentTypes);
+            });
+          });
+
+          print(paymentType);
+        } else {
+          print(response.reasonPhrase);
         }
       });
     } else {
       print(response.reasonPhrase);
     }
+
+    //POST Request
+    //   SharedPreferences prefern = await SharedPreferences.getInstance();
+    //   final http.Response res = await http.post((url),
+    //   body: ({
+    //     'customer_id': prefs.getString('customer_id'),
+    //     'gross_price': prefs.getString('gross_price'),
+    //     'tax_id': prefs.getString('tax_id'),
+    //     'tax_amount': prefs.getString('tax_amount'),
+    //     'disc_id': prefs.getString('disc_id'),
+    //     'disc_amount': prefs.getString('disc_amount'),
+    //     'net_price': prefs.getDouble('net_price'),
+    //     'payment_type': paymentType.toString(),
+    //     'remarks': prefs.getString('remarks'),
+    //     'items_array': ItemsArray,
+    //   }),
+    //   );
+
+    //   final Map<String, dynamic> customer = json.decode(response.body);
+
+    //   if (response.statusCode == 200) {
+    //   print("POS TRANSACTION SUCCESSFULLY SAVED");
+    //   setState(() {
+    //     isLoading = false;
+    //     if (customer['data']['customer'] == null) {
+    //       var data = Customer(
+    //         id: customer['data']['custom']['id'],
+    //         merchantId: customer['data']['customer']['merchant_id'],
+    //         customerId: customer['data']['customer']['customer_id'],
+    //         posTxnNo: customer['data']['customer']['pos_txn_no'],
+    //         grossPrice: customer['data']['customer']['gross_price'],
+    //         taxId: customer['data']['customer']['tax_id'],
+    //         taxAmount: customer['data']['customer']['tax_amount'],
+    //         discId: customer['data']['customer']['disc_id'],
+    //         discAmount: customer['data']['customer']['disc_amount'],
+    //         netPrice: customer['data']['customer']['net_price'].toDouble(),
+    //         paymentTypes: customer['data']['customer']['payment_type'],
+    //         remarks: customer['data']['customer']['remarks'],
+    //         status: customer['data']['customer']['status'],
+    //       );
+
+    //       id = data.id;
+    //       merchantId = data.merchantId;
+    //       customerId = data.customerId;
+    //       posTxnNo = data.posTxnNo;
+    //       grossPrice = data.grossPrice;
+    //       taxId = data.taxId;
+    //       taxAmount = data.taxAmount;
+    //       discId = data.discId;
+    //       discAmount = data.discAmount;
+    //       netPrice = data.netPrice;
+    //       paymentTypes = data.paymentTypes;
+    //       remarks = data.remarks;
+    //     }
+    //   });
+    // } else {
+    //   print(response.reasonPhrase);
+    // }
+    return;
   }
 
   // Future fetchSavePostTransaction() async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();
   //   isLoading = true;
-    
+
   //   var dataFromResponse = await _postSavePosTransaction();
   //   dataFromResponse['data']['items_array'].forEach((newItems) {
   //     List<ItemsArray> itemsArray = [];
@@ -215,9 +262,8 @@ class _HomeScreenState extends State<HomeScreen> {
   //     )
   //     );
   //   });
-    
-  // }
 
+  // }
 
   @override
   void initState() {
@@ -225,6 +271,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     super.initState();
     fetchPos();
+    _paymentType = fetchPaymentTypes();
+    _paymentTax = fetchPaymentTax();
+    
   }
 
   @override
@@ -455,15 +504,79 @@ class _HomeScreenState extends State<HomeScreen> {
                                 letterSpacing: 1.0,
                               ),
                             ),
-                            Text(
-                              "\RM${calculateTax().toStringAsFixed(2)}",
-                              style: GoogleFonts.breeSerif(
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                                fontSize: 11.sp,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
+                            Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: kTextColor,
+                                ),
+                                width: 32.w,
+                                height: 4.h,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 15,
+                                  vertical: 15,
+                                ),
+                                child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                  return FutureBuilder<List<PaymentTax>>(
+                                    future: _paymentTax,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasError) {
+                                        return Text('Error: ${snapshot.error}');
+                                      }
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const CircularProgressIndicator();
+                                      }
+                                      return DropdownButtonHideUnderline(
+                                        child: DropdownButton<PaymentTax>(
+                                          icon: FaIcon(
+                                            FontAwesomeIcons.chevronDown,
+                                            size: 15,
+                                          ),
+                                          borderRadius: BorderRadius.circular(20),
+                                          isExpanded: true,
+                                          hint: Text(
+                                            "Select Tax Type",
+                                            style: TextStyle(
+                                              color: kHint,
+                                              fontSize: 6.5.sp,
+                                              letterSpacing: 0.5,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          items: [
+                                            ...snapshot.data!.map(
+                                              (tax) => DropdownMenuItem(
+                                                value: tax,
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      '${tax.name}',
+                                                      style: TextStyle(
+                                                        color: kForm,
+                                                        fontSize: 5.sp,
+                                                        letterSpacing: 1.0,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                          onChanged: (type) {
+                                            setState(() {
+                                              _selectedPaymentTax = type;
+                                            });
+                                          },
+                                          value: _selectedPaymentTax,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                })),
                           ],
                         ),
                         Row(
@@ -501,43 +614,82 @@ class _HomeScreenState extends State<HomeScreen> {
                                 letterSpacing: 1.0,
                               ),
                             ),
-                            DropdownButton<PaymentType>(
-                              dropdownColor: kPrimaryColor,
-                              iconEnabledColor: kLabel,
-                              value: _selectedPaymentType,
-                              hint: Text(
-                                "Select Payment Type",
-                                style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 11.sp,
-                                  letterSpacing: 1.0,
-                                ),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: kTextColor,
                               ),
-                              items: paymentType.map((PaymentType type) {
-                                return DropdownMenuItem(
-                                    value: type,
-                                    child: Text(
-                                      type.name,
-                                      style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 11.sp,
-                                  letterSpacing: 1.0,
-                                ),
-                                    ));
-                              }).toList(),
-                              onChanged: (payType) {
-                                setState(() {
-                                  _selectedPaymentType = payType;
-                                });
-                               
-                              },
+                              width: 32.w,
+                              height: 4.h,
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 15, vertical: 15,
+                              ),
+                              child: LayoutBuilder(builder: (context, constraints) {
+                                return FutureBuilder<List<PaymentType>>(
+                                future: _paymentType,
+                                builder: (context, snapshot) {
+                                  if(snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  }
+                                  if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                    return const CircularProgressIndicator();
+                                  }
+                                  return DropdownButtonHideUnderline(
+                                    child: DropdownButton<PaymentType>(
+                                      icon: FaIcon(
+                                        FontAwesomeIcons.chevronDown,
+                                        size: 15,
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      isExpanded: true,
+                                      hint: Text(
+                                        "Select Payment Type",
+                                        style: TextStyle(
+                                          color: kHint,
+                                          fontSize: 6.5.sp,
+                                          letterSpacing: 0.5,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      items: [
+                                        ...snapshot.data!.map((type) =>
+                                            DropdownMenuItem(
+                                              value: type,
+                                              child: Row(
+                                              children: [
+                                                Text('${type.name}',
+                                                style: TextStyle(
+                                                      color: kForm,
+                                                      fontSize: 5.sp,
+                                                      letterSpacing: 1.0,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                      onChanged: (type) {
+                                        setState(() {
+                                          _selectedPaymentType = type;
+                                        });
+                                      },
+                                      value: _selectedPaymentType,
+                                    ),
+                                  );
+                                },
+                              );
+                              })
                             ),
                             
                           ],
                         ),
-                        SizedBox(height: 1.h,),
+                        
+                        SizedBox(
+                          height: 1.h,
+                        ),
                         ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
@@ -590,17 +742,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(6),
                             child: Text(
-                                "Product Name",
-                                style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w600,
-                                  color: kLabel,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
-                                ),
+                              "Product Name",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
                             ),
                           ),
-                          ),
-                          TableCell(
+                        ),
+                        TableCell(
                           child: Padding(
                             padding: const EdgeInsets.all(6),
                             child: Text(
@@ -705,8 +857,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ),
-                      ]
-                    ),
+                      ]),
                   ],
                 ),
               ),

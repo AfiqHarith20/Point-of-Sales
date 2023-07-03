@@ -1,50 +1,143 @@
-class Pos {
-  final int merchantId;
-  final int userId;
-  final String userName;
-  final String userEmail;
-  final String companyName;
-  final List<dynamic> products;
-  final List<PaymentType> paymentType;
-  final List<PaymentType> paymentTypeName;
-  final List<PaymentTax> paymentTax;
-  final List<PaymentTax> paymentTaxPercent;
-  final List<PaymentTax> paymentTaxName;
+import 'dart:convert';
 
+Pos posFromJson(String str) => Pos.fromJson(json.decode(str));
+
+String posToJson(Pos data) => json.encode(data.toJson());
+
+class Pos {
+  final List<Datum> data;
+  final List<PaymentType> paymentType;
+  final List<PaymentTax> paymentTax;
 
   Pos({
-    required this.merchantId,
-    required this.userId,
-    required this.userName,
-    required this.userEmail,
-    required this.companyName,
-    required this.products,
+    required this.data,
     required this.paymentType,
     required this.paymentTax,
-    required this.paymentTypeName,
-    required this.paymentTaxPercent, 
-    required this.paymentTaxName,
   });
+
+  factory Pos.fromJson(Map<String, dynamic> json) => Pos(
+        data: List<Datum>.from(json["data"].map((x) => Datum.fromJson(x))),
+        paymentType: List<PaymentType>.from(
+            json["payment_type"].map((x) => PaymentType.fromJson(x))),
+        paymentTax: List<PaymentTax>.from(
+            json["payment_tax"].map((x) => PaymentTax.fromJson(x))),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "data": List<dynamic>.from(data.map((x) => x.toJson())),
+        "payment_type": List<dynamic>.from(paymentType.map((x) => x.toJson())),
+        "payment_tax": List<dynamic>.from(paymentTax.map((x) => x.toJson())),
+      };
 }
 
-class ProductPos {
-  final String sku;
-  final String name;
-  final String summary;
-  final String details;
-  final String categoryId;
-  final String price;
-  final String quantity;
+class Datum {
+  final int merchantId;
+  final int userId;
+  final User user;
+  final Merchant merchant;
+  final List<dynamic> products;
+  final List<dynamic> customers;
 
-  ProductPos({
-    required this.sku,
-    required this.name,
-    required this.summary,
-    required this.details,
-    required this.categoryId,
-    required this.price,
-    required this.quantity,
+  Datum({
+    required this.merchantId,
+    required this.userId,
+    required this.user,
+    required this.merchant,
+    required this.products,
+    required this.customers,
   });
+
+  factory Datum.fromJson(Map<String, dynamic> json) => Datum(
+        merchantId: json["merchant_id"],
+        userId: json["user_id"],
+        user: User.fromJson(json["user"]),
+        merchant: Merchant.fromJson(json["merchant"]),
+        products: List<dynamic>.from(json["products"].map((x) => x)),
+        customers: List<dynamic>.from(json["customers"].map((x) => x)),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "merchant_id": merchantId,
+        "user_id": userId,
+        "user": user.toJson(),
+        "merchant": merchant.toJson(),
+        "products": List<dynamic>.from(products.map((x) => x)),
+        "customers": List<dynamic>.from(customers.map((x) => x)),
+      };
+}
+
+class Merchant {
+  final int id;
+  final String companyName;
+  final dynamic logoUrl;
+
+  Merchant({
+    required this.id,
+    required this.companyName,
+    this.logoUrl,
+  });
+
+  factory Merchant.fromJson(Map<String, dynamic> json) => Merchant(
+        id: json["id"],
+        companyName: json["company_name"],
+        logoUrl: json["logo_url"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "company_name": companyName,
+        "logo_url": logoUrl,
+      };
+}
+
+class User {
+  final int id;
+  final String name;
+  final String email;
+
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) => User(
+        id: json["id"],
+        name: json["name"],
+        email: json["email"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "email": email,
+      };
+}
+
+Payment paymentFromJson(String str) => Payment.fromJson(json.decode(str));
+
+String paymentToJson(Payment data) => json.encode(data.toJson());
+
+class Payment {
+  final List<PaymentType> paymentType;
+  final List<PaymentTax> paymentTax;
+
+  Payment({
+    required this.paymentType,
+    required this.paymentTax,
+  });
+
+  factory Payment.fromJson(Map<String, dynamic> json) => Payment(
+        paymentType: List<PaymentType>.from(
+            json["payment_type"].map((x) => PaymentType.fromJson(x))),
+        paymentTax: List<PaymentTax>.from(
+            json["payment_tax"].map((x) => PaymentTax.fromJson(x))),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "payment_type": List<dynamic>.from(paymentType.map((x) => x.toJson())),
+        "payment_tax": List<dynamic>.from(paymentTax.map((x) => x.toJson())),
+      };
 }
 
 class PaymentTax {
@@ -71,26 +164,6 @@ class PaymentTax {
       };
 }
 
-class PayType {
-  List<PaymentType> data;
-
-  PayType({
-    required this.data,
-  });
-
-  factory PayType.fromJson(Map<String, dynamic> json) => PayType(
-        data: List<PaymentType>.from(
-          json["data"].map((x) => PaymentType.fromJson(x)),
-        ),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "data": List<dynamic>.from(
-          data.map((x) => x.toJson()),
-        ),
-      };
-}
-
 class PaymentType {
   final int id;
   final String name;
@@ -104,6 +177,7 @@ class PaymentType {
         id: json["id"],
         name: json["name"],
       );
+
 
   Map<String, dynamic> toJson() => {
         "id": id,
