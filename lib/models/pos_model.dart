@@ -91,26 +91,26 @@ class Merchant {
 }
 
 class User {
-  final int id;
-  final String name;
-  final String email;
+  final int userid;
+  final String username;
+  final String useremail;
 
   User({
-    required this.id,
-    required this.name,
-    required this.email,
+    required this.userid,
+    required this.username,
+    required this.useremail,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json["id"],
-        name: json["name"],
-        email: json["email"],
+        userid: json["id"],
+        username: json["name"],
+        useremail: json["email"],
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "email": email,
+        "id": userid,
+        "name": username,
+        "email": useremail,
       };
 }
 
