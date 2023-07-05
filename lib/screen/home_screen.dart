@@ -22,6 +22,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final skuController = TextEditingController();
+  final quantityController = TextEditingController();
   int? merchantId, userId, taxid, payid, taxpercentage, status;
   String? userName,
       userEmail,
@@ -78,15 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
     double tax = calculateTax();
     return subtotal - discount + tax;
   }
-
-  String selectedPayment = "Cash";
-  List<String> paymentOptions = [
-    "Cash",
-    "Credit Card",
-    "Debit Card",
-    "TNG",
-    "Online Payment",
-  ];
 
   ///////////////////////// Payment Type //////////////////////////////////////////////////////////
 
@@ -188,9 +181,9 @@ Future<User> fetchUser() async{
             userName = data.username;
             userEmail = data.useremail;
 
-            print('User ID: $userId');
-            print('User Name: $userName');
-            print('User Email: $userEmail');
+            // print('User ID: $userId');
+            // print('User Name: $userName');
+            // print('User Email: $userEmail');
           }else {
             print("User data is null");
           }
@@ -199,9 +192,10 @@ Future<User> fetchUser() async{
           Future<List<PaymentTax>> _paymentTax = fetchPaymentTax();
 
           _paymentTax.then((paymentTax) {
+            var paymentTaxId = int.parse(pos["payment_type"]["id"]);
             var data = PaymentTax(
-              id: pos['payment_tax']['id'],
-              name: pos['payment_tax']['name'],
+              id: paymentTaxId,
+              name: pos['payment_tax']['name'].toString(),
               taxPercentage: pos['payment_tax']['tax_percentage'],
             );
             taxid = data.id;
@@ -215,9 +209,10 @@ Future<User> fetchUser() async{
           });
 
           _paymentType.then((paymentTypes) {
+            var paymentTypeId = int.parse(pos["payment_type"]["id"]);
             var data = PaymentType(
-              id: pos["payment_type"]["id"],
-              name: pos["payment_type"]["name"],
+              id: paymentTypeId,
+              name: pos["payment_type"]["name"].toString(),
             );
             payid = data.id;
             payname = data.name;
@@ -305,10 +300,38 @@ Future<User> fetchUser() async{
       throw Exception('Failed to save POS transaction');
     }
   }
+  ////////////////////////// Search SKU //////////////////////////////////////////////////
+
+  Future<void> searchProduct() async {
+    final url = Uri.parse(Constants.apiSearchProduct);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final http.Response response = await http.post(
+      url,
+      body: ({
+        "sku" : skuController.text,
+      }),
+      headers: 
+      {
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json'
+      },
+    );
+    if(response.statusCode == 200) {
+      print(response);
+      print("Success search SKU");
+    }else{
+      print(response.reasonPhrase);
+    }
+    if(response.statusCode == 201) {
+    
+    }
+  }
 
   Future fetchSavePostTransaction() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     isLoading = true;
+
 
     var dataFromResponse = await _postSavePosTransaction();
     dataFromResponse['data']['items_array'].forEach((newItems) {
@@ -316,7 +339,7 @@ Future<User> fetchUser() async{
       itemsArray.add(
         new ItemsArray(
         productId: newItems['product_id'].toString(),
-        quantity: newItems['quantity'],
+        quantity: quantityController.text,
         price: newItems['price'],
       )
       );
@@ -419,7 +442,7 @@ Future<User> fetchUser() async{
                         SizedBox(
                           height: 4.h,
                           child: TextField(
-                            // controller: ,
+                            controller: skuController ,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: kTextColor,
@@ -452,7 +475,7 @@ Future<User> fetchUser() async{
                         SizedBox(
                           height: 4.h,
                           child: TextField(
-                            // controller: ,
+                            controller: quantityController,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: kTextColor,
