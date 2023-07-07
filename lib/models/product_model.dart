@@ -78,24 +78,24 @@ class ProductDetail {
   });
 
   factory ProductDetail.fromJson(Map<String, dynamic> json) => ProductDetail(
-        id: json["id"],
-        sku: json["sku"],
-        name: json["name"],
-        summary: json["summary"],
-        details: json["details"],
-        categoryId: json["category_id"],
-        price: json["price"]?.toDouble(),
-        quantity: json["quantity"],
-        isSearch: json["isSearch"],
-        ispromo: json["ispromo"],
-        promoPrice: json["promo_price"],
-        promoStartdate: json["promo_startdate"],
-        promoEnddate: json["promo_enddate"],
-        stock: json["stock"],
-        status: json["status"],
-        mainImage: json["main_image"],
-        productCategory: ProductCategory.fromJson(json["product_category"]),
-      );
+  id: json["id"],
+  sku: json["sku"],
+  name: json["name"],
+  summary: json["summary"],
+  details: json["details"],
+  categoryId: json["category_id"],
+  price: json["price"]?.toDouble(),
+  quantity: json["quantity"],
+  isSearch: json["isSearch"],
+  ispromo: json["ispromo"],
+  promoPrice: json["promo_price"],
+  promoStartdate: json["promo_startdate"],
+  promoEnddate: json["promo_enddate"],
+  stock: json["stock"],
+  status: json["status"],
+  mainImage: json["main_image"],
+  productCategory: ProductCategory.fromJson(json["product_category"] as Map<String, dynamic>),
+);
 
   Map<String, dynamic> toJson() => {
         "id": id,
