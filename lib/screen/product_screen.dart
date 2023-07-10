@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -6,9 +8,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
+import 'package:pointofsales/models/data.dart';
 import 'package:pointofsales/models/product_model.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/invoice_screen.dart';
+import 'package:pointofsales/screen/product/create_product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:getwidget/getwidget.dart';
@@ -23,6 +27,18 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   bool isLoading = true;
   late List<ProductDetail> products = [];
+
+  int? prodId, prodCategorId, prodQuantity, prodStatus;
+  String? prodSku, prodName, prodSummary, prodDetails;
+  double? prodPrice;
+  dynamic prodIsSearch,
+      prodIsPromo,
+      prodPromoPrice,
+      prodPromoStartDate,
+      prodPromoEndDate,
+      prodStock,
+      prodMainImage;
+  late ProductCategory prodCategory;
 
   Future<List<ProductDetail>> fetchProduct() async {
     final url = Uri.parse(Constants.apiProductIndex);
@@ -44,7 +60,7 @@ class _ProductScreenState extends State<ProductScreen> {
     }
   }
 
-  void _getIndexProduct() async {
+void _getIndexProduct() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var response = await http.get(
@@ -67,40 +83,6 @@ class _ProductScreenState extends State<ProductScreen> {
               products = productsJson
                   .map((productJson) => ProductDetail.fromJson(productJson))
                   .toList();
-
-              Future<List<ProductDetail>> _productDetail = fetchProduct();
-
-              print(products);
-
-              _productDetail.then((productDetail) {
-                setState(() {
-                  
-                  products = productDetail.map((productJson) {
-                    return ProductDetail(
-                      id: productJson.id,
-                      sku: productJson.sku,
-                      name: productJson.name,
-                      summary: productJson.summary,
-                      details: productJson.details,
-                      categoryId: productJson.categoryId,
-                      price: productJson.price,
-                      quantity: productJson.quantity,
-                      isSearch: productJson.isSearch,
-                      ispromo: productJson.ispromo,
-                      promoPrice: productJson.promoPrice,
-                      promoStartdate: productJson.promoStartdate,
-                      promoEnddate: productJson.promoEnddate,
-                      status: productJson.status,
-                      stock: productJson.stock,
-                      mainImage: productJson.mainImage,
-                      productCategory:
-                          ProductCategory.fromJson(productJson.productCategory as Map<String, dynamic>),
-                    );
-                    
-                  }).toList();
-                  
-                });
-              });
             }
           }
         });
@@ -153,14 +135,14 @@ class _ProductScreenState extends State<ProductScreen> {
         actions: <Widget>[
           IconButton(
             icon: FaIcon(
-              FontAwesomeIcons.cartFlatbed,
+              FontAwesomeIcons.boxesStacked,
               color: Colors.white,
             ),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => InvoiceScreen(),
+                  builder: (context) => CreateProduct(),
                 ),
               );
             },
@@ -204,7 +186,8 @@ class _ProductScreenState extends State<ProductScreen> {
                             ),
                             child: Column(
                               children: [
-                                product.mainImage != null &&
+                                prodMainImage != null &&
+                                        product.mainImage != null &&
                                         product.mainImage.isNotEmpty
                                     ? Image.network(
                                         product.mainImage!,
