@@ -1,5 +1,7 @@
 import 'dart:convert' as JSON;
 import 'dart:io';
+import 'package:gsform/gs_form/core/form_style.dart';
+import 'package:gsform/gs_form/widget/field.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -36,18 +38,41 @@ class _CreateProductState extends State<CreateProduct> {
   final prodPriceController = TextEditingController();
   final prodQuantityController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize the TextEditingController instances
+    prodSkuController.text = '';
+    prodNameController.text = '';
+    prodSummaryController.text = '';
+    prodDetailsController.text = '';
+    prodCategoryController.text = '';
+    prodPriceController.text = '';
+    prodQuantityController.text = '';
+  }
+
   //Submit Product//
-  void _submitProd() async {
+void _submitProd() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _isLoader = true;
     });
+
+    if (_formKey.currentState == null) {
+      setState(() {
+        _isLoader = false;
+      });
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) {
       setState(() {
         _isLoader = false;
       });
       return;
     }
+
     _formKey.currentState!.save();
 
     final http.Response response = await http.post(
@@ -66,15 +91,18 @@ class _CreateProductState extends State<CreateProduct> {
         'Content-Type': 'application/json'
       },
     );
+
     if (response.statusCode == 200) {
       print(response);
       print("Success Register Merchant");
     } else {
       print(response.reasonPhrase);
     }
+
     setState(() {
       _isLoader = false;
     });
+
     if (response.statusCode == 201) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -133,6 +161,135 @@ class _CreateProductState extends State<CreateProduct> {
           ),
         ],
         ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              child: form = GSForm.singleSection(context,
+              style: GSFormStyle(
+                backgroundSectionColor: kScaffoldColor,
+                  backgroundFieldColor: kTextColor,
+                  fieldTextStyle: TextStyle(
+                    color: kForm,
+                    fontSize: 12.sp,
+                    letterSpacing: 1.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  fieldHintStyle: TextStyle(
+                    color: kHint,
+                    fontSize: 10.sp,
+                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  titleStyle: TextStyle(
+                    color: kTextColor,
+                    fontSize: 14.sp,
+                    letterSpacing: 1.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+              ),
+              fields: [
+                GSField.text(
+                  value: prodSkuController.text,
+                  tag: 'sku',
+                  title: "Product SKU",
+                   minLine: 2,
+                    maxLine: 2,
+                    weight: 12,
+                    required: true,
+                    maxLength: 100,
+                    errorMessage: 'The fill is empty',
+                    hint: 'SP00012A',
+                ),
+                 SizedBox(
+                    height: .5.h,
+                  ),
+                GSField.text(
+                  value: prodNameController.text,
+                    tag: 'name',
+                    title: "Product Name",
+                    minLine: 2,
+                    maxLine: 2,
+                    weight: 12,
+                    required: true,
+                    maxLength: 100,
+                    errorMessage: 'The fill is empty',
+                    hint: 'Pipe',
+                  ),
+                   SizedBox(
+                    height: .5.h,
+                  ),
+                  GSField.text(
+                    value: prodSummaryController.text,
+                    tag: 'summary',
+                    title: "Product Summary",
+                    minLine: 2,
+                    maxLine: 2,
+                    weight: 12,
+                    required: true,
+                    maxLength: 100,
+                    errorMessage: 'The fill is empty',
+                    hint: 'Summary product',
+                  ),
+                  SizedBox(
+                    height: .5.h,
+                  ),
+                  GSField.text(
+                    value: prodDetailsController.text,
+                    tag: 'details',
+                    title: "Product Details",
+                    minLine: 2,
+                    maxLine: 2,
+                    weight: 12,
+                    required: true,
+                    maxLength: 100,
+                    errorMessage: 'The fill is empty',
+                    hint: 'Details product description',
+                  ),
+                  SizedBox(
+                    height: .5.h,
+                  ),
+                  GSField.number(
+                    value: prodCategoryController.text,
+                    tag: 'category_id',
+                    title: 'Category Number',
+                    hint: '1',
+                    errorMessage: 'Do not use space',
+                    maxLength: 11,
+                    weight: 12,
+                    required: true,
+                  ),
+                  SizedBox(
+                    height: .5.h,
+                  ),
+                  GSField.number(
+                    value: prodPriceController.text,
+                    tag: 'price',
+                    title: 'Product Price (RM)',
+                    hint: '30.00',
+                    errorMessage: 'Do not use space',
+                    maxLength: 11,
+                    weight: 12,
+                    required: true,
+                  ),
+                  SizedBox(
+                    height: .5.h,
+                  ),
+                  GSField.number(
+                    value: prodQuantityController.text,
+                    tag: 'quantity',
+                    title: 'Product Quantity',
+                    hint: '10',
+                    errorMessage: 'Do not use space',
+                    maxLength: 11,
+                    weight: 12,
+                    required: true,
+                  ),
+              ],
+              ),
+            ),
+          ),
+        )
     );
   }
 }

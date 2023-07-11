@@ -1,3 +1,4 @@
+import 'package:getwidget/components/drawer/gf_drawer.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -54,7 +55,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
+    return GFDrawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
