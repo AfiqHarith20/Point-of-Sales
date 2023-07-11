@@ -12,6 +12,7 @@ import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/data.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/product_screen.dart';
+import 'package:pointofsales/widget/progressIndicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
@@ -118,6 +119,19 @@ class _CreateProductState extends State<CreateProduct> {
             color: kTextColor,
           ),
         ),
+        actions: <Widget>[
+          IconButton(
+            iconSize: 35,
+            icon: FaIcon(
+              FontAwesomeIcons.floppyDisk,
+              color: Colors.white,
+              
+            ),
+            onPressed: () =>
+                _isLoader ? buildCircularProgressIndicator() : _submitProd(),
+            tooltip: "Add Product",
+          ),
+        ],
         ),
     );
   }

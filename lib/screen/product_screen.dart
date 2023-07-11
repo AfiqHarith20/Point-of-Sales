@@ -9,6 +9,7 @@ import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/product_model.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/invoice_screen.dart';
+import 'package:pointofsales/screen/product/create_product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:getwidget/getwidget.dart';
@@ -153,14 +154,14 @@ class _ProductScreenState extends State<ProductScreen> {
         actions: <Widget>[
           IconButton(
             icon: FaIcon(
-              FontAwesomeIcons.cartFlatbed,
+              FontAwesomeIcons.boxesPacking,
               color: Colors.white,
             ),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => InvoiceScreen(),
+                  builder: (context) => CreateProduct(),
                 ),
               );
             },
