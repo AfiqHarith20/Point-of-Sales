@@ -165,127 +165,263 @@ void _submitProd() async {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-              child: form = GSForm.singleSection(context,
-              style: GSFormStyle(
-                backgroundSectionColor: kScaffoldColor,
-                  backgroundFieldColor: kTextColor,
-                  fieldTextStyle: TextStyle(
-                    color: kForm,
-                    fontSize: 12.sp,
-                    letterSpacing: 1.0,
-                    fontWeight: FontWeight.w600,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          "SKU:",
+                          style: GoogleFonts.ubuntu(
+                            fontSize: 14.sp,
+                            letterSpacing: 1.0,
+                            fontWeight: FontWeight.w500,
+                            color: kTextColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  fieldHintStyle: TextStyle(
-                    color: kHint,
-                    fontSize: 10.sp,
-                    letterSpacing: 0.5,
-                    fontWeight: FontWeight.w500,
+                  TextFormField(
+                    controller: prodSkuController,
+                    style: TextStyle(
+                      color: kForm,
+                      fontSize: 10.sp,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: kTextColor,
+                    ),
                   ),
-                  titleStyle: TextStyle(
-                    color: kTextColor,
-                    fontSize: 14.sp,
-                    letterSpacing: 1.0,
-                    fontWeight: FontWeight.w500,
+                  SizedBox(height: 1.h,),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          "Name:",
+                          style: GoogleFonts.ubuntu(
+                            fontSize: 14.sp,
+                            letterSpacing: 1.0,
+                            fontWeight: FontWeight.w500,
+                            color: kTextColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-              ),
-              fields: [
-                GSField.text(
-                  value: prodSkuController.text,
-                  tag: 'sku',
-                  title: "Product SKU",
-                   minLine: 2,
-                    maxLine: 2,
-                    weight: 12,
-                    required: true,
-                    maxLength: 100,
-                    errorMessage: 'The fill is empty',
-                    hint: 'SP00012A',
-                ),
-                 SizedBox(
-                    height: .5.h,
-                  ),
-                GSField.text(
-                  value: prodNameController.text,
-                    tag: 'name',
-                    title: "Product Name",
-                    minLine: 2,
-                    maxLine: 2,
-                    weight: 12,
-                    required: true,
-                    maxLength: 100,
-                    errorMessage: 'The fill is empty',
-                    hint: 'Pipe',
-                  ),
-                   SizedBox(
-                    height: .5.h,
-                  ),
-                  GSField.text(
-                    value: prodSummaryController.text,
-                    tag: 'summary',
-                    title: "Product Summary",
-                    minLine: 2,
-                    maxLine: 2,
-                    weight: 12,
-                    required: true,
-                    maxLength: 100,
-                    errorMessage: 'The fill is empty',
-                    hint: 'Summary product',
-                  ),
-                  SizedBox(
-                    height: .5.h,
-                  ),
-                  GSField.text(
-                    value: prodDetailsController.text,
-                    tag: 'details',
-                    title: "Product Details",
-                    minLine: 2,
-                    maxLine: 2,
-                    weight: 12,
-                    required: true,
-                    maxLength: 100,
-                    errorMessage: 'The fill is empty',
-                    hint: 'Details product description',
+                  TextFormField(
+                    controller: prodNameController,
+                    style: TextStyle(
+                      color: kForm,
+                      fontSize: 10.sp,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: kTextColor,
+                    ),
                   ),
                   SizedBox(
-                    height: .5.h,
+                    height: 1.h,
                   ),
-                  GSField.number(
-                    value: prodCategoryController.text,
-                    tag: 'category_id',
-                    title: 'Category Number',
-                    hint: '1',
-                    errorMessage: 'Do not use space',
-                    maxLength: 11,
-                    weight: 12,
-                    required: true,
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          "Summary:",
+                          style: GoogleFonts.ubuntu(
+                            fontSize: 14.sp,
+                            letterSpacing: 1.0,
+                            fontWeight: FontWeight.w500,
+                            color: kTextColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TextFormField(
+                    controller: prodSummaryController,
+                    style: TextStyle(
+                      color: kForm,
+                      fontSize: 10.sp,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: kTextColor,
+                    ),
                   ),
                   SizedBox(
-                    height: .5.h,
+                    height: 1.h,
                   ),
-                  GSField.number(
-                    value: prodPriceController.text,
-                    tag: 'price',
-                    title: 'Product Price (RM)',
-                    hint: '30.00',
-                    errorMessage: 'Do not use space',
-                    maxLength: 11,
-                    weight: 12,
-                    required: true,
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          "Details:",
+                          style: GoogleFonts.ubuntu(
+                            fontSize: 14.sp,
+                            letterSpacing: 1.0,
+                            fontWeight: FontWeight.w500,
+                            color: kTextColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TextFormField(
+                    controller: prodDetailsController,
+                    style: TextStyle(
+                      color: kForm,
+                      fontSize: 10.sp,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: kTextColor,
+                    ),
                   ),
                   SizedBox(
-                    height: .5.h,
+                    height: 1.h,
                   ),
-                  GSField.number(
-                    value: prodQuantityController.text,
-                    tag: 'quantity',
-                    title: 'Product Quantity',
-                    hint: '10',
-                    errorMessage: 'Do not use space',
-                    maxLength: 11,
-                    weight: 12,
-                    required: true,
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          "Price:",
+                          style: GoogleFonts.ubuntu(
+                            fontSize: 14.sp,
+                            letterSpacing: 1.0,
+                            fontWeight: FontWeight.w500,
+                            color: kTextColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-              ],
+                  TextFormField(
+                    controller: prodPriceController,
+                    style: TextStyle(
+                      color: kForm,
+                      fontSize: 10.sp,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: kTextColor,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 1.h,
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          "Quantity:",
+                          style: GoogleFonts.ubuntu(
+                            fontSize: 14.sp,
+                            letterSpacing: 1.0,
+                            fontWeight: FontWeight.w500,
+                            color: kTextColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TextFormField(
+                    controller: prodQuantityController,
+                    style: TextStyle(
+                      color: kForm,
+                      fontSize: 10.sp,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: kTextColor,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 1.h,
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          "Category:",
+                          style: GoogleFonts.ubuntu(
+                            fontSize: 14.sp,
+                            letterSpacing: 1.0,
+                            fontWeight: FontWeight.w500,
+                            color: kTextColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TextFormField(
+                    controller: prodCategoryController,
+                    style: TextStyle(
+                      color: kForm,
+                      fontSize: 10.sp,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: kTextColor,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
