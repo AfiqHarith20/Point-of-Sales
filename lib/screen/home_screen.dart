@@ -10,6 +10,7 @@ import 'package:pointofsales/models/pos_model.dart';
 import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/drawer_screen.dart';
 import 'package:pointofsales/screen/product_screen.dart';
+import 'package:pointofsales/widget/progressIndicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -41,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<User> _user;
   PaymentType? _selectedPaymentType;
   PaymentTax? _selectedPaymentTax;
+  bool _isLoader = false;
 
   late Future<List<PaymentType>> _paymentType;
   late Payment type = Payment(
@@ -171,7 +173,7 @@ Future<User> fetchUser() async{
 
         if (pos["data"] != null) {
           var userData = pos['data'][0]['user'];
-          if(userData != null) {
+          if (userData != null) {
             var data = User(
               userid: pos['data'][0]['user']['id'],
               username: pos['data'][0]['user']['name'].toString(),
@@ -180,47 +182,54 @@ Future<User> fetchUser() async{
             userId = data.userid;
             userName = data.username;
             userEmail = data.useremail;
-
-            // print('User ID: $userId');
-            // print('User Name: $userName');
-            // print('User Email: $userEmail');
-          }else {
+            
+          } else {
             print("User data is null");
           }
-          
+
           Future<List<PaymentType>> _paymentType = fetchPaymentTypes();
           Future<List<PaymentTax>> _paymentTax = fetchPaymentTax();
 
-          _paymentTax.then((paymentTax) {
-            var paymentTaxId = int.parse(pos["payment_type"]["id"]);
-            var data = PaymentTax(
-              id: paymentTaxId,
-              name: pos['payment_tax']['name'].toString(),
-              taxPercentage: pos['payment_tax']['tax_percentage'],
-            );
-            taxid = data.id;
-            taxname = data.name;
-            taxpercentage = data.taxPercentage;
+          var paymentTaxId = pos["payment_type"]?["id"];
+          if (paymentTaxId is int) {
+            _paymentTax.then((paymentTax) {
+              var parsedPaymentTaxId = paymentTaxId;
+              var data = PaymentTax(
+                id: parsedPaymentTaxId,
+                name: pos['payment_tax']['name'].toString(),
+                taxPercentage: pos['payment_tax']['tax_percentage'],
+              );
+              taxid = data.id;
+              taxname = data.name;
+              taxpercentage = data.taxPercentage;
 
-            setState(() {
-              _paymentTax = Future.value(paymentTax);
+              setState(() {
+                _paymentTax = Future.value(paymentTax);
+              });
             });
 
-          });
+            _paymentType.then((paymentTypes) {
+              var parsedPaymentTypeId = paymentTaxId;
+              var data = PaymentType(
+                id: parsedPaymentTypeId,
+                name: pos["payment_type"]["name"].toString(),
+              );
+              payid = data.id;
+              payname = data.name;
 
-          _paymentType.then((paymentTypes) {
-            var paymentTypeId = int.parse(pos["payment_type"]["id"]);
-            var data = PaymentType(
-              id: paymentTypeId,
-              name: pos["payment_type"]["name"].toString(),
-            );
-            payid = data.id;
-            payname = data.name;
-
-            setState(() {
-              _paymentType = Future.value(paymentTypes);
+              setState(() {
+                _paymentType = Future.value(paymentTypes);
+              });
             });
-          });
+          } else {
+            // Handle the case when the value is not an integer or is null
+            if (pos["payment_type"] == null) {
+              print("Payment type data is null");
+            } else {
+              var idValue = pos["payment_type"]["id"];
+              print("Invalid payment type ID: $idValue");
+            }
+          }
 
           print(paymentType);
         } else {
@@ -305,12 +314,15 @@ Future<User> fetchUser() async{
   Future<void> searchProduct() async {
     final url = Uri.parse(Constants.apiSearchProduct);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final Map<String, dynamic> requestBody = {
+      "sku": skuController.text,
+    };
 
     final http.Response response = await http.post(
       url,
-      body: ({
-        "sku" : skuController.text,
-      }),
+      body: jsonEncode(
+        requestBody,
+      ),
       headers: 
       {
         'Authorization': 'Bearer ' + prefs.getString('token').toString(),
@@ -509,7 +521,7 @@ Future<User> fetchUser() async{
                                   },
                                 ),
                               ),
-                              onPressed: () {},
+                              onPressed: () => _isLoader ? buildCircularProgressIndicator() : searchProduct(),
                               child: Text(
                                 "Add",
                                 style: GoogleFonts.manrope(
