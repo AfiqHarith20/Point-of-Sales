@@ -91,10 +91,24 @@ void _submitProd() async {
         'Content-Type': 'application/json'
       },
     );
-
     if (response.statusCode == 200) {
       print(response);
       print("Success Register Merchant");
+
+      prodSkuController.clear();
+      prodNameController.clear();
+      prodSummaryController.clear();
+      prodDetailsController.clear();
+      prodCategoryController.clear();
+      prodPriceController.clear();
+      prodQuantityController.clear();
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => ProductScreen(),
+        ),
+      );
+      
     } else {
       print(response.reasonPhrase);
     }
@@ -165,263 +179,266 @@ void _submitProd() async {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          "SKU:",
-                          style: GoogleFonts.ubuntu(
-                            fontSize: 14.sp,
-                            letterSpacing: 1.0,
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            "SKU:",
+                            style: GoogleFonts.ubuntu(
+                              fontSize: 14.sp,
+                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  TextFormField(
-                    controller: prodSkuController,
-                    style: TextStyle(
-                      color: kForm,
-                      fontSize: 10.sp,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w500,
+                      ],
                     ),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                        ),
+                    TextFormField(
+                      controller: prodSkuController,
+                      style: TextStyle(
+                        color: kForm,
+                        fontSize: 10.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
                       ),
-                      filled: true,
-                      fillColor: kTextColor,
-                    ),
-                  ),
-                  SizedBox(height: 1.h,),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          "Name:",
-                          style: GoogleFonts.ubuntu(
-                            fontSize: 14.sp,
-                            letterSpacing: 1.0,
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
                           ),
                         ),
+                        filled: true,
+                        fillColor: kTextColor,
                       ),
-                    ],
-                  ),
-                  TextFormField(
-                    controller: prodNameController,
-                    style: TextStyle(
-                      color: kForm,
-                      fontSize: 10.sp,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w500,
                     ),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: kTextColor,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 1.h,
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          "Summary:",
-                          style: GoogleFonts.ubuntu(
-                            fontSize: 14.sp,
-                            letterSpacing: 1.0,
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
+                    SizedBox(height: 1.h,),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            "Name:",
+                            style: GoogleFonts.ubuntu(
+                              fontSize: 14.sp,
+                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  TextFormField(
-                    controller: prodSummaryController,
-                    style: TextStyle(
-                      color: kForm,
-                      fontSize: 10.sp,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w500,
+                      ],
                     ),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                        ),
+                    TextFormField(
+                      controller: prodNameController,
+                      style: TextStyle(
+                        color: kForm,
+                        fontSize: 10.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
                       ),
-                      filled: true,
-                      fillColor: kTextColor,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 1.h,
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          "Details:",
-                          style: GoogleFonts.ubuntu(
-                            fontSize: 14.sp,
-                            letterSpacing: 1.0,
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
                           ),
                         ),
+                        filled: true,
+                        fillColor: kTextColor,
                       ),
-                    ],
-                  ),
-                  TextFormField(
-                    controller: prodDetailsController,
-                    style: TextStyle(
-                      color: kForm,
-                      fontSize: 10.sp,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w500,
                     ),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: kTextColor,
+                    SizedBox(
+                      height: 1.h,
                     ),
-                  ),
-                  SizedBox(
-                    height: 1.h,
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          "Price:",
-                          style: GoogleFonts.ubuntu(
-                            fontSize: 14.sp,
-                            letterSpacing: 1.0,
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            "Summary:",
+                            style: GoogleFonts.ubuntu(
+                              fontSize: 14.sp,
+                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  TextFormField(
-                    controller: prodPriceController,
-                    style: TextStyle(
-                      color: kForm,
-                      fontSize: 10.sp,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w500,
+                      ],
                     ),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                        ),
+                    TextFormField(
+                      controller: prodSummaryController,
+                      style: TextStyle(
+                        color: kForm,
+                        fontSize: 10.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
                       ),
-                      filled: true,
-                      fillColor: kTextColor,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 1.h,
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          "Quantity:",
-                          style: GoogleFonts.ubuntu(
-                            fontSize: 14.sp,
-                            letterSpacing: 1.0,
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
                           ),
                         ),
+                        filled: true,
+                        fillColor: kTextColor,
                       ),
-                    ],
-                  ),
-                  TextFormField(
-                    controller: prodQuantityController,
-                    style: TextStyle(
-                      color: kForm,
-                      fontSize: 10.sp,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w500,
                     ),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: kTextColor,
+                    SizedBox(
+                      height: 1.h,
                     ),
-                  ),
-                  SizedBox(
-                    height: 1.h,
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          "Category:",
-                          style: GoogleFonts.ubuntu(
-                            fontSize: 14.sp,
-                            letterSpacing: 1.0,
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            "Details:",
+                            style: GoogleFonts.ubuntu(
+                              fontSize: 14.sp,
+                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  TextFormField(
-                    controller: prodCategoryController,
-                    style: TextStyle(
-                      color: kForm,
-                      fontSize: 10.sp,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w500,
+                      ],
                     ),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
+                    TextFormField(
+                      controller: prodDetailsController,
+                      style: TextStyle(
+                        color: kForm,
+                        fontSize: 10.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
+                          ),
                         ),
+                        filled: true,
+                        fillColor: kTextColor,
                       ),
-                      filled: true,
-                      fillColor: kTextColor,
                     ),
-                  ),
-                ],
+                    SizedBox(
+                      height: 1.h,
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            "Price:",
+                            style: GoogleFonts.ubuntu(
+                              fontSize: 14.sp,
+                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TextFormField(
+                      controller: prodPriceController,
+                      style: TextStyle(
+                        color: kForm,
+                        fontSize: 10.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: kTextColor,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 1.h,
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            "Quantity:",
+                            style: GoogleFonts.ubuntu(
+                              fontSize: 14.sp,
+                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TextFormField(
+                      controller: prodQuantityController,
+                      style: TextStyle(
+                        color: kForm,
+                        fontSize: 10.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: kTextColor,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 1.h,
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            "Category:",
+                            style: GoogleFonts.ubuntu(
+                              fontSize: 14.sp,
+                              letterSpacing: 1.0,
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TextFormField(
+                      controller: prodCategoryController,
+                      style: TextStyle(
+                        color: kForm,
+                        fontSize: 10.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: kTextColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
