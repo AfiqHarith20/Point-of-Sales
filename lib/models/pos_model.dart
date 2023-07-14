@@ -253,11 +253,13 @@ class Items {
 
 class ItemsArray {
   final String productId;
-  final String quantity;
+  final String name;
+  late final String quantity;
   final String price;
 
   ItemsArray({
     required this.productId,
+    required this.name,
     required this.quantity,
     required this.price,
   });
