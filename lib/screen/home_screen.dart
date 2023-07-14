@@ -1,3 +1,5 @@
+// ignore_for_file: cast_from_null_always_fails
+
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -24,7 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final skuController = TextEditingController();
-  final quantityController = TextEditingController();
+  final quantityController = TextEditingController(text: '1');
   int? merchantId, userId, taxid, payid, taxpercentage, status;
   String? userName,
       userEmail,
@@ -50,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     paymentTax: [],
   );
   late Future<List<PaymentTax>> _paymentTax;
+  List<ItemsArray> searchResults = [];
 
   List<PaymentType> paymentType = [];
   bool isLoading = true;
@@ -320,42 +323,53 @@ Future<User> fetchUser() async{
 
     final http.Response response = await http.post(
       url,
-      body: jsonEncode(
-        requestBody,
-      ),
-      headers: 
-      {
+      body: jsonEncode(requestBody),
+      headers: {
         'Authorization': 'Bearer ' + prefs.getString('token').toString(),
         'Content-Type': 'application/json'
       },
     );
-    if(response.statusCode == 200) {
-      print(response);
-      print("Success search SKU");
-    }else{
+
+    if (response.statusCode == 200) {
+      final dynamic responseData = json.decode(response.body);
+
+      if (responseData is Map<String, dynamic> &&
+          responseData.containsKey('data')) {
+        final dynamic productData = responseData['data'];
+
+        if (productData.containsKey('products') &&
+            productData['products'] is Map<String, dynamic>) {
+          final dynamic product = productData['products'];
+          final ItemsArray result = ItemsArray(
+            productId: product['id'].toString(),
+            name: product['name'].toString(),
+            quantity: quantityController.text.isNotEmpty
+                ? quantityController.text
+                : '1',
+            price: product['price'].toString(),
+          );
+
+          setState(() {
+            final existingProductIndex = searchResults.indexWhere(
+              (item) => item.productId == result.productId,
+            );
+            if (existingProductIndex != -1) {
+              // If the product already exists, update the quantity
+              searchResults[existingProductIndex].quantity = result.quantity;
+            } else {
+              // If the product doesn't exist, add it to the search results
+              searchResults.add(result);
+            }
+          });
+        } else {
+          print('Invalid product data');
+        }
+      } else {
+        print('Invalid response format: $responseData');
+      }
+    } else {
       print(response.reasonPhrase);
     }
-    if(response.statusCode == 201) {
-    
-    }
-  }
-
-  Future fetchSavePostTransaction() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    isLoading = true;
-
-
-    var dataFromResponse = await _postSavePosTransaction();
-    dataFromResponse['data']['items_array'].forEach((newItems) {
-      List<ItemsArray> itemsArray = [];
-      itemsArray.add(
-        new ItemsArray(
-        productId: newItems['product_id'].toString(),
-        quantity: quantityController.text,
-        price: newItems['price'],
-      )
-      );
-    });
   }
 
   @override
@@ -827,10 +841,11 @@ Future<User> fetchUser() async{
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                   border: TableBorder.all(color: Colors.transparent),
                   columnWidths: {
-                    0: FlexColumnWidth(3),
-                    1: FlexColumnWidth(2),
+                    0: FlexColumnWidth(1),
+                    1: FlexColumnWidth(3),
                     2: FlexColumnWidth(2),
                     3: FlexColumnWidth(2),
+                    4: FlexColumnWidth(2),
                   },
                   children: [
                     TableRow(
@@ -839,7 +854,21 @@ Future<User> fetchUser() async{
                           child: Padding(
                             padding: const EdgeInsets.all(6),
                             child: Text(
-                              "Product Name",
+                              "ID",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Text(
+                              "Name",
                               style: GoogleFonts.aubrey(
                                 fontWeight: FontWeight.w600,
                                 color: kLabel,
@@ -871,7 +900,7 @@ Future<User> fetchUser() async{
                               style: GoogleFonts.aubrey(
                                 fontWeight: FontWeight.w600,
                                 color: kLabel,
-                                fontSize: 12.sp,
+                                fontSize: 11.sp,
                                 letterSpacing: 1.0,
                               ),
                             ),
@@ -885,7 +914,7 @@ Future<User> fetchUser() async{
                               style: GoogleFonts.aubrey(
                                 fontWeight: FontWeight.w600,
                                 color: kLabel,
-                                fontSize: 12.sp,
+                                fontSize: 10.sp,
                                 letterSpacing: 1.0,
                               ),
                             ),
@@ -893,13 +922,13 @@ Future<User> fetchUser() async{
                         ),
                       ],
                     ),
-                    for (int index = 0; index < invoice().length; index++)
+                    for (final result in searchResults)
                       TableRow(children: [
                         TableCell(
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Text(
-                              invoice()[index].prodname ?? "",
+                              result.productId,
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
@@ -913,7 +942,7 @@ Future<User> fetchUser() async{
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Text(
-                              invoice()[index].price ?? "",
+                              result.name,
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
@@ -927,7 +956,7 @@ Future<User> fetchUser() async{
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Text(
-                              invoice()[index].quantity ?? "",
+                              result.price,
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
@@ -941,10 +970,21 @@ Future<User> fetchUser() async{
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Text(
-                              (double.parse(invoice()[index].price ?? "0") *
-                                      double.parse(
-                                          invoice()[index].quantity ?? "0"))
-                                  .toStringAsFixed(2),
+                              result.quantity,
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              '',
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
