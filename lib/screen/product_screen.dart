@@ -167,7 +167,8 @@ void _getIndexProduct() async {
                   ),
                 )
               : SingleChildScrollView(
-                  child: Column(
+                  child: Wrap(
+                    alignment: WrapAlignment.start,
                     children: products
                         .map(
                           (product) => Container(
