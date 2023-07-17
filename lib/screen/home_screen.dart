@@ -45,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   PaymentType? _selectedPaymentType;
   PaymentTax? _selectedPaymentTax;
   bool _isLoader = false;
+  double total = 0;
 
   late Future<List<PaymentType>> _paymentType;
   late Payment type = Payment(
@@ -71,9 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double calculateSubtotal() {
     double subtotal = 0;
-    for (int index = 0; index < invoice().length; index++) {
-      double price = double.parse(invoice()[index].price ?? "0");
-      double quantity = double.parse(invoice()[index].quantity ?? "0");
+    for (final item in searchResults) {
+      double price = double.parse(item.price);
+      double quantity = double.parse(item.quantity ?? '0');
       subtotal += price * quantity;
     }
     return subtotal;
@@ -355,11 +356,26 @@ Future<User> fetchUser() async{
             );
             if (existingProductIndex != -1) {
               // If the product already exists, update the quantity
-              searchResults[existingProductIndex].quantity = result.quantity;
+              int currentQuantity = int.parse(
+                  searchResults[existingProductIndex].quantity ?? '0');
+              int newQuantity =
+                  currentQuantity + int.parse(quantityController.text);
+              searchResults[existingProductIndex].quantity =
+                  newQuantity.toString();
             } else {
               // If the product doesn't exist, add it to the search results
               searchResults.add(result);
             }
+          });
+         // Reset the quantity controller to '1' after adding
+          quantityController.text = '1';
+
+          // Calculate the new total price
+          double newTotalPrice = calculateSubtotal();
+
+          // Update the total price
+          setState(() {
+            total = newTotalPrice;
           });
         } else {
           print('Invalid product data');
@@ -690,29 +706,30 @@ Future<User> fetchUser() async{
                                 })),
                           ],
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Total",
-                              style: GoogleFonts.aubrey(
-                                fontWeight: FontWeight.w600,
-                                color: kLabel,
-                                fontSize: 11.sp,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                            Text(
-                              "\RM${calculateTotal().toStringAsFixed(2)}",
-                              style: GoogleFonts.breeSerif(
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                                fontSize: 11.sp,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ],
-                        ),
+                        // Row(
+                        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //   children: [
+                        //     Text(
+                        //       "Total",
+                        //       style: GoogleFonts.aubrey(
+                        //         fontWeight: FontWeight.w600,
+                        //         color: kLabel,
+                        //         fontSize: 11.sp,
+                        //         letterSpacing: 1.0,
+                        //       ),
+                        //     ),
+                        //     Text(
+                        //       "\RM${calculateTotal().toStringAsFixed(2)}",
+                        //       style: GoogleFonts.breeSerif(
+                        //         fontWeight: FontWeight.w500,
+                        //         color: kTextColor,
+                        //         fontSize: 11.sp,
+                        //         letterSpacing: 1.0,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        SizedBox(height: 1.h,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -837,164 +854,203 @@ Future<User> fetchUser() async{
               child: SingleChildScrollView(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                child: Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: TableBorder.all(color: Colors.transparent),
-                  columnWidths: {
-                    0: FlexColumnWidth(1),
-                    1: FlexColumnWidth(3),
-                    2: FlexColumnWidth(2),
-                    3: FlexColumnWidth(2),
-                    4: FlexColumnWidth(2),
-                  },
+                child: Column(
                   children: [
-                    TableRow(
+                    Table(
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      border: TableBorder.all(color: Colors.transparent),
+                      columnWidths: {
+                        0: FlexColumnWidth(1),
+                        1: FlexColumnWidth(3),
+                        2: FlexColumnWidth(2),
+                        3: FlexColumnWidth(2),
+                        4: FlexColumnWidth(2),
+                      },
                       children: [
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6),
-                            child: Text(
-                              "ID",
-                              style: GoogleFonts.aubrey(
-                                fontWeight: FontWeight.w600,
-                                color: kLabel,
-                                fontSize: 12.sp,
-                                letterSpacing: 1.0,
+                        TableRow(
+                          children: [
+                            TableCell(
+                              child: Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: Text(
+                                  "ID",
+                                  style: GoogleFonts.aubrey(
+                                    fontWeight: FontWeight.w600,
+                                    color: kLabel,
+                                    fontSize: 12.sp,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6),
-                            child: Text(
-                              "Name",
-                              style: GoogleFonts.aubrey(
-                                fontWeight: FontWeight.w600,
-                                color: kLabel,
-                                fontSize: 12.sp,
-                                letterSpacing: 1.0,
+                            TableCell(
+                              child: Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: Text(
+                                  "Name",
+                                  style: GoogleFonts.aubrey(
+                                    fontWeight: FontWeight.w600,
+                                    color: kLabel,
+                                    fontSize: 12.sp,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6),
-                            child: Text(
-                              "Price (MYR)",
-                              style: GoogleFonts.aubrey(
-                                fontWeight: FontWeight.w600,
-                                color: kLabel,
-                                fontSize: 12.sp,
-                                letterSpacing: 1.0,
+                            TableCell(
+                              child: Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: Text(
+                                  "Price (MYR)",
+                                  style: GoogleFonts.aubrey(
+                                    fontWeight: FontWeight.w600,
+                                    color: kLabel,
+                                    fontSize: 12.sp,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6),
-                            child: Text(
-                              "Quantity",
-                              style: GoogleFonts.aubrey(
-                                fontWeight: FontWeight.w600,
-                                color: kLabel,
-                                fontSize: 11.sp,
-                                letterSpacing: 1.0,
+                            TableCell(
+                              child: Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: Text(
+                                  "Quantity",
+                                  style: GoogleFonts.aubrey(
+                                    fontWeight: FontWeight.w600,
+                                    color: kLabel,
+                                    fontSize: 11.sp,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6),
-                            child: Text(
-                              "Subtotal (MYR)",
-                              style: GoogleFonts.aubrey(
-                                fontWeight: FontWeight.w600,
-                                color: kLabel,
-                                fontSize: 10.sp,
-                                letterSpacing: 1.0,
+                            TableCell(
+                              child: Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: Text(
+                                  "Subtotal (MYR)",
+                                  style: GoogleFonts.aubrey(
+                                    fontWeight: FontWeight.w600,
+                                    color: kLabel,
+                                    fontSize: 10.sp,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
+                        for (final result in searchResults)
+                          TableRow(
+                            children: [
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: Text(
+                                    result.productId,
+                                    style: GoogleFonts.breeSerif(
+                                      fontWeight: FontWeight.w500,
+                                      color: kTextColor,
+                                      fontSize: 12.sp,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: Text(
+                                    result.name,
+                                    style: GoogleFonts.breeSerif(
+                                      fontWeight: FontWeight.w500,
+                                      color: kTextColor,
+                                      fontSize: 12.sp,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: Text(
+                                    result.price,
+                                    style: GoogleFonts.breeSerif(
+                                      fontWeight: FontWeight.w500,
+                                      color: kTextColor,
+                                      fontSize: 12.sp,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: Text(
+                                    result.quantity as String,
+                                    style: GoogleFonts.breeSerif(
+                                      fontWeight: FontWeight.w500,
+                                      color: kTextColor,
+                                      fontSize: 12.sp,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: Text(
+                                    '${(double.parse(result.quantity ?? '0') * double.parse(result.price)).toStringAsFixed(2)}',
+                                    style: GoogleFonts.breeSerif(
+                                      fontWeight: FontWeight.w500,
+                                      color: kTextColor,
+                                      fontSize: 12.sp,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
-                    for (final result in searchResults)
-                      TableRow(children: [
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(
-                              result.productId,
-                              style: GoogleFonts.breeSerif(
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                                fontSize: 12.sp,
-                                letterSpacing: 1.0,
-                              ),
+                    SizedBox(height: 2.h,),
+                    Divider(
+                      color: Colors.red,
+                      thickness: 2.0,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 15),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Total",
+                            style: GoogleFonts.aubrey(
+                              fontWeight: FontWeight.w600,
+                              color: kLabel,
+                              fontSize: 11.sp,
+                              letterSpacing: 1.0,
                             ),
                           ),
-                        ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(
-                              result.name,
-                              style: GoogleFonts.breeSerif(
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                                fontSize: 12.sp,
-                                letterSpacing: 1.0,
-                              ),
+                          Text(
+                            calculateTotal().toStringAsFixed(2),
+                            style: GoogleFonts.breeSerif(
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                              fontSize: 11.sp,
+                              letterSpacing: 1.0,
                             ),
                           ),
-                        ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(
-                              result.price,
-                              style: GoogleFonts.breeSerif(
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                                fontSize: 12.sp,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ),
-                        ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(
-                              result.quantity,
-                              style: GoogleFonts.breeSerif(
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                                fontSize: 12.sp,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ),
-                        ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(
-                              '',
-                              style: GoogleFonts.breeSerif(
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                                fontSize: 12.sp,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ]),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
