@@ -35,7 +35,7 @@ class Datum {
   final int userId;
   final User user;
   final Merchant merchant;
-  final List<dynamic> products;
+  final List<Product> products;
   final List<dynamic> customers;
 
   Datum({
@@ -52,7 +52,7 @@ class Datum {
         userId: json["user_id"],
         user: User.fromJson(json["user"]),
         merchant: Merchant.fromJson(json["merchant"]),
-        products: List<dynamic>.from(json["products"].map((x) => x)),
+        products: List<Product>.from(json["products"].map((x) => x)),
         customers: List<dynamic>.from(json["customers"].map((x) => x)),
       );
 
@@ -264,3 +264,73 @@ class ItemsArray {
     required this.price,
   });
 }
+
+class Product {
+  final int id;
+  final int merchantId;
+  final String sku;
+  final String name;
+  final String summary;
+  final int categoryId;
+  final double price;
+  final dynamic mainImage;
+  final ProductCategory productCategory;
+
+  Product({
+    required this.id,
+    required this.merchantId,
+    required this.sku,
+    required this.name,
+    required this.summary,
+    required this.categoryId,
+    required this.price,
+    this.mainImage,
+    required this.productCategory,
+  });
+
+  factory Product.fromJson(Map<String, dynamic> json) => Product(
+        id: json["id"],
+        merchantId: json["merchant_id"],
+        sku: json["sku"],
+        name: json["name"],
+        summary: json["summary"],
+        categoryId: json["category_id"],
+        price: json["price"]?.toDouble(),
+        mainImage: json["main_image"],
+        productCategory: ProductCategory.fromJson(json["product_category"]),
+      );
+
+      Map<String, dynamic> toJson() => {
+        "id": id,
+        "merchant_id": merchantId,
+        "sku": sku,
+        "name": name,
+        "summary": summary,
+        "category_id": categoryId,
+        "price": price,
+        "main_image": mainImage,
+        "product_category": productCategory.toJson(),
+      };
+}
+
+class ProductCategory {
+  final int catid;
+  final String catname;
+
+  ProductCategory({
+    required this.catid,
+    required this.catname,
+  });
+
+  factory ProductCategory.fromJson(Map<String, dynamic> json) =>
+      ProductCategory(
+        catid: json["id"],
+        catname: json["name"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": catid,
+        "name": catname,
+      };
+}
+
