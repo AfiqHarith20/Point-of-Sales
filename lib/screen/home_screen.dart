@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:animated_button_bar/animated_button_bar.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -106,7 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
       final Map<String, dynamic> json = jsonDecode(response.body);
       final payType = Payment.fromJson(json);
       return payType.paymentType;
-
     } else {
       throw Exception('Failed to fetch payment types');
     }
@@ -136,8 +136,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ///////////////////////////// Fetch User //////////////////////////////////////////////////////////
 
-Future<User> fetchUser() async{
-  final url = Uri.parse(Constants.apiPosIndex);
+  Future<User> fetchUser() async {
+    final url = Uri.parse(Constants.apiPosIndex);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final http.Response response = await http.get(
       url,
@@ -153,12 +153,12 @@ Future<User> fetchUser() async{
     } else {
       throw Exception('Failed to fetch user');
     }
-}
+  }
 
 ////////////////////////////// Fetch Product Category ////////////////////////////////////////
 
-Future<ProductCategory> fetchProdCategory() async {
-  final url = Uri.parse(Constants.apiPosIndex);
+  Future<ProductCategory> fetchProdCategory() async {
+    final url = Uri.parse(Constants.apiPosIndex);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final http.Response response = await http.get(
       url,
@@ -174,7 +174,7 @@ Future<ProductCategory> fetchProdCategory() async {
     } else {
       throw Exception('Failed to fetch user');
     }
-}
+  }
 
 ///////////////////////////// fetch Get and Post ////////////////////////////////////////
 
@@ -194,11 +194,12 @@ Future<ProductCategory> fetchProdCategory() async {
     final Map<String, dynamic> pos = json.decode(response.body);
     if (response.statusCode == 200) {
       print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
+      print(response.body);
       setState(() {
         isLoading = false;
 
         /////////////////////////// User ////////////////////////////////////
-        
+
         if (pos["data"] != null) {
           var userData = pos['data'][0]['user'];
           if (userData != null) {
@@ -210,23 +211,28 @@ Future<ProductCategory> fetchProdCategory() async {
             userId = data.userid;
             userName = data.username;
             userEmail = data.useremail;
-            
           } else {
             print("User data is null");
           }
 
           ///////////////////// Product Category ///////////////////////////
-          
-          if(pos["data"] != null) {
+
+          if (pos["data"] != null) {
             var catData = pos['data'][0]['products'][0]['product_category'];
-            if(catData != null) {
+            if (catData != null) {
               var data = ProductCategory(
                 catid: pos['data'][0]['products'][0]['product_category']['id'],
-                catname: pos['data'][0]['products'][0]['product_category']['name'].toString(),
-                );
-                catId: data.catid;
-                catName: data.catname;
-            }else {
+                catname: pos['data'][0]['products'][0]['product_category']
+                        ['name']
+                    .toString(),
+              );
+              catId:
+              data.catid;
+              catName:
+              data.catname;
+
+              print(catData);
+            } else {
               print("Category data is null");
             }
           }
@@ -300,7 +306,7 @@ Future<ProductCategory> fetchProdCategory() async {
         'Content-Type': 'application/json',
       },
       body: {
-       'customer_id': prefs.getString('customer_id'),
+        'customer_id': prefs.getString('customer_id'),
         'gross_price': prefs.getString('gross_price'),
         'tax_id': prefs.getString('tax_id'),
         'tax_amount': prefs.getString('tax_amount'),
@@ -312,8 +318,8 @@ Future<ProductCategory> fetchProdCategory() async {
         'items_array': ItemsArray,
       },
     );
-    
-      final Map<String, dynamic> customer = json.decode(response.body);
+
+    final Map<String, dynamic> customer = json.decode(response.body);
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
 
@@ -349,7 +355,7 @@ Future<ProductCategory> fetchProdCategory() async {
           paymentTypes = data.paymentTypes;
           remarks = data.remarks;
         }
-        });
+      });
       return responseData;
     } else {
       throw Exception('Failed to save POS transaction');
@@ -409,7 +415,7 @@ Future<ProductCategory> fetchProdCategory() async {
               searchResults.add(result);
             }
           });
-         // Reset the quantity controller to '1' after adding
+          // Reset the quantity controller to '1' after adding
           quantityController.text = '1';
 
           // Calculate the new total price
@@ -445,42 +451,42 @@ Future<ProductCategory> fetchProdCategory() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: DrawerScreen(),
-      appBar: AppBar(
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const FaIcon(
-                FontAwesomeIcons.bars,
-                color: kTextColor,
-              ),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
-        title: Text(
-          "DASHBOARD",
-          style: GoogleFonts.ubuntu(
-            fontSize: 16.sp,
-            letterSpacing: 1.0,
-            fontWeight: FontWeight.w500,
-            color: kTextColor,
+        drawer: DrawerScreen(),
+        appBar: AppBar(
+          leading: Builder(
+            builder: (context) {
+              return IconButton(
+                icon: const FaIcon(
+                  FontAwesomeIcons.bars,
+                  color: kTextColor,
+                ),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
+            },
           ),
-        ),
-        actions: <Widget>[
-          IconButton(
-            icon: FaIcon(
-              FontAwesomeIcons.bell,
-              color: Colors.white,
+          title: Text(
+            "DASHBOARD",
+            style: GoogleFonts.ubuntu(
+              fontSize: 16.sp,
+              letterSpacing: 1.0,
+              fontWeight: FontWeight.w500,
+              color: kTextColor,
             ),
-            onPressed: () {},
-            tooltip: "Notifications Section",
           ),
-        ],
-      ),
-      body: SafeArea(
+          actions: <Widget>[
+            IconButton(
+              icon: FaIcon(
+                FontAwesomeIcons.bell,
+                color: Colors.white,
+              ),
+              onPressed: () {},
+              tooltip: "Notifications Section",
+            ),
+          ],
+        ),
+        body: SafeArea(
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
@@ -1191,7 +1197,50 @@ Future<ProductCategory> fetchProdCategory() async {
                         ),
                       ]),
                     ),
-                    Container()
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedButtonBar(
+                          foregroundColor: Colors.blueGrey.shade400,
+                          radius: 8.0,
+                          padding: const EdgeInsets.all(16.0),
+                          invertedSelection: true,
+                          children: [
+                            ButtonBarEntry(
+                              child: Text("Consumer Product", 
+                              style: GoogleFonts.breeSerif(
+                                  fontWeight: FontWeight.w400,
+                                  color: kTextColor,
+                                  fontSize: 8.sp,
+                                  letterSpacing: 1.0,
+                                ),
+                              ), 
+                            onTap: () => print('First category tapped'),
+                            ),
+                            ButtonBarEntry(
+                                child: Text("Industrial Product", 
+                                style: GoogleFonts.breeSerif(
+                                              fontWeight: FontWeight.w400,
+                                              color: kTextColor,
+                                              fontSize: 8.sp,
+                                              letterSpacing: 1.0,
+                                            ),),
+                                onTap: () => print('Second category tapped'),
+                              ),
+                          ],
+                        ),
+                      ],
+                      ),
+                    
+                    Container(
+                      height: 53.h,
+                      margin: kMargin,
+                      padding: kPadding,
+                      decoration: BoxDecoration(
+                        color: kPrimaryColor,
+                        borderRadius: kRadius,
+                      ),
+                    )
                   ],
                 ),
               ),
