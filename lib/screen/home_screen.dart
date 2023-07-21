@@ -3,12 +3,13 @@
 import 'dart:convert';
 
 import 'package:animated_button_bar/animated_button_bar.dart';
+import 'package:getwidget/components/loader/gf_loader.dart';
+import 'package:getwidget/types/gf_loader_type.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
-import 'package:pointofsales/models/data.dart';
 import 'package:pointofsales/models/pos_model.dart';
 import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/drawer_screen.dart';
@@ -27,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final skuController = TextEditingController();
+  String? selectedCategory;
   final quantityController = TextEditingController(text: '1');
   int? merchantId, userId, catId, taxid, payid, taxpercentage, status;
   String? userName,
@@ -42,7 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
       payname,
       paymentTypes;
   dynamic taxId, taxAmount, discId, discAmount;
-  late List<dynamic> products;
   late Future<User> _user;
   late Future<ProductCategory> _prodCategory;
   PaymentType? _selectedPaymentType;
@@ -50,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoader = false;
   double total = 0;
 
+  late List<Product> products = [];
   late Future<List<PaymentType>> _paymentType;
   late Payment type = Payment(
     paymentType: [],
@@ -197,6 +199,15 @@ class _HomeScreenState extends State<HomeScreen> {
       print(response.body);
       setState(() {
         isLoading = false;
+
+        if (pos['data'] != null && pos['data'].isNotEmpty) {
+          var productsJson = pos['data'][0]['products'] as List<dynamic>?;
+          if (productsJson != null) {
+            products = productsJson
+                .map((productJson) => Product.fromJson(productJson))
+                .toList();
+          }
+        }
 
         /////////////////////////// User ////////////////////////////////////
 
@@ -1215,7 +1226,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                   letterSpacing: 1.0,
                                 ),
                               ), 
-                            onTap: () => print('First category tapped'),
+                            onTap: () {
+                              setState(() {
+                                  selectedCategory =
+                                      "Consumer products"; // Update with the appropriate consumer category
+                                });
+                            },
                             ),
                             ButtonBarEntry(
                                 child: Text("Industrial Product", 
@@ -1225,21 +1241,93 @@ class _HomeScreenState extends State<HomeScreen> {
                                               fontSize: 8.sp,
                                               letterSpacing: 1.0,
                                             ),),
-                                onTap: () => print('Second category tapped'),
+                                onTap: () {
+                                  setState(() {
+                                  selectedCategory =
+                                      "Industrial products"; // Update with the appropriate industrial category
+                                });
+                                },
                               ),
                           ],
                         ),
                       ],
                       ),
-                    
                     Container(
-                      height: 53.h,
+                      height: 54.h,
+                      width: 200.w,
                       margin: kMargin,
                       padding: kPadding,
                       decoration: BoxDecoration(
                         color: kPrimaryColor,
                         borderRadius: kRadius,
                       ),
+                      child: isLoading
+                          ? Center(
+                              child: GFLoader(type: GFLoaderType.android,
+                              ),
+                            )
+                          : products.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    'No products available',
+                                    style: GoogleFonts.ubuntu(
+                                      fontSize: 16.sp,
+                                      letterSpacing: 1.0,
+                                      fontWeight: FontWeight.w500,
+                                      color: kTextColor,
+                                    ),
+                                  ),
+                                )
+                              : Wrap(
+                        alignment: WrapAlignment.start,
+                        children: [
+                          ...products.map((product) => Container(
+                            margin: EdgeInsets.all(10.0),
+                            padding: EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                
+                                SizedBox(height: 10.0),
+                                Text(
+                                  product.name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                                SizedBox(height: 5.0),
+                                Text(
+                                  '\RM${product.price}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14.0,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                SizedBox(height: 10.0),
+                                Text(
+                                  product.summary,
+                                  style: TextStyle(
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ).toList()
+                        ],
+                        ),
                     )
                   ],
                 ),
