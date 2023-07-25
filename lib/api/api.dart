@@ -22,7 +22,7 @@ class Constants {
 
   static String apiProductIndex = pos_baseurl + "/product";
   static String apiSearchProduct = pos_baseurl + "/product/search/item";
-
+  static String apiListCategory = pos_baseurl + "/product/category/list";
 
 }
 

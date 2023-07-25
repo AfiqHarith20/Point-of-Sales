@@ -274,7 +274,7 @@ class Product {
   final int categoryId;
   final double price;
   final dynamic mainImage;
-  final ProductCategory productCategory;
+  final ProductsCategory productCategory;
 
   Product({
     required this.id,
@@ -297,7 +297,7 @@ class Product {
         categoryId: json["category_id"],
         price: json["price"]?.toDouble(),
         mainImage: json["main_image"],
-        productCategory: ProductCategory.fromJson(json["product_category"]),
+        productCategory: ProductsCategory.fromJson(json["product_category"]),
       );
 
       Map<String, dynamic> toJson() => {
@@ -313,17 +313,17 @@ class Product {
       };
 }
 
-class ProductCategory {
+class ProductsCategory {
   final int catid;
   final String catname;
 
-  ProductCategory({
+  ProductsCategory({
     required this.catid,
     required this.catname,
   });
 
-  factory ProductCategory.fromJson(Map<String, dynamic> json) =>
-      ProductCategory(
+  factory ProductsCategory.fromJson(Map<String, dynamic> json) =>
+      ProductsCategory(
         catid: json["id"],
         catname: json["name"],
       );
