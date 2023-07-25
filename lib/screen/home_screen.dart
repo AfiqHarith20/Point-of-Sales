@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:animated_button_bar/animated_button_bar.dart';
 import 'package:getwidget/components/loader/gf_loader.dart';
+import 'package:pointofsales/models/category_model.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:getwidget/types/gf_loader_type.dart';
 import 'package:http/http.dart' as http;
@@ -46,13 +47,15 @@ class _HomeScreenState extends State<HomeScreen> {
       paymentTypes;
   dynamic taxId, taxAmount, discId, discAmount;
   late Future<User> _user;
-  late Future<ProductCategory> _prodCategory;
+  late List<Category> category = [];
+  late Future<List<Category>> _prodCategory;
   PaymentType? _selectedPaymentType;
   PaymentTax? _selectedPaymentTax;
   bool _isLoader = false;
   double total = 0;
 
-  late List<Product> products = [];
+  Category? selectedCategoryData;
+  List<ProductList> productList = [];
   late Future<List<PaymentType>> _paymentType;
   late Payment type = Payment(
     paymentType: [],
@@ -159,22 +162,45 @@ class _HomeScreenState extends State<HomeScreen> {
 
 ////////////////////////////// Fetch Product Category ////////////////////////////////////////
 
-  Future<ProductCategory> fetchProdCategory() async {
-    final url = Uri.parse(Constants.apiPosIndex);
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final http.Response response = await http.get(
-      url,
-      headers: ({
-        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-        'Content-Type': 'application/json'
-      }),
-    );
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> json = jsonDecode(response.body);
-      final prodCategory = ProductCategory.fromJson(json);
-      return prodCategory;
-    } else {
-      throw Exception('Failed to fetch user');
+  Future<List<Category>> fetchProdCategory() async {
+  final url = Uri.parse(Constants.apiListCategory);
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final http.Response response = await http.get(
+    url,
+    headers: {
+      'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+      'Content-Type': 'application/json'
+    },
+  );
+  if (response.statusCode == 200) {
+    final List<Category> categories =
+          (jsonDecode(response.body)['data'] as List)
+              .map((data) => Category.fromJson(data))
+              .toList();
+    return categories;
+  } else {
+    throw Exception('Failed to fetch category');
+  }
+}
+
+  Future<void> _fetchProductList() async {
+    try {
+      List<Category> categories = await fetchProdCategory();
+      // Assuming you have a method to get the products from the selected category
+      List<ProductList> selectedProductList = categories
+          .firstWhere((category) => category.name == selectedCategory)
+          .productList;
+
+      setState(() {
+        productList = selectedProductList;
+        isLoading = false;
+      });
+    } catch (e) {
+      // Handle any errors that might occur during API call
+      setState(() {
+        isLoading = false;
+      });
+      print('Error fetching product list: $e');
     }
   }
 
@@ -200,15 +226,6 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         isLoading = false;
 
-        if (pos['data'] != null && pos['data'].isNotEmpty) {
-          var productsJson = pos['data'][0]['products'] as List<dynamic>?;
-          if (productsJson != null) {
-            products = productsJson
-                .map((productJson) => Product.fromJson(productJson))
-                .toList();
-          }
-        }
-
         /////////////////////////// User ////////////////////////////////////
 
         if (pos["data"] != null) {
@@ -231,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (pos["data"] != null) {
             var catData = pos['data'][0]['products'][0]['product_category'];
             if (catData != null) {
-              var data = ProductCategory(
+              var data = ProductsCategory(
                 catid: pos['data'][0]['products'][0]['product_category']['id'],
                 catname: pos['data'][0]['products'][0]['product_category']
                         ['name']
@@ -484,6 +501,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _user = fetchUser();
     _prodCategory = fetchProdCategory();
     selectedCategory = "Consumer products";
+    _fetchProductList();
   }
 
   @override
@@ -1220,50 +1238,50 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ]),
                     ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AnimatedButtonBar(
-                          foregroundColor: Colors.blueGrey.shade400,
-                          radius: 8.0,
-                          padding: const EdgeInsets.all(16.0),
-                          invertedSelection: true,
-                          children: [
-                            ButtonBarEntry(
-                              child: Text("Consumer Product", 
-                              style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w400,
-                                  color: kTextColor,
-                                  fontSize: 8.sp,
-                                  letterSpacing: 1.0,
-                                ),
-                              ), 
-                            onTap: () {
-                              setState(() {
-                                  selectedCategory =
-                                      "Consumer products"; // Update with the appropriate consumer category
-                                });
-                            },
-                            ),
-                            ButtonBarEntry(
-                                child: Text("Industrial Product", 
-                                style: GoogleFonts.breeSerif(
-                                              fontWeight: FontWeight.w400,
-                                              color: kTextColor,
-                                              fontSize: 8.sp,
-                                              letterSpacing: 1.0,
-                                            ),),
-                                onTap: () {
-                                  setState(() {
-                                  selectedCategory =
-                                      "Industrial products"; // Update with the appropriate industrial category
-                                });
-                                },
+                    FutureBuilder<List<Category>>(
+                      future: fetchProdCategory(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          final categories = snapshot.data ?? [];
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AnimatedButtonBar(
+                                foregroundColor: Colors.blueGrey.shade400,
+                                radius: 8.0,
+                                padding: const EdgeInsets.all(16.0),
+                                invertedSelection: true,
+                                children: [
+                                  for (var category in categories)
+                                    ButtonBarEntry(
+                                      child: Text(
+                                        category.name,
+                                        style: GoogleFonts.breeSerif(
+                                          fontWeight: FontWeight.w400,
+                                          color: kTextColor,
+                                          fontSize: 8.sp,
+                                          letterSpacing: 1.0,
+                                        ),
+                                      ),
+                                      onTap: () {
+                                        setState(() {
+                                          selectedCategory = category.name;
+                                        });
+                                        _fetchProductList(); // Fetch products for the selected category
+                                      },
+                                    ),
+                                ],
                               ),
-                          ],
-                        ),
-                      ],
-                      ),
+                            ],
+                          );
+                        }
+                      },
+                    ),
                     Container(
                       height: 54.h,
                       width: 200.w,
@@ -1278,7 +1296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: GFLoader(type: GFLoaderType.android,
                               ),
                             )
-                          : products.isEmpty
+                          : productList.isEmpty
                               ? Center(
                                   child: Text(
                                     'No products available',
@@ -1293,14 +1311,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               : Wrap(
                                   alignment: WrapAlignment.start,
                                   children: [
-                                    ...products
+                                    ...productList
                                         .where((product) =>
-                                            product.productCategory.catname ==
+                                            product.name ==
                                             selectedCategory)
                                         .map(
                                           (product) => GestureDetector(
                                             onTap: () {
-                                              addSelectedProduct(product);
+                                              addSelectedProduct(product as Product);
                                             },
                                             child: Container(
                                               width: 18.w,
@@ -1363,89 +1381,3 @@ class _HomeScreenState extends State<HomeScreen> {
         ));
   }
 }
-
-// Widget builSelectedProductTable() {
-//   return Table(
-//     border: TableBorder.all(color: Colors.grey),
-//     columnWidths: const {
-//       0: FlexColumnWidth(1),
-//       1: FlexColumnWidth(2),
-//       2: FlexColumnWidth(1),
-//       3: FlexColumnWidth(1),
-//     },
-//     children: [
-//       TableRow(
-//         children: [
-//           TableCell(
-//             child: Padding(
-//               padding: const EdgeInsets.all(8.0),
-//               child: Text(
-//                 'Product Name',
-//                 style: TextStyle(fontWeight: FontWeight.bold),
-//               ),
-//             ),
-//           ),
-//           TableCell(
-//             child: Padding(
-//               padding: const EdgeInsets.all(8.0),
-//               child: Text(
-//                 'Price',
-//                 style: TextStyle(fontWeight: FontWeight.bold),
-//               ),
-//             ),
-//           ),
-//           TableCell(
-//             child: Padding(
-//               padding: const EdgeInsets.all(8.0),
-//               child: Text(
-//                 'Quantity',
-//                 style: TextStyle(fontWeight: FontWeight.bold),
-//               ),
-//             ),
-//           ),
-//           TableCell(
-//             child: Padding(
-//               padding: const EdgeInsets.all(8.0),
-//               child: Text(
-//                 'Total',
-//                 style: TextStyle(fontWeight: FontWeight.bold),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//       ...searchResults.map(
-//         (item) => TableRow(
-//           children: [
-//             TableCell(
-//               child: Padding(
-//                 padding: const EdgeInsets.all(8.0),
-//                 child: Text(item.name),
-//               ),
-//             ),
-//             TableCell(
-//               child: Padding(
-//                 padding: const EdgeInsets.all(8.0),
-//                 child: Text('\RM${item.price}'),
-//               ),
-//             ),
-//             TableCell(
-//               child: Padding(
-//                 padding: const EdgeInsets.all(8.0),
-//                 child: Text(item.quantity ?? '1'),
-//               ),
-//             ),
-//             TableCell(
-//               child: Padding(
-//                 padding: const EdgeInsets.all(8.0),
-//                 child: Text(
-//                   '\RM${double.parse(item.price) * double.parse(item.quantity ?? '1')}',
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     ],
-//   );
-// }
