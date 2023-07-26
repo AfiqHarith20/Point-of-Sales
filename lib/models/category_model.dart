@@ -1,43 +1,31 @@
 import 'dart:convert';
 
-ProductCategory productCategoryFromJson(String str) =>
-    ProductCategory.fromJson(json.decode(str));
-
-String productCategoryToJson(ProductCategory data) =>
-    json.encode(data.toJson());
-
 class ProductCategory {
-  final Data data;
-
-  ProductCategory({
-    required this.data,
-  });
-
-  factory ProductCategory.fromJson(Map<String, dynamic> json) =>
-      ProductCategory(
-        data: Data.fromJson(json["data"]),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "data": data.toJson(),
-      };
-}
-
-class Data {
   final List<Category> category;
 
-  Data({
+  ProductCategory({
     required this.category,
   });
 
-  factory Data.fromJson(Map<String, dynamic> json) => Data(
-        category: List<Category>.from(
-            json["category"].map((x) => Category.fromJson(x))),
-      );
+  factory ProductCategory.fromJson(Map<String, dynamic> json) {
+    final List<Category> parsedCategories = [];
 
-  Map<String, dynamic> toJson() => {
-        "category": List<dynamic>.from(category.map((x) => x.toJson())),
-      };
+    if (json['data'] != null && json['data']['category'] != null) {
+      // Extract categories from the numerical indices
+      final List<dynamic> categoryList = json['data']['category'];
+      for (var categoryData in categoryList) {
+        // Assuming the category name is a string, you can modify the type accordingly
+        final categoryName = categoryData.toString();
+        final category =
+            Category(id: 0, name: categoryName, status: 0, productList: []);
+        parsedCategories.add(category);
+      }
+    } else {
+      print('Error: "category" field is missing or null in the JSON response.');
+    }
+
+    return ProductCategory(category: parsedCategories);
+  }
 }
 
 class Category {

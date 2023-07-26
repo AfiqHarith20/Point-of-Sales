@@ -30,7 +30,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final skuController = TextEditingController();
-  String selectedCategory = "Consumer products";
+  // String selectedCategory = "Consumer products";
   final quantityController = TextEditingController(text: '1');
   int? merchantId, userId, catId, taxid, payid, taxpercentage, status;
   String? userName,
@@ -44,11 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
       remarks,
       taxname,
       payname,
+      selectedCategory,
       paymentTypes;
   dynamic taxId, taxAmount, discId, discAmount;
   late Future<User> _user;
-  late List<Category> category = [];
-  late Future<List<Category>> _prodCategory;
+  late List<Category> categoryNames = [];
+  late Future<List<String>> _prodCategory;
   PaymentType? _selectedPaymentType;
   PaymentTax? _selectedPaymentTax;
   bool _isLoader = false;
@@ -162,47 +163,71 @@ class _HomeScreenState extends State<HomeScreen> {
 
 ////////////////////////////// Fetch Product Category ////////////////////////////////////////
 
-  Future<List<Category>> fetchProdCategory() async {
-  final url = Uri.parse(Constants.apiListCategory);
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final http.Response response = await http.get(
-    url,
-    headers: {
-      'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-      'Content-Type': 'application/json'
-    },
-  );
-  if (response.statusCode == 200) {
-    final List<Category> categories =
-          (jsonDecode(response.body)['data'] as List)
-              .map((data) => Category.fromJson(data))
-              .toList();
-    return categories;
-  } else {
-    throw Exception('Failed to fetch category');
-  }
-}
+  Future<List<String>> fetchCategoryNames() async {
+    final url = Uri.parse(Constants.apiListCategory);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final http.Response response = await http.get(
+      url,
+      headers: ({
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json'
+      }),
+    );
 
-  Future<void> _fetchProductList() async {
-    try {
-      List<Category> categories = await fetchProdCategory();
-      // Assuming you have a method to get the products from the selected category
-      List<ProductList> selectedProductList = categories
-          .firstWhere((category) => category.name == selectedCategory)
-          .productList;
+    print('Response status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
 
-      setState(() {
-        productList = selectedProductList;
-        isLoading = false;
-      });
-    } catch (e) {
-      // Handle any errors that might occur during API call
-      setState(() {
-        isLoading = false;
-      });
-      print('Error fetching product list: $e');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> json = jsonDecode(response.body);
+      final List<dynamic> categoryList = json['data']['category'];
+      final List<String> categoryNames =
+          categoryList.map((category) => category['name'].toString()).toList();
+
+      print('Category names from JSON: $categoryNames');
+
+      return categoryNames;
+    } else {
+      throw Exception('Failed to fetch category names');
     }
   }
+
+  // Future<void> _fetchProductCategories() async {
+  //   try {
+  //     List<Category> categories = await fetchCategoryNames();
+  //     setState(() {
+  //       categoryNames = categories;
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     // Handle any errors that might occur during API call
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //     print('Error fetching product categories: $e');
+  //   }
+  // }
+
+  // Future<void> _fetchProductList() async {
+  //   try {
+  //     List<String> categories = await fetchCategoryNames();
+
+  //     // Assuming you have a method to get the products from the selected category
+  //     String selectedProductList = categories.firstWhere(
+  //         (category) => category == selectedCategory,
+  //         orElse: () => '');
+
+  //     setState(() {
+  //       productList = selectedProductList as List<ProductList>;
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     // Handle any errors that might occur during API call
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //     print('Error fetching product list: $e');
+  //   }
+  // }
 
 ///////////////////////////// fetch Get and Post ////////////////////////////////////////
 
@@ -222,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final Map<String, dynamic> pos = json.decode(response.body);
     if (response.statusCode == 200) {
       print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
-      print(response.body);
+      // print(response.body);
       setState(() {
         isLoading = false;
 
@@ -259,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
               catName:
               data.catname;
 
-              print(catData);
+              // print(catData);
             } else {
               print("Category data is null");
             }
@@ -499,9 +524,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _paymentType = fetchPaymentTypes();
     _paymentTax = fetchPaymentTax();
     _user = fetchUser();
-    _prodCategory = fetchProdCategory();
-    selectedCategory = "Consumer products";
-    _fetchProductList();
+    // _fetchProductCategories();
+    _prodCategory = fetchCategoryNames();
+    // selectedCategory = "Consumer products";
+    // _fetchProductList();
   }
 
   @override
@@ -1224,30 +1250,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15, horizontal: 10),
-                      child: Column(children: [
-                        Text(
-                          "Categories",
-                          style: GoogleFonts.ubuntu(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
-                          ),
-                        ),
-                      ]),
-                    ),
-                    FutureBuilder<List<Category>>(
-                      future: fetchProdCategory(),
+                    FutureBuilder<List<String>>(
+                      future: fetchCategoryNames(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
+                        } else if (snapshot.hasError || snapshot.data == null) {
+                          // Handle the error or null case
+                          return Text('Error: Failed to load categories');
                         } else {
-                          final categories = snapshot.data ?? [];
+                          final List<String> categoryList = snapshot.data!;
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -1257,10 +1270,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 padding: const EdgeInsets.all(16.0),
                                 invertedSelection: true,
                                 children: [
-                                  for (var category in categories)
+                                  for (var categoryName in categoryList)
                                     ButtonBarEntry(
                                       child: Text(
-                                        category.name,
+                                        categoryName,
                                         style: GoogleFonts.breeSerif(
                                           fontWeight: FontWeight.w400,
                                           color: kTextColor,
@@ -1270,9 +1283,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                       onTap: () {
                                         setState(() {
-                                          selectedCategory = category.name;
+                                          selectedCategory = categoryName;
                                         });
-                                        _fetchProductList(); // Fetch products for the selected category
+                                        // _fetchProductList(); // Fetch products for the selected category
                                       },
                                     ),
                                 ],
@@ -1314,11 +1327,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ...productList
                                         .where((product) =>
                                             product.name ==
-                                            selectedCategory)
+                                            null)
                                         .map(
                                           (product) => GestureDetector(
                                             onTap: () {
-                                              addSelectedProduct(product as Product);
+                                              // addSelectedProduct(product as Product);
                                             },
                                             child: Container(
                                               width: 18.w,
