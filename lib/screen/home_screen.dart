@@ -1,4 +1,4 @@
-// ignore_for_file: cast_from_null_always_fails, unrelated_type_equality_checks
+// ignore_for_file: cast_from_null_always_fails, unrelated_type_equality_checks, unnecessary_null_comparison
 
 import 'dart:convert';
 
@@ -44,11 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
       remarks,
       taxname,
       payname,
-      selectedCategory,
-      paymentTypes;
+      paymentTypes, selectedCategory;
   dynamic taxId, taxAmount, discId, discAmount;
+  // late final String selectedCategory;
   late Future<User> _user;
-  late List<Category> categoryNames = [];
+  late List<String> categoryNames = [];
+  late List<Product> products;
   late Future<List<String>> _prodCategory;
   PaymentType? _selectedPaymentType;
   PaymentTax? _selectedPaymentTax;
@@ -168,20 +169,19 @@ class _HomeScreenState extends State<HomeScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final http.Response response = await http.get(
       url,
-      headers: ({
+      headers: {
         'Authorization': 'Bearer ' + prefs.getString('token').toString(),
         'Content-Type': 'application/json'
-      }),
+      },
     );
-
-    print('Response status code: ${response.statusCode}');
-    print('Response body: ${response.body}');
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> json = jsonDecode(response.body);
       final List<dynamic> categoryList = json['data']['category'];
-      final List<String> categoryNames =
-          categoryList.map((category) => category['name'].toString()).toList();
+
+      final List<String> categoryNames = categoryList
+          .map((categoryData) => categoryData['name'].toString().trim())
+          .toList();
 
       print('Category names from JSON: $categoryNames');
 
@@ -191,43 +191,87 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Future<void> _fetchProductCategories() async {
-  //   try {
-  //     List<Category> categories = await fetchCategoryNames();
-  //     setState(() {
-  //       categoryNames = categories;
-  //       isLoading = false;
-  //     });
-  //   } catch (e) {
-  //     // Handle any errors that might occur during API call
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //     print('Error fetching product categories: $e');
-  //   }
-  // }
+Future<List<ProductList>> fetchProductsForCategory(String category) async {
+    final url = Uri.parse(Constants.apiListCategory);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final http.Response response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json'
+      },
+    );
 
-  // Future<void> _fetchProductList() async {
-  //   try {
-  //     List<String> categories = await fetchCategoryNames();
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> json = jsonDecode(response.body);
+      final List<dynamic> categoryList = json['data']['category'];
 
-  //     // Assuming you have a method to get the products from the selected category
-  //     String selectedProductList = categories.firstWhere(
-  //         (category) => category == selectedCategory,
-  //         orElse: () => '');
+      // Find the category with the matching name
+      Map<String, dynamic>? selectedCategory;
+      for (var categoryData in categoryList) {
+        final categoryName = categoryData['name'].toString().trim();
+        if (categoryName == category) {
+          selectedCategory = categoryData;
+          break;
+        }
+      }
 
-  //     setState(() {
-  //       productList = selectedProductList as List<ProductList>;
-  //       isLoading = false;
-  //     });
-  //   } catch (e) {
-  //     // Handle any errors that might occur during API call
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //     print('Error fetching product list: $e');
-  //   }
-  // }
+      if (selectedCategory != null) {
+        // Assuming ProductList is the data model class for products
+        final List<ProductList> productList = List<ProductList>.from(
+          selectedCategory['product_list']
+              .map((productJson) => ProductList.fromJson(productJson)),
+        );
+
+        return productList;
+      } else {
+        // print('Selected category not found in categoryList: $category');
+        // print('Available category names: $categoryList');
+        throw Exception('Category not found');
+      }
+    } else {
+      print('Failed to fetch products from API');
+      throw Exception('Failed to fetch product from category');
+    }
+  }
+
+  Future<void> _fetchProductCategories() async {
+    try {
+      List<String> categories = await fetchCategoryNames();
+      setState(() {
+        categoryNames = categories;
+        isLoading = false;
+      });
+    } catch (e) {
+      // Handle any errors that might occur during API call
+      setState(() {
+        isLoading = false;
+      });
+      print('Error fetching product categories: $e');
+    }
+  }
+
+  Future<void> _fetchProductList() async {
+    try {
+      List<String> categories = await fetchCategoryNames();
+
+      // Assuming you have a method to get the products from the selected category
+      String selectedProductList = categories.firstWhere(
+          (category) => category == selectedCategory,
+          orElse: () => '');
+
+      setState(() {
+        productList = selectedProductList as List<ProductList>;
+        isLoading = false;
+      });
+    } catch (e) {
+      // Handle any errors that might occur during API call
+      setState(() {
+        isLoading = false;
+      });
+      print('Error fetching product list: $e');
+    }
+  }
 
 ///////////////////////////// fetch Get and Post ////////////////////////////////////////
 
@@ -524,6 +568,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _paymentType = fetchPaymentTypes();
     _paymentTax = fetchPaymentTax();
     _user = fetchUser();
+    // Initialize selectedCategory with the first category name if available
+    if (categoryNames.isNotEmpty) {
+      selectedCategory = categoryNames[0];
+    } else {
+      // If categoryNames is empty, you can set a default value here
+      selectedCategory = 'defaultCategory';
+    }
     // _fetchProductCategories();
     _prodCategory = fetchCategoryNames();
     // selectedCategory = "Consumer products";
@@ -1253,13 +1304,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     FutureBuilder<List<String>>(
                       future: fetchCategoryNames(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return CircularProgressIndicator();
-                        } else if (snapshot.hasError || snapshot.data == null) {
-                          // Handle the error or null case
-                          return Text('Error: Failed to load categories');
-                        } else {
+                        
                           final List<String> categoryList = snapshot.data!;
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -1293,7 +1338,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           );
                         }
-                      },
+                      
                     ),
                     Container(
                       height: 54.h,
@@ -1304,88 +1349,116 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: kPrimaryColor,
                         borderRadius: kRadius,
                       ),
-                      child: isLoading
-                          ? Center(
-                              child: GFLoader(type: GFLoaderType.android,
-                              ),
-                            )
-                          : productList.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    'No products available',
-                                    style: GoogleFonts.ubuntu(
-                                      fontSize: 16.sp,
-                                      letterSpacing: 1.0,
-                                      fontWeight: FontWeight.w500,
-                                      color: kTextColor,
+                      child: selectedCategory != null
+                          ? FutureBuilder<List<ProductList>>(
+                              future: fetchProductsForCategory(
+                                  selectedCategory!),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Center(
+                                    child: Text(
+                                      'Error fetching products: ${snapshot.error}',
+                                      style: TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w500,
+                                        color: kTextColor,
+                                      ),
                                     ),
-                                  ),
-                                )
-                              : Wrap(
-                                  alignment: WrapAlignment.start,
-                                  children: [
-                                    ...productList
-                                        .where((product) =>
-                                            product.name ==
-                                            null)
-                                        .map(
-                                          (product) => GestureDetector(
-                                            onTap: () {
-                                              // addSelectedProduct(product as Product);
-                                            },
-                                            child: Container(
-                                              width: 18.w,
-                                              margin: EdgeInsets.all(10.0),
-                                              padding: EdgeInsets.all(10.0),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.grey
-                                                        .withOpacity(0.5),
-                                                    spreadRadius: 2,
-                                                    blurRadius: 5,
-                                                    offset: Offset(0, 3),
-                                                  ),
-                                                ],
-                                              ),
-                                              child: Column(
-                                                children: [
-                                                  SizedBox(height: 10.0),
-                                                  Text(
-                                                    product.name,
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 16.0,
+                                  );
+                                } else {
+                                  List<ProductList> productList =
+                                      snapshot.data ?? [];
+                                  if (productList.isEmpty) {
+                                    return Center(
+                                      child: Text(
+                                        'No products available',
+                                        style: TextStyle(
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.w500,
+                                          color: kTextColor,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    return Wrap(
+                                      alignment: WrapAlignment.start,
+                                      children: productList
+                                          .map(
+                                            (product) => GestureDetector(
+                                              onTap: () {
+                                                // addSelectedProduct(product);
+                                              },
+                                              child: Container(
+                                                width: 18.w,
+                                                margin: EdgeInsets.all(10.0),
+                                                padding: EdgeInsets.all(10.0),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.grey
+                                                          .withOpacity(0.5),
+                                                      spreadRadius: 2,
+                                                      blurRadius: 5,
+                                                      offset: Offset(0, 3),
                                                     ),
-                                                  ),
-                                                  SizedBox(height: 5.0),
-                                                  Text(
-                                                    '\RM${product.price}',
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 14.0,
-                                                      color: Colors.blue,
+                                                  ],
+                                                ),
+                                                child: Column(
+                                                  children: [
+                                                    SizedBox(height: 10.0),
+                                                    Text(
+                                                      product.name,
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16.0,
+                                                      ),
                                                     ),
-                                                  ),
-                                                  SizedBox(height: 10.0),
-                                                  Text(
-                                                    product.summary,
-                                                    style: TextStyle(
-                                                      fontSize: 14.0,
+                                                    SizedBox(height: 5.0),
+                                                    Text(
+                                                      '\RM${product.price}',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14.0,
+                                                        color: Colors.blue,
+                                                      ),
                                                     ),
-                                                  ),
-                                                ],
+                                                    SizedBox(height: 10.0),
+                                                    Text(
+                                                      product.summary,
+                                                      style: TextStyle(
+                                                        fontSize: 14.0,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        )
-                                        .toList()
-                                  ],
+                                          )
+                                          .toList(),
+                                    );
+                                  }
+                                }
+                              },
+                            )
+                          : Center(
+                              child: Text(
+                                'Selected category is null',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w500,
+                                  color: kTextColor,
                                 ),
-                    )
+                              ),
+                            ),
+                    ),
                   ],
                 ),
               ),
