@@ -30,8 +30,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final skuController = TextEditingController();
-  // String selectedCategory = "Consumer products";
-  final quantityController = TextEditingController(text: '1');
+  int quantity = 1;
+  final TextEditingController quantityController = TextEditingController();
   int? merchantId, userId, catId, taxid, payid, taxpercentage, status;
   String? userName,
       catName,
@@ -44,11 +44,13 @@ class _HomeScreenState extends State<HomeScreen> {
       remarks,
       taxname,
       payname,
-      paymentTypes, selectedCategory;
+      paymentTypes;
   dynamic taxId, taxAmount, discId, discAmount;
-  // late final String selectedCategory;
+  late String selectedCategory = "Consumer products";
+  bool isInitialLoading = true;
   late Future<User> _user;
   late List<String> categoryNames = [];
+  late List<Category> categories;
   late List<Product> products;
   late Future<List<String>> _prodCategory;
   PaymentType? _selectedPaymentType;
@@ -198,7 +200,7 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
       url,
       headers: {
         'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
     );
 
@@ -225,43 +227,27 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
 
         return productList;
       } else {
-        // print('Selected category not found in categoryList: $category');
-        // print('Available category names: $categoryList');
-        throw Exception('Category not found');
+        // Return an empty list if the category is not found or has no products
+        return [];
       }
     } else {
+      // Return an empty list if there's an error fetching products
       print('Failed to fetch products from API');
-      throw Exception('Failed to fetch product from category');
+      return [];
     }
   }
 
-  Future<void> _fetchProductCategories() async {
-    try {
-      List<String> categories = await fetchCategoryNames();
-      setState(() {
-        categoryNames = categories;
-        isLoading = false;
-      });
-    } catch (e) {
-      // Handle any errors that might occur during API call
-      setState(() {
-        isLoading = false;
-      });
-      print('Error fetching product categories: $e');
-    }
-  }
-
-  Future<void> _fetchProductList() async {
+  Future<void> _fetchProductList(String selectedCategoryName) async {
     try {
       List<String> categories = await fetchCategoryNames();
 
       // Assuming you have a method to get the products from the selected category
-      String selectedProductList = categories.firstWhere(
-          (category) => category == selectedCategory,
-          orElse: () => '');
+      List<ProductList> productList =
+          await fetchProductsForCategory(selectedCategoryName);
 
       setState(() {
-        productList = selectedProductList as List<ProductList>;
+        selectedCategory = selectedCategoryName;
+        productList = productList;
         isLoading = false;
       });
     } catch (e) {
@@ -511,16 +497,12 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
               // If the product doesn't exist, add it to the search results
               searchResults.add(result);
             }
-          });
-          // Reset the quantity controller to '1' after adding
-          quantityController.text = '1';
 
-          // Calculate the new total price
-          double newTotalPrice = calculateSubtotal();
+            // Reset the quantity controller to '1' after adding
+            quantityController.text = '1';
 
-          // Update the total price
-          setState(() {
-            total = newTotalPrice;
+            // Calculate the new total price after updating the quantity
+            total = calculateTotal();
           });
         } else {
           print('Invalid product data');
@@ -533,10 +515,12 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
     }
   }
 
-  void addSelectedProduct(Product product) {
+//////////////////////// Add Product ////////////////////////////////////////////////////
+
+  void addSelectedProduct(ProductList productList) {
     setState(() {
       final existingProductIndex = searchResults
-          .indexWhere((item) => item.productId == product.id.toString());
+          .indexWhere((item) => item.productId == productList.id.toString());
       if (existingProductIndex != -1) {
         // If the product already exists, update the quantity
         int currentQuantity =
@@ -547,10 +531,10 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
         // If the product doesn't exist, add it to the search results
         searchResults.add(
           ItemsArray(
-            productId: product.id.toString(),
-            name: product.name,
+            productId: productList.id.toString(),
+            name: productList.name,
             quantity: '1',
-            price: product.price.toString(),
+            price: productList.price.toString(),
           ),
         );
       }
@@ -568,17 +552,26 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
     _paymentType = fetchPaymentTypes();
     _paymentTax = fetchPaymentTax();
     _user = fetchUser();
-    // Initialize selectedCategory with the first category name if available
-    if (categoryNames.isNotEmpty) {
-      selectedCategory = categoryNames[0];
-    } else {
-      // If categoryNames is empty, you can set a default value here
-      selectedCategory = 'defaultCategory';
-    }
-    // _fetchProductCategories();
+    _fetchProductList(selectedCategory);
     _prodCategory = fetchCategoryNames();
-    // selectedCategory = "Consumer products";
-    // _fetchProductList();
+    selectedCategory = "Consumer products";
+    quantityController.text = quantity.toString();
+  }
+
+  void _incrementQuantity() {
+    setState(() {
+      quantity++;
+      quantityController.text = quantity.toString();
+    });
+  }
+
+  void _decrementQuantity() {
+    setState(() {
+      if (quantity > 1) {
+        quantity--;
+        quantityController.text = quantity.toString();
+      }
+    });
   }
 
   @override
@@ -665,36 +658,52 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                         SizedBox(
                                           height: 1.h,
                                         ),
-                                        Text(
-                                          "Product Code (SKU)",
-                                          style: GoogleFonts.abel(
-                                            fontSize: 10.sp,
-                                            color: kTextColor,
-                                            fontWeight: FontWeight.w400,
-                                            letterSpacing: 1.0,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 4.h,
-                                          child: TextField(
-                                            controller: skuController,
-                                            decoration: InputDecoration(
-                                              filled: true,
-                                              fillColor: kTextColor,
-                                              enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20.0),
-                                                borderSide: BorderSide(
-                                                    width: 3,
-                                                    color: Colors.greenAccent),
+                                        GestureDetector(
+                                          onTap: () {
+                                            // Remove focus from TextField when tapped outside
+                                            FocusScope.of(context)
+                                                .requestFocus(FocusNode());
+                                          },
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Product Code (SKU)",
+                                                style: GoogleFonts.abel(
+                                                  fontSize: 10.sp,
+                                                  color: kTextColor,
+                                                  fontWeight: FontWeight.w400,
+                                                  letterSpacing: 1.0,
+                                                ),
                                               ),
-                                            ),
-                                            style: GoogleFonts.abel(
-                                              fontSize: 11.sp,
-                                              color: kScaffoldColor,
-                                              fontWeight: FontWeight.w500,
-                                              letterSpacing: 1.0,
-                                            ),
+                                              SizedBox(
+                                                height: 4.h,
+                                                child: TextField(
+                                                  controller: skuController,
+                                                  decoration: InputDecoration(
+                                                    filled: true,
+                                                    fillColor: kTextColor,
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20.0),
+                                                      borderSide: BorderSide(
+                                                          width: 3,
+                                                          color: Colors
+                                                              .greenAccent),
+                                                    ),
+                                                  ),
+                                                  style: GoogleFonts.abel(
+                                                    fontSize: 11.sp,
+                                                    color: kScaffoldColor,
+                                                    fontWeight: FontWeight.w500,
+                                                    letterSpacing: 1.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                         SizedBox(
@@ -709,10 +718,22 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                             letterSpacing: 1.0,
                                           ),
                                         ),
+                                        IconButton(
+                                          icon: FaIcon(
+                                            FontAwesomeIcons.chevronUp,
+                                            size: 40.0,
+                                            color: Colors.black,
+                                          ),
+                                          onPressed: _incrementQuantity,
+                                        ),
                                         SizedBox(
-                                          height: 4.h,
+                                          height: 1.h,
+                                        ),
+                                        SizedBox(
+                                          width: 40.w,
                                           child: TextField(
                                             controller: quantityController,
+                                            keyboardType: TextInputType.number,
                                             decoration: InputDecoration(
                                               filled: true,
                                               fillColor: kTextColor,
@@ -720,8 +741,9 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                                 borderRadius:
                                                     BorderRadius.circular(20.0),
                                                 borderSide: BorderSide(
-                                                    width: 3,
-                                                    color: Colors.greenAccent),
+                                                  width: 3,
+                                                  color: Colors.greenAccent,
+                                                ),
                                               ),
                                             ),
                                             style: GoogleFonts.abel(
@@ -730,7 +752,24 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                               fontWeight: FontWeight.w500,
                                               letterSpacing: 1.0,
                                             ),
+                                            textAlign: TextAlign.center,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                quantity = int.parse(value);
+                                              });
+                                            },
                                           ),
+                                        ),
+                                        SizedBox(
+                                          height: 1.h,
+                                        ),
+                                        IconButton(
+                                          icon: FaIcon(
+                                            FontAwesomeIcons.chevronDown,
+                                            size: 40.0,
+                                            color: Colors.black,
+                                          ),
+                                          onPressed: _decrementQuantity,
                                         ),
                                         SizedBox(
                                           height: .5.h,
@@ -754,7 +793,7 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                                   ? buildCircularProgressIndicator()
                                                   : searchProduct(),
                                               child: Text(
-                                                "Add",
+                                                "Enter",
                                                 style: GoogleFonts.manrope(
                                                   fontSize: 8.sp,
                                                   color: kTextColor,
@@ -1048,15 +1087,19 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                           ],
                                         ),
                                         SizedBox(
-                                          height: 1.h,
+                                          height: 2.h,
                                         ),
                                         ElevatedButton(
                                           onPressed: () {},
                                           style: ElevatedButton.styleFrom(
                                             foregroundColor: Colors.white,
-                                            backgroundColor: kPrimaryColor,
+                                            backgroundColor: kForm,
                                             padding: const EdgeInsets.symmetric(
-                                                vertical: 15),
+                                                vertical: 15, horizontal: 15),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  20.0), // Adjust the radius value for the desired curve
+                                            ),
                                           ),
                                           child: Text(
                                             "CHECKOUT",
@@ -1304,8 +1347,21 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                     FutureBuilder<List<String>>(
                       future: fetchCategoryNames(),
                       builder: (context, snapshot) {
-                        
-                          final List<String> categoryList = snapshot.data!;
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              'Error fetching categories: ${snapshot.error}',
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                              ),
+                            ),
+                          );
+                        } else if (snapshot.hasData) {
+                          // Check if data is available
+                          List<String> categoryList = snapshot
+                              .data!; // Data is not null, use ! to access
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -1330,15 +1386,26 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                         setState(() {
                                           selectedCategory = categoryName;
                                         });
-                                        // _fetchProductList(); // Fetch products for the selected category
                                       },
                                     ),
                                 ],
                               ),
                             ],
                           );
+                        } else {
+                          // Handle the case when snapshot.data is null
+                          return Center(
+                            child: Text(
+                              'No categories available',
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                              ),
+                            ),
+                          );
                         }
-                      
+                      },
                     ),
                     Container(
                       height: 54.h,
@@ -1349,17 +1416,19 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                         color: kPrimaryColor,
                         borderRadius: kRadius,
                       ),
-                      child: selectedCategory != null
-                          ? FutureBuilder<List<ProductList>>(
-                              future: fetchProductsForCategory(
-                                  selectedCategory!),
+                      child: FutureBuilder<List<ProductList>>(
+                              future:
+                                  fetchProductsForCategory(selectedCategory),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
+                                        ConnectionState.waiting &&
+                                    isInitialLoading) {
                                   return Center(
                                     child: CircularProgressIndicator(),
                                   );
                                 } else if (snapshot.hasError) {
+                                  isInitialLoading =
+                                      false; // Set the flag to false to avoid circular loading when error occurs
                                   return Center(
                                     child: Text(
                                       'Error fetching products: ${snapshot.error}',
@@ -1371,6 +1440,8 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                     ),
                                   );
                                 } else {
+                                  isInitialLoading =
+                                      false; // Set the flag to false after successful loading
                                   List<ProductList> productList =
                                       snapshot.data ?? [];
                                   if (productList.isEmpty) {
@@ -1391,10 +1462,11 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                           .map(
                                             (product) => GestureDetector(
                                               onTap: () {
-                                                // addSelectedProduct(product);
+                                                addSelectedProduct(product);
                                               },
                                               child: Container(
-                                                width: 18.w,
+                                                width: 29.w,
+                                                alignment: Alignment.center,
                                                 margin: EdgeInsets.all(10.0),
                                                 padding: EdgeInsets.all(10.0),
                                                 decoration: BoxDecoration(
@@ -1448,16 +1520,7 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                 }
                               },
                             )
-                          : Center(
-                              child: Text(
-                                'Selected category is null',
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                ),
-                              ),
-                            ),
+                         
                     ),
                   ],
                 ),
