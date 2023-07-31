@@ -1,10 +1,16 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/data.dart';
+import 'package:pointofsales/models/pos_model.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/product_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 class InvoiceScreen extends StatefulWidget {
@@ -15,6 +21,10 @@ class InvoiceScreen extends StatefulWidget {
 }
 
 class _InvoiceScreenState extends State<InvoiceScreen> {
+  int? merchantId;
+  String? paymentType, posTxnNo, grossPrice, customerId, netPrice, remarks;
+  dynamic taxId, taxAmount, discId, discAmount;
+  bool isLoading = true;
   double discountPercentage = 10;
   double taxPercentage = 3;
 
@@ -53,6 +63,75 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     "TNG",
     "Online Payment",
   ];
+
+  /////////////// POST Request ////////////////////////////////
+
+  Future<Map<String, dynamic>> _postSavePosTransaction() async {
+    final url = Uri.parse(Constants.apiPosIndex);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final http.Response response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json',
+      },
+      body: {
+        'customer_id': prefs.getString('customer_id'),
+        'gross_price': prefs.getString('gross_price'),
+        'tax_id': prefs.getString('tax_id'),
+        'tax_amount': prefs.getString('tax_amount'),
+        'disc_id': prefs.getString('disc_id'),
+        'disc_amount': prefs.getString('disc_amount'),
+        'net_price': prefs.getDouble('net_price'),
+        'payment_type': paymentType.toString(),
+        'remarks': prefs.getString('remarks'),
+        'items_array': ItemsArray,
+      },
+    );
+
+    final Map<String, dynamic> customer = json.decode(response.body);
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+
+      print("POS TRANSACTION SUCCESSFULLY SAVED");
+      setState(() {
+        isLoading = false;
+        if (customer['data']['customer'] == null) {
+          var data = Customer(
+            id: customer['data']['customer']['id'],
+            merchantId: customer['data']['customer']['merchant_id'],
+            customerId: customer['data']['customer']['customer_id'],
+            posTxnNo: customer['data']['customer']['pos_txn_no'],
+            grossPrice: customer['data']['customer']['gross_price'],
+            taxId: customer['data']['customer']['tax_id'],
+            taxAmount: customer['data']['customer']['tax_amount'],
+            discId: customer['data']['customer']['disc_id'],
+            discAmount: customer['data']['customer']['disc_amount'],
+            netPrice: customer['data']['customer']['net_price'].toDouble(),
+            paymentTypes: customer['data']['customer']['payment_type'],
+            remarks: customer['data']['customer']['remarks'],
+            status: customer['data']['customer']['status'],
+          );
+
+          merchantId = data.merchantId;
+          customerId = data.customerId;
+          posTxnNo = data.posTxnNo;
+          grossPrice = data.grossPrice;
+          taxId = data.taxId;
+          taxAmount = data.taxAmount;
+          discId = data.discId;
+          discAmount = data.discAmount;
+          netPrice = data.netPrice;
+          paymentType = data.paymentTypes;
+          remarks = data.remarks;
+        }
+      });
+      return responseData;
+    } else {
+      throw Exception('Failed to save POS transaction');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

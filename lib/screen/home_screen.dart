@@ -77,9 +77,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return (total * discountPercentage) / 100;
   }
 
-  double calculateTax() {
-    double total = calculateSubtotal();
-    return (total * taxPercentage) / 100;
+double calculateTax() {
+    double subtotal = calculateSubtotal();
+    num taxPercentage =
+        _selectedPaymentTax != null ? _selectedPaymentTax!.taxPercentage : 0;
+    return (subtotal * taxPercentage) / 100;
   }
 
   double calculateSubtotal() {
@@ -92,11 +94,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return subtotal;
   }
 
-  double calculateTotal() {
+ double calculateTotal() {
     double subtotal = calculateSubtotal();
     double discount = calculateDiscount();
-    double tax = calculateTax();
-    return subtotal - discount + tax;
+    double tax =
+        calculateTax(); // Calculate the tax based on the selected tax percentage
+    return subtotal + tax; // Add the tax to the subtotal to get the total
   }
 
   ///////////////////////// Payment Type //////////////////////////////////////////////////////////
@@ -133,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'Content-Type': 'application/json'
       }),
     );
-
+    
     if (response.statusCode == 200) {
       final Map<String, dynamic> json = jsonDecode(response.body);
       final payTax = Payment.fromJson(json);
@@ -375,75 +378,7 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
       print(response.reasonPhrase);
     }
   }
-
-  /////////////// POST Request ////////////////////////////////
-
-  Future<Map<String, dynamic>> _postSavePosTransaction() async {
-    final url = Uri.parse(Constants.apiPosIndex);
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    final http.Response response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-        'Content-Type': 'application/json',
-      },
-      body: {
-        'customer_id': prefs.getString('customer_id'),
-        'gross_price': prefs.getString('gross_price'),
-        'tax_id': prefs.getString('tax_id'),
-        'tax_amount': prefs.getString('tax_amount'),
-        'disc_id': prefs.getString('disc_id'),
-        'disc_amount': prefs.getString('disc_amount'),
-        'net_price': prefs.getDouble('net_price'),
-        'payment_type': paymentType.toString(),
-        'remarks': prefs.getString('remarks'),
-        'items_array': ItemsArray,
-      },
-    );
-
-    final Map<String, dynamic> customer = json.decode(response.body);
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
-
-      print("POS TRANSACTION SUCCESSFULLY SAVED");
-      setState(() {
-        isLoading = false;
-        if (customer['data']['customer'] == null) {
-          var data = Customer(
-            id: customer['data']['customer']['id'],
-            merchantId: customer['data']['customer']['merchant_id'],
-            customerId: customer['data']['customer']['customer_id'],
-            posTxnNo: customer['data']['customer']['pos_txn_no'],
-            grossPrice: customer['data']['customer']['gross_price'],
-            taxId: customer['data']['customer']['tax_id'],
-            taxAmount: customer['data']['customer']['tax_amount'],
-            discId: customer['data']['customer']['disc_id'],
-            discAmount: customer['data']['customer']['disc_amount'],
-            netPrice: customer['data']['customer']['net_price'].toDouble(),
-            paymentTypes: customer['data']['customer']['payment_type'],
-            remarks: customer['data']['customer']['remarks'],
-            status: customer['data']['customer']['status'],
-          );
-
-          merchantId = data.merchantId;
-          customerId = data.customerId;
-          posTxnNo = data.posTxnNo;
-          grossPrice = data.grossPrice;
-          taxId = data.taxId;
-          taxAmount = data.taxAmount;
-          discId = data.discId;
-          discAmount = data.discAmount;
-          netPrice = data.netPrice;
-          paymentTypes = data.paymentTypes;
-          remarks = data.remarks;
-        }
-      });
-      return responseData;
-    } else {
-      throw Exception('Failed to save POS transaction');
-    }
-  }
+  
   ////////////////////////// Search SKU //////////////////////////////////////////////////
 
   Future<void> searchProduct() async {
@@ -574,6 +509,12 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
     });
   }
 
+  void handleDeleteProduct(ItemsArray product) {
+    setState(() {
+      searchResults.remove(product);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -629,7 +570,7 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                             flex: 3,
                             child: Form(
                               child: Container(
-                                height: 65.h,
+                                height: 70.h,
                                 margin: kMargin,
                                 padding: kPadding,
                                 decoration: BoxDecoration(
@@ -908,69 +849,109 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                                         return const CircularProgressIndicator();
                                                       }
                                                       return DropdownButtonHideUnderline(
-                                                        child: DropdownButton<
-                                                            PaymentTax>(
-                                                          icon: FaIcon(
-                                                            FontAwesomeIcons
-                                                                .chevronDown,
-                                                            size: 15,
+                                                      child: DropdownButton<
+                                                          PaymentTax>(
+                                                        icon: FaIcon(
+                                                          FontAwesomeIcons
+                                                              .chevronDown,
+                                                          size: 15,
+                                                        ),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
+                                                        isExpanded: true,
+                                                        hint: Text(
+                                                          "Select Tax Type",
+                                                          style: TextStyle(
+                                                            color: kHint,
+                                                            fontSize: 6.5.sp,
+                                                            letterSpacing: 0.5,
+                                                            fontWeight:
+                                                                FontWeight.w500,
                                                           ),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(20),
-                                                          isExpanded: true,
-                                                          hint: Text(
-                                                            "Select Tax Type",
-                                                            style: TextStyle(
-                                                              color: kHint,
-                                                              fontSize: 6.5.sp,
-                                                              letterSpacing:
-                                                                  0.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                          ),
-                                                          items: [
-                                                            ...snapshot.data!
-                                                                .map(
-                                                              (tax) =>
-                                                                  DropdownMenuItem(
-                                                                value: tax,
-                                                                child: Row(
-                                                                  children: [
-                                                                    Text(
-                                                                      '${tax.name}',
-                                                                      style:
-                                                                          TextStyle(
-                                                                        color:
-                                                                            kForm,
-                                                                        fontSize:
-                                                                            5.sp,
-                                                                        letterSpacing:
-                                                                            1.0,
-                                                                        fontWeight:
-                                                                            FontWeight.w600,
-                                                                      ),
+                                                        ),
+                                                        items: [
+                                                          ...snapshot.data!.map(
+                                                            (tax) =>
+                                                                DropdownMenuItem(
+                                                              value: tax,
+                                                              child: Row(
+                                                                children: [
+                                                                  Text(
+                                                                    '${tax.name}',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color:
+                                                                          kForm,
+                                                                      fontSize:
+                                                                          5.sp,
+                                                                      letterSpacing:
+                                                                          1.0,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
                                                                     ),
-                                                                  ],
-                                                                ),
+                                                                  ),
+                                                                ],
                                                               ),
                                                             ),
-                                                          ],
+                                                          ),
+                                                        ],
                                                           onChanged: (type) {
-                                                            setState(() {
-                                                              _selectedPaymentTax =
-                                                                  type;
-                                                            });
-                                                          },
-                                                          value:
-                                                              _selectedPaymentTax,
+                                                          setState(() {
+                                                            _selectedPaymentTax =
+                                                                type; // Update _selectedPaymentTax when a tax type is selected
+                                                          });
+                                                        },
+                                                        value:
+                                                            _selectedPaymentTax,
+
                                                         ),
                                                       );
                                                     },
                                                   );
-                                                })),
+                                                }),),
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: 1.h,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              "Tax Amount",
+                                              style: GoogleFonts.aubrey(
+                                                fontWeight: FontWeight.w600,
+                                                color: kLabel,
+                                                fontSize: 11.sp,
+                                                letterSpacing: 1.0,
+                                              ),
+                                            ),
+                                            _selectedPaymentTax != null
+                                                ? Text(
+                                                    "${_selectedPaymentTax!.taxPercentage}%", // Access taxPercentage from _selectedPaymentTax
+                                                    style:
+                                                        GoogleFonts.breeSerif(
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: kTextColor,
+                                                      fontSize: 11.sp,
+                                                      letterSpacing: 1.0,
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    "0", // Show this when no tax type is selected
+                                                    style:
+                                                        GoogleFonts.breeSerif(
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: kTextColor,
+                                                      fontSize: 8.sp,
+                                                      letterSpacing: 1.0,
+                                                    ),
+                                                  ),
                                           ],
                                         ),
                                         SizedBox(
@@ -1123,7 +1104,7 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  height: 65.h,
+                                  height: 70.h,
                                   margin: kMargin,
                                   padding: kPadding,
                                   decoration: BoxDecoration(
@@ -1144,8 +1125,6 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                           borderRadius: kRadius,
                                         ),
                                           child: SingleChildScrollView(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 15, vertical: 15),
                                             child: Table(
                                               defaultVerticalAlignment:
                                                   TableCellVerticalAlignment.middle,
@@ -1157,6 +1136,7 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                                 1: FlexColumnWidth(2),
                                                 2: FlexColumnWidth(1),
                                                 3: FlexColumnWidth(2),
+                                                4: FlexColumnWidth(1),
                                               },
                                               children: [
                                                 TableRow(
@@ -1222,6 +1202,24 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                                         ),
                                                       ),
                                                     ),
+                                                    TableCell(
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              6),
+                                                      child: Text(
+                                                        "Del",
+                                                        style:
+                                                            GoogleFonts.aubrey(
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: kLabel,
+                                                          fontSize: 9.sp,
+                                                          letterSpacing: 1.0,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
                                                   ],
                                                 ),
                                                 for (final result in searchResults)
@@ -1295,6 +1293,21 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                                             ),
                                                           ),
                                                         ),
+                                                      ),
+                                                      TableCell(
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.all(6.0),
+                                                          child: GestureDetector(
+                                                            onTap:() {
+                                                              handleDeleteProduct(result);
+                                                            },
+                                                            child: FaIcon(
+                                                              FontAwesomeIcons.trash,
+                                                              color: Colors.redAccent,
+                                                              size: 30
+                                                              ),
+                                                          ),
+                                                          ),
                                                       ),
                                                     ],
                                                   ),
