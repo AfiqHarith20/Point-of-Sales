@@ -14,13 +14,41 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 class InvoiceScreen extends StatefulWidget {
-  const InvoiceScreen({Key? key}) : super(key: key);
+  final String customerId;
+  final double grossPrice;
+  final String taxId;
+  final double taxAmount;
+  final String discountId;
+  final double discountAmount;
+  final double netPrice;
+  final String paymentType;
+  final String remark;
+  final String customerEmail;
+  final List<ItemsArray> itemsArray;
+  final String selectedPayment;
+
+
+  InvoiceScreen({
+    required this.customerId,
+    required this.grossPrice,
+    required this.taxId,
+    required this.taxAmount,
+    required this.discountId,
+    required this.discountAmount,
+    required this.netPrice,
+    required this.paymentType,
+    required this.remark,
+    required this.customerEmail,
+    required this.itemsArray,
+    required this.selectedPayment
+  });
 
   @override
   State<InvoiceScreen> createState() => _InvoiceScreenState();
 }
 
 class _InvoiceScreenState extends State<InvoiceScreen> {
+  late TextEditingController customerEmailController;
   int? merchantId;
   String? paymentType, posTxnNo, grossPrice, customerId, netPrice, remarks;
   dynamic taxId, taxAmount, discId, discAmount;
@@ -76,56 +104,25 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         'Authorization': 'Bearer ' + prefs.getString('token').toString(),
         'Content-Type': 'application/json',
       },
-      body: {
-        'customer_id': prefs.getString('customer_id'),
-        'gross_price': prefs.getString('gross_price'),
-        'tax_id': prefs.getString('tax_id'),
-        'tax_amount': prefs.getString('tax_amount'),
-        'disc_id': prefs.getString('disc_id'),
-        'disc_amount': prefs.getString('disc_amount'),
-        'net_price': prefs.getDouble('net_price'),
-        'payment_type': paymentType.toString(),
-        'remarks': prefs.getString('remarks'),
-        'items_array': ItemsArray,
-      },
+      body: jsonEncode({
+        'customer_id': widget.customerId,
+        'gross_price': widget.grossPrice,
+        'tax_id': widget.taxId,
+        'tax_amount': widget.taxAmount,
+        'disc_id': widget.discountId,
+        'disc_amount': widget.discountAmount,
+        'net_price': widget.netPrice,
+        'payment_type': widget.paymentType,
+        'remarks': widget.remark,
+        'items_array': widget.itemsArray,
+      }),
     );
 
-    final Map<String, dynamic> customer = json.decode(response.body);
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
-
       print("POS TRANSACTION SUCCESSFULLY SAVED");
       setState(() {
         isLoading = false;
-        if (customer['data']['customer'] == null) {
-          var data = Customer(
-            id: customer['data']['customer']['id'],
-            merchantId: customer['data']['customer']['merchant_id'],
-            customerId: customer['data']['customer']['customer_id'],
-            posTxnNo: customer['data']['customer']['pos_txn_no'],
-            grossPrice: customer['data']['customer']['gross_price'],
-            taxId: customer['data']['customer']['tax_id'],
-            taxAmount: customer['data']['customer']['tax_amount'],
-            discId: customer['data']['customer']['disc_id'],
-            discAmount: customer['data']['customer']['disc_amount'],
-            netPrice: customer['data']['customer']['net_price'].toDouble(),
-            paymentTypes: customer['data']['customer']['payment_type'],
-            remarks: customer['data']['customer']['remarks'],
-            status: customer['data']['customer']['status'],
-          );
-
-          merchantId = data.merchantId;
-          customerId = data.customerId;
-          posTxnNo = data.posTxnNo;
-          grossPrice = data.grossPrice;
-          taxId = data.taxId;
-          taxAmount = data.taxAmount;
-          discId = data.discId;
-          discAmount = data.discAmount;
-          netPrice = data.netPrice;
-          paymentType = data.paymentTypes;
-          remarks = data.remarks;
-        }
       });
       return responseData;
     } else {
@@ -219,13 +216,15 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
+                  final item =
+                      widget.itemsArray[index]; // Access the item from the list
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          invoice()[index].orderId ?? "",
+                          item.orderId ?? "",
                           style: GoogleFonts.breeSerif(
                             fontWeight: FontWeight.w500,
                             color: kTextColor,
@@ -234,7 +233,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           ),
                         ),
                         Text(
-                          invoice()[index].date ?? "",
+                          item.date ?? "",
                           style: GoogleFonts.breeSerif(
                             fontWeight: FontWeight.w500,
                             color: kTextColor,
@@ -243,7 +242,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           ),
                         ),
                         Text(
-                          invoice()[index].custusr ?? "",
+                          item.custusr ?? "",
                           style: GoogleFonts.breeSerif(
                             fontWeight: FontWeight.w500,
                             color: kTextColor,
@@ -255,7 +254,8 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                     ),
                   );
                 },
-                childCount: invoice().length,
+                childCount:
+                    widget.itemsArray.length, // Use widget.itemsArray.length
               ),
             ),
             SliverToBoxAdapter(
@@ -269,138 +269,143 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 child: Table(
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    border: TableBorder.all(color: Colors.transparent),
-                    columnWidths: {
-                      0: FlexColumnWidth(3),
-                      1: FlexColumnWidth(2),
-                      2: FlexColumnWidth(2),
-                      3: FlexColumnWidth(2),
-                    },
-                    children: [
-                      TableRow(
-                        children: [
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Text(
-                                "Product Name",
-                                style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w600,
-                                  color: kLabel,
-                                  fontSize: 14.sp,
-                                  letterSpacing: 2.0,
-                                ),
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  border: TableBorder.all(color: Colors.transparent),
+                  columnWidths: {
+                    0: FlexColumnWidth(3),
+                    1: FlexColumnWidth(2),
+                    2: FlexColumnWidth(2),
+                    3: FlexColumnWidth(2),
+                  },
+                  children: [
+                    TableRow(
+                      children: [
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Text(
+                              "Product Name",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 14.sp,
+                                letterSpacing: 2.0,
                               ),
                             ),
                           ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Text(
-                                "Price (MYR)",
-                                style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w600,
-                                  color: kLabel,
-                                  fontSize: 14.sp,
-                                  letterSpacing: 2.0,
-                                ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Text(
+                              "Price (MYR)",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 14.sp,
+                                letterSpacing: 2.0,
                               ),
                             ),
                           ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Text(
-                                "Quantity",
-                                style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w600,
-                                  color: kLabel,
-                                  fontSize: 14.sp,
-                                  letterSpacing: 2.0,
-                                ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Text(
+                              "Quantity",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 14.sp,
+                                letterSpacing: 2.0,
                               ),
                             ),
                           ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Text(
-                                "Subtotal (MYR)",
-                                style: GoogleFonts.aubrey(
-                                  fontWeight: FontWeight.w600,
-                                  color: kLabel,
-                                  fontSize: 14.sp,
-                                  letterSpacing: 2.0,
-                                ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Text(
+                              "Subtotal (MYR)",
+                              style: GoogleFonts.aubrey(
+                                fontWeight: FontWeight.w600,
+                                color: kLabel,
+                                fontSize: 14.sp,
+                                letterSpacing: 2.0,
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                      for (int index = 0; index < invoice().length; index++)
-                        TableRow(children: [
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Text(
-                                invoice()[index].prodname ?? "",
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
-                                ),
+                        ),
+                      ],
+                    ),
+                    for (int index = 0;
+                        index < widget.itemsArray.length;
+                        index++)
+                      TableRow(children: [
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              widget.itemsArray[index].prodname ?? "",
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
                               ),
                             ),
                           ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Text(
-                                invoice()[index].price ?? "",
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
-                                ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              widget.itemsArray[index].price ?? "",
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
                               ),
                             ),
                           ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Text(
-                                invoice()[index].quantity ?? "",
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
-                                ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              widget.itemsArray[index].quantity ?? "",
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
                               ),
                             ),
                           ),
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Text(
-                                (double.parse(invoice()[index].price ?? "0") *
-                                        double.parse(
-                                            invoice()[index].quantity ?? "0"))
-                                    .toStringAsFixed(2),
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
-                                ),
+                        ),
+                        TableCell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Text(
+                              (double.parse(widget.itemsArray[index].price ??
+                                          "0") *
+                                      double.parse(
+                                          widget.itemsArray[index].quantity ??
+                                              "0"))
+                                  .toStringAsFixed(2),
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
                               ),
                             ),
                           ),
-                        ]),
-                    ]),
+                        ),
+                      ]),
+                  ],
+                ),
               ),
             ),
             SliverToBoxAdapter(
