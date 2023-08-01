@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:animated_button_bar/animated_button_bar.dart';
 import 'package:getwidget/components/loader/gf_loader.dart';
 import 'package:pointofsales/models/category_model.dart';
+import 'package:pointofsales/screen/invoice_screen.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:getwidget/types/gf_loader_type.dart';
 import 'package:http/http.dart' as http;
@@ -44,7 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
       remarks,
       taxname,
       payname,
-      paymentTypes;
+      paymentTypes,
+      selectedPayment;
   dynamic taxId, taxAmount, discId, discAmount;
   late String selectedCategory = "Consumer products";
   bool isInitialLoading = true;
@@ -1071,7 +1073,28 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                           height: 2.h,
                                         ),
                                         ElevatedButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    InvoiceScreen(
+                                                  customerId: customerId!,
+                                                  grossPrice: calculateSubtotal(),
+                                                  taxId: taxId!,
+                                                  taxAmount: taxAmount!,
+                                                  discountId: discId!,
+                                                  discountAmount: discAmount!,
+                                                  netPrice: calculateTotal(),
+                                                  paymentType: payname!,
+                                                  customerEmail: userEmail!,
+                                                  itemsArray: searchResults, 
+                                                  remark: remarks!,
+                                                  selectedPayment: selectedPayment!,
+                                                ),
+                                              ),
+                                            );
+                                          },
                                           style: ElevatedButton.styleFrom(
                                             foregroundColor: Colors.white,
                                             backgroundColor: kForm,

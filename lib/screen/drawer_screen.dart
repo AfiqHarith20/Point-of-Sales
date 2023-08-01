@@ -128,7 +128,20 @@ class _DrawerScreenState extends State<DrawerScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => InvoiceScreen(),
+                  builder: (context) => InvoiceScreen(
+                    customerId: '',
+                    grossPrice: 2,
+                    taxId: '',
+                    taxAmount: 1,
+                    discountId: '',
+                    discountAmount: 1,
+                    netPrice: 2,
+                    paymentType: '',
+                    customerEmail: '',
+                    itemsArray: [],
+                    remark: '',
+                    selectedPayment: '',
+                  ),
                 ),
               ),
             },
