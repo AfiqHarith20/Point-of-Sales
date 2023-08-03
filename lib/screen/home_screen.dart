@@ -1087,7 +1087,6 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                                   discountAmount: discAmount!,
                                                   netPrice: calculateTotal(),
                                                   paymentType: payname!,
-                                                  customerEmail: userEmail!,
                                                   itemsArray: searchResults, 
                                                   remark: remarks!,
                                                   selectedPayment: selectedPayment!,

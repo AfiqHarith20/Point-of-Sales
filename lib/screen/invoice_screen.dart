@@ -23,7 +23,6 @@ class InvoiceScreen extends StatefulWidget {
   final double netPrice;
   final String paymentType;
   final String remark;
-  final String customerEmail;
   final List<ItemsArray> itemsArray;
   final String selectedPayment;
 
@@ -38,7 +37,6 @@ class InvoiceScreen extends StatefulWidget {
     required this.netPrice,
     required this.paymentType,
     required this.remark,
-    required this.customerEmail,
     required this.itemsArray,
     required this.selectedPayment
   });
@@ -49,7 +47,7 @@ class InvoiceScreen extends StatefulWidget {
 
 class _InvoiceScreenState extends State<InvoiceScreen> {
   late TextEditingController customerEmailController;
-  int? merchantId;
+  int? merchantId, isReceipt;
   String? paymentType, posTxnNo, grossPrice, customerId, netPrice, remarks;
   dynamic taxId, taxAmount, discId, discAmount;
   bool isLoading = true;
@@ -113,6 +111,8 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         'disc_amount': widget.discountAmount,
         'net_price': widget.netPrice,
         'payment_type': widget.paymentType,
+        'cust_email': customerEmailController,
+        'is_receipt': isReceipt,
         'remarks': widget.remark,
         'items_array': widget.itemsArray,
       }),
@@ -128,6 +128,17 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     } else {
       throw Exception('Failed to save POS transaction');
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    customerEmailController = TextEditingController();
+  }
+@override
+  void dispose() {
+    customerEmailController.dispose();
+    super.dispose();
   }
 
   @override
@@ -224,7 +235,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          item.orderId ?? "",
+                           "",
                           style: GoogleFonts.breeSerif(
                             fontWeight: FontWeight.w500,
                             color: kTextColor,
@@ -233,7 +244,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           ),
                         ),
                         Text(
-                          item.date ?? "",
+                          "",
                           style: GoogleFonts.breeSerif(
                             fontWeight: FontWeight.w500,
                             color: kTextColor,
@@ -242,7 +253,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           ),
                         ),
                         Text(
-                          item.custusr ?? "",
+                          "",
                           style: GoogleFonts.breeSerif(
                             fontWeight: FontWeight.w500,
                             color: kTextColor,
@@ -346,7 +357,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Text(
-                              widget.itemsArray[index].prodname ?? "",
+                              "",
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
