@@ -137,7 +137,6 @@ class _DrawerScreenState extends State<DrawerScreen> {
                     discountAmount: 1,
                     netPrice: 2,
                     paymentType: '',
-                    customerEmail: '',
                     itemsArray: [],
                     remark: '',
                     selectedPayment: '',
