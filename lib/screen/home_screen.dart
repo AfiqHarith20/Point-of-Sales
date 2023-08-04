@@ -480,6 +480,58 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
     });
   }
 
+  void _onCheckoutButtonPressed() async {
+  try {
+    // Calculate subtotal based on your logic
+    double subtotal = calculateSubtotal(); // Replace with your calculation logic
+
+    // Fetch payment tax data from API
+    List<PaymentTax> paymentTaxList = await fetchPaymentTax();
+
+    // Find the relevant payment tax based on your logic
+    double taxAmount = 0.0;
+    for (PaymentTax paymentTax in paymentTaxList) {
+      if (paymentTax.id == taxid) {
+        // Calculate tax amount based on tax percentage and subtotal
+        taxAmount = subtotal * (paymentTax.taxPercentage / 100);
+        break;
+      }
+    }
+
+    // Calculate total including tax
+    double total = subtotal + taxAmount;
+
+    // Get the selected payment type based on your logic
+    String selectedPaymentType = getSelectedPaymentType(); // Replace with your logic
+
+    // Get other data
+    List<ItemsArray> searchResult;
+    String remark = "Your remark here"; // Replace with the actual remark
+
+    // Create an instance of InvoiceData
+    InvoiceData invoiceData = InvoiceData(
+      subtotal: subtotal,
+      taxId: taxid,
+      taxAmount: taxAmount,
+      total: total,
+      paymentType: selectedPaymentType,
+      searchResult: searchResult,
+      remark: remark,
+    );
+
+    // Navigate to the InvoicePage and pass the data
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InvoicePage(data: invoiceData),
+      ),
+    );
+  } catch (e) {
+    // Handle any errors that might occur during API call or calculations
+    print('Error during checkout: $e');
+  }
+}
+
   @override
   void initState() {
     // TODO: implement initState
@@ -1087,7 +1139,7 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                                   discountAmount: discAmount!,
                                                   netPrice: calculateTotal(),
                                                   paymentType: payname!,
-                                                  itemsArray: searchResults, 
+                                                  searchResults: searchResults, 
                                                   remark: remarks!,
                                                   selectedPayment: selectedPayment!,
                                                 ),
