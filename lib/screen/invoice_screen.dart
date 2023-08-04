@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,7 +24,7 @@ class InvoiceScreen extends StatefulWidget {
   final double netPrice;
   final String paymentType;
   final String remark;
-  final List<ItemsArray> itemsArray;
+  final List<ItemsArray> searchResults;
   final String selectedPayment;
 
 
@@ -37,7 +38,7 @@ class InvoiceScreen extends StatefulWidget {
     required this.netPrice,
     required this.paymentType,
     required this.remark,
-    required this.itemsArray,
+    required this.searchResults,
     required this.selectedPayment
   });
 
@@ -53,6 +54,8 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   bool isLoading = true;
   double discountPercentage = 10;
   double taxPercentage = 3;
+
+  List<ItemsArray> searchResults = [];
 
   double calculateDiscount() {
     double total = calculateSubtotal();
@@ -114,7 +117,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         'cust_email': customerEmailController,
         'is_receipt': isReceipt,
         'remarks': widget.remark,
-        'items_array': widget.itemsArray,
+        'items_array': widget.searchResults,
       }),
     );
 
@@ -190,35 +193,43 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Table(
+                  columnWidths: const {
+                    0: FlexColumnWidth(1.0),
+                    1: FlexColumnWidth(1.0),
+                    2: FlexColumnWidth(2.0),
+                  },
                   children: [
-                    Text(
-                      "Order",
-                      style: GoogleFonts.aubrey(
-                        fontWeight: FontWeight.w600,
-                        color: kLabel,
-                        fontSize: 16.sp,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    Text(
-                      "Date",
-                      style: GoogleFonts.aubrey(
-                        fontWeight: FontWeight.w600,
-                        color: kLabel,
-                        fontSize: 16.sp,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    Text(
-                      "Customer",
-                      style: GoogleFonts.aubrey(
-                        fontWeight: FontWeight.w600,
-                        color: kLabel,
-                        fontSize: 16.sp,
-                        letterSpacing: 2.0,
-                      ),
+                    TableRow(
+                      children: [
+                        Text(
+                          "Order",
+                          style: GoogleFonts.aubrey(
+                            fontWeight: FontWeight.w600,
+                            color: kLabel,
+                            fontSize: 16.sp,
+                            letterSpacing: 2.0,
+                          ),
+                        ),
+                        Text(
+                          "Date",
+                          style: GoogleFonts.aubrey(
+                            fontWeight: FontWeight.w600,
+                            color: kLabel,
+                            fontSize: 16.sp,
+                            letterSpacing: 2.0,
+                          ),
+                        ),
+                        Text(
+                          "Customer",
+                          style: GoogleFonts.aubrey(
+                            fontWeight: FontWeight.w600,
+                            color: kLabel,
+                            fontSize: 16.sp,
+                            letterSpacing: 2.0,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -227,46 +238,61 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  final item =
-                      widget.itemsArray[index]; // Access the item from the list
+                  final currentDate = DateTime.now();
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Table(
+                      columnWidths: const {
+                        0: FlexColumnWidth(1.0),
+                        1: FlexColumnWidth(1.0),
+                        2: FlexColumnWidth(2.0),
+                      },
                       children: [
-                        Text(
-                           "",
-                          style: GoogleFonts.breeSerif(
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
-                            fontSize: 12.sp,
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                        Text(
-                          "",
-                          style: GoogleFonts.breeSerif(
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
-                            fontSize: 12.sp,
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                        Text(
-                          "",
-                          style: GoogleFonts.breeSerif(
-                            fontWeight: FontWeight.w500,
-                            color: kTextColor,
-                            fontSize: 12.sp,
-                            letterSpacing: 1.0,
-                          ),
+                        TableRow(
+                          children: [
+                            Text(
+                              "",
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            Text(
+                              DateFormat('yyyy-MM-dd').format(currentDate),
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 12.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            TextField(
+                              controller: customerEmailController,
+                              decoration: InputDecoration(
+                                hintText: "Customer Email",
+                                hintStyle: GoogleFonts.breeSerif(
+                                  fontWeight: FontWeight.w400,
+                                  color: kHint,
+                                  fontSize: 10.sp,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                              style: GoogleFonts.breeSerif(
+                                fontWeight: FontWeight.w500,
+                                color: kTextColor,
+                                fontSize: 10.sp,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   );
                 },
-                childCount:
-                    widget.itemsArray.length, // Use widget.itemsArray.length
+                childCount: 1,
               ),
             ),
             SliverToBoxAdapter(
@@ -275,7 +301,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 thickness: 1.0,
               ),
             ),
-            SliverToBoxAdapter(
+SliverToBoxAdapter(
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
@@ -349,15 +375,13 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                         ),
                       ],
                     ),
-                    for (int index = 0;
-                        index < widget.itemsArray.length;
-                        index++)
+                    for (final result in widget.searchResults)
                       TableRow(children: [
                         TableCell(
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Text(
-                              "",
+                              result.name,
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
@@ -371,7 +395,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Text(
-                              widget.itemsArray[index].price ?? "",
+                              result.price ?? "",
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
@@ -385,7 +409,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Text(
-                              widget.itemsArray[index].quantity ?? "",
+                              result.quantity ?? "",
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
@@ -399,11 +423,8 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Text(
-                              (double.parse(widget.itemsArray[index].price ??
-                                          "0") *
-                                      double.parse(
-                                          widget.itemsArray[index].quantity ??
-                                              "0"))
+                              (double.parse(result.price ?? "0") *
+                                      double.parse(result.quantity ?? "0"))
                                   .toStringAsFixed(2),
                               style: GoogleFonts.breeSerif(
                                 fontWeight: FontWeight.w500,
