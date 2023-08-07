@@ -119,32 +119,22 @@ class _DrawerScreenState extends State<DrawerScreen> {
               ),
             },
           ),
-          ListTile(
-            leading: FaIcon(
-              FontAwesomeIcons.fileInvoiceDollar,
-            ),
-            title: Text('Invoices'),
-            onTap: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => InvoiceScreen(
-                    customerId: '',
-                    grossPrice: 2,
-                    taxId: '',
-                    taxAmount: 1,
-                    discountId: '',
-                    discountAmount: 1,
-                    netPrice: 2,
-                    paymentType: '',
-                    searchResults: [],
-                    remark: '',
-                    selectedPayment: '',
-                  ),
-                ),
-              ),
-            },
-          ),
+          // ListTile(
+          //   leading: FaIcon(
+          //     FontAwesomeIcons.fileInvoiceDollar,
+          //   ),
+          //   title: Text('Invoices'),
+          //   onTap: () => {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => InvoiceScreen(
+          //           invoiceData: invoiceData
+          //         ),
+          //       ),
+          //     ),
+          //   },
+          // ),
           ListTile(
               leading: FaIcon(
                 FontAwesomeIcons.clockRotateLeft,

@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:animated_button_bar/animated_button_bar.dart';
 import 'package:getwidget/components/loader/gf_loader.dart';
 import 'package:pointofsales/models/category_model.dart';
+import 'package:pointofsales/models/invoice_model.dart';
 import 'package:pointofsales/screen/invoice_screen.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:getwidget/types/gf_loader_type.dart';
@@ -33,20 +34,19 @@ class _HomeScreenState extends State<HomeScreen> {
   final skuController = TextEditingController();
   int quantity = 1;
   final TextEditingController quantityController = TextEditingController();
-  int? merchantId, userId, catId, taxid, payid, taxpercentage, status;
+  int? merchantId, userId, catId, taxid, payid, taxpercentage, status, discountId;
   String? userName,
       catName,
       userEmail,
       companyName,
       customerId,
       posTxnNo,
-      grossPrice,
-      netPrice,
       remarks,
       taxname,
       payname,
       paymentTypes,
       selectedPayment;
+  double? grossPrice, netPrice, discountAmount;
   dynamic taxId, taxAmount, discId, discAmount;
   late String selectedCategory = "Consumer products";
   bool isInitialLoading = true;
@@ -80,28 +80,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 double calculateTax() {
-    double subtotal = calculateSubtotal();
+    double netPrice = calculateSubtotal();
     num taxPercentage =
         _selectedPaymentTax != null ? _selectedPaymentTax!.taxPercentage : 0;
-    return (subtotal * taxPercentage) / 100;
+    return (netPrice * taxPercentage) / 100;
   }
 
   double calculateSubtotal() {
-    double subtotal = 0;
+    double netPrice = 0;
     for (final item in searchResults) {
       double price = double.parse(item.price);
       double quantity = double.parse(item.quantity ?? '0');
-      subtotal += price * quantity;
+      netPrice += price * quantity;
     }
-    return subtotal;
+    return netPrice;
   }
 
  double calculateTotal() {
-    double subtotal = calculateSubtotal();
+    double netPrice = calculateSubtotal();
     double discount = calculateDiscount();
     double tax =
         calculateTax(); // Calculate the tax based on the selected tax percentage
-    return subtotal + tax; // Add the tax to the subtotal to get the total
+    return netPrice + tax; // Add the tax to the subtotal to get the total
   }
 
   ///////////////////////// Payment Type //////////////////////////////////////////////////////////
@@ -499,31 +499,33 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
     }
 
     // Calculate total including tax
-    double total = subtotal + taxAmount;
+    double grossPrice = netPrice! + taxAmount;
 
     // Get the selected payment type based on your logic
-    String selectedPaymentType = getSelectedPaymentType(); // Replace with your logic
+    Future<List<PaymentType>> selectedPaymentType = fetchPaymentTypes(); // Replace with your logic
 
     // Get other data
-    List<ItemsArray> searchResult;
+    List<ItemsArray> searchResult = [];
     String remark = "Your remark here"; // Replace with the actual remark
 
     // Create an instance of InvoiceData
     InvoiceData invoiceData = InvoiceData(
-      subtotal: subtotal,
-      taxId: taxid,
-      taxAmount: taxAmount,
-      total: total,
-      paymentType: selectedPaymentType,
-      searchResult: searchResult,
-      remark: remark,
-    );
+        taxId: taxid!,
+        taxAmount: taxAmount,
+        netPrice: netPrice!,
+        grossPrice: grossPrice,
+        discountId: discountId!,
+        discountAmount: discountAmount!,
+        paymentType: selectedPaymentType as List<PaymentType>,
+        searchResult: searchResult,
+        remark: remark,
+      );
 
     // Navigate to the InvoicePage and pass the data
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => InvoicePage(data: invoiceData),
+        builder: (context) => InvoiceScreen(invoiceData: invoiceData),
       ),
     );
   } catch (e) {
@@ -1124,44 +1126,42 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                         SizedBox(
                                           height: 2.h,
                                         ),
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    InvoiceScreen(
-                                                  customerId: customerId!,
-                                                  grossPrice: calculateSubtotal(),
-                                                  taxId: taxId!,
-                                                  taxAmount: taxAmount!,
-                                                  discountId: discId!,
-                                                  discountAmount: discAmount!,
-                                                  netPrice: calculateTotal(),
-                                                  paymentType: payname!,
-                                                  searchResults: searchResults, 
-                                                  remark: remarks!,
-                                                  selectedPayment: selectedPayment!,
-                                                ),
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(10),
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              if (searchResults.isNotEmpty) {
+                                                _onCheckoutButtonPressed();
+                                              } else {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: Text("No Items"),
+                                                      content: Text(
+                                                          "You must add items before proceeding."),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: Text("OK"),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              }
+                                            },
+                                            child: Text(
+                                              "CHECKOUT",
+                                              style: GoogleFonts.ubuntu(
+                                                fontSize: 14.sp,
+                                                letterSpacing: 1.0,
+                                                fontWeight: FontWeight.w500,
                                               ),
-                                            );
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            foregroundColor: Colors.white,
-                                            backgroundColor: kForm,
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 15, horizontal: 15),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                  20.0), // Adjust the radius value for the desired curve
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "CHECKOUT",
-                                            style: GoogleFonts.ubuntu(
-                                              fontSize: 14.sp,
-                                              letterSpacing: 1.0,
-                                              fontWeight: FontWeight.w500,
                                             ),
                                           ),
                                         )
