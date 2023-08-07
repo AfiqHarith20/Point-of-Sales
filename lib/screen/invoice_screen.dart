@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/data.dart';
+import 'package:pointofsales/models/invoice_model.dart';
 import 'package:pointofsales/models/pos_model.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/product_screen.dart';
@@ -15,32 +16,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 class InvoiceScreen extends StatefulWidget {
-  final String customerId;
-  final double grossPrice;
-  final String taxId;
-  final double taxAmount;
-  final String discountId;
-  final double discountAmount;
-  final double netPrice;
-  final String paymentType;
-  final String remark;
-  final List<ItemsArray> searchResults;
-  final String selectedPayment;
+  final InvoiceData invoiceData;
 
-
-  InvoiceScreen({
-    required this.customerId,
-    required this.grossPrice,
-    required this.taxId,
-    required this.taxAmount,
-    required this.discountId,
-    required this.discountAmount,
-    required this.netPrice,
-    required this.paymentType,
-    required this.remark,
-    required this.searchResults,
-    required this.selectedPayment
-  });
+  InvoiceScreen({required this.invoiceData});
 
   @override
   State<InvoiceScreen> createState() => _InvoiceScreenState();
@@ -106,18 +84,18 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'customer_id': widget.customerId,
-        'gross_price': widget.grossPrice,
-        'tax_id': widget.taxId,
-        'tax_amount': widget.taxAmount,
-        'disc_id': widget.discountId,
-        'disc_amount': widget.discountAmount,
-        'net_price': widget.netPrice,
-        'payment_type': widget.paymentType,
-        'cust_email': customerEmailController,
-        'is_receipt': isReceipt,
-        'remarks': widget.remark,
-        'items_array': widget.searchResults,
+        // 'customer_id': widget.invoiceData.customerId,
+        'gross_price': widget.invoiceData.grossPrice,
+        'tax_id': widget.invoiceData.taxId,
+        'tax_amount': widget.invoiceData.taxAmount,
+        'disc_id': widget.invoiceData.discountId,
+        'disc_amount': widget.invoiceData.discountAmount,
+        'net_price': widget.invoiceData.netPrice,
+        'payment_type': widget.invoiceData.paymentType,
+        'cust_email': customerEmailController.text,
+        'is_receipt': isReceipt, // Make sure isReceipt is defined
+        'remarks': widget.invoiceData.remark,
+        'items_array': widget.invoiceData.searchResult,
       }),
     );
 
@@ -375,7 +353,7 @@ SliverToBoxAdapter(
                         ),
                       ],
                     ),
-                    for (final result in widget.searchResults)
+                    for (final result in widget.invoiceData.searchResult)
                       TableRow(children: [
                         TableCell(
                           child: Padding(
