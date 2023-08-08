@@ -16,9 +16,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 class InvoiceScreen extends StatefulWidget {
-  final InvoiceData invoiceData;
+  final int posId;
 
-  InvoiceScreen({required this.invoiceData});
+  InvoiceScreen({required this.posId});
 
   @override
   State<InvoiceScreen> createState() => _InvoiceScreenState();
@@ -26,7 +26,7 @@ class InvoiceScreen extends StatefulWidget {
 
 class _InvoiceScreenState extends State<InvoiceScreen> {
   late TextEditingController customerEmailController;
-  int? merchantId, isReceipt;
+  int? merchantId, isReceip, posId;
   String? paymentType, posTxnNo, grossPrice, customerId, netPrice, remarks;
   dynamic taxId, taxAmount, discId, discAmount;
   bool isLoading = true;
@@ -74,7 +74,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
   /////////////// POST Request ////////////////////////////////
 
   Future<Map<String, dynamic>> _postSavePosTransaction() async {
-    final url = Uri.parse(Constants.apiPosIndex);
+    final url = Uri.parse(Constants.apiPosIndex + '$posId');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     final http.Response response = await http.post(
@@ -84,18 +84,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        // 'customer_id': widget.invoiceData.customerId,
-        'gross_price': widget.invoiceData.grossPrice,
-        'tax_id': widget.invoiceData.taxId,
-        'tax_amount': widget.invoiceData.taxAmount,
-        'disc_id': widget.invoiceData.discountId,
-        'disc_amount': widget.invoiceData.discountAmount,
-        'net_price': widget.invoiceData.netPrice,
-        'payment_type': widget.invoiceData.paymentType,
-        'cust_email': customerEmailController.text,
-        'is_receipt': isReceipt, // Make sure isReceipt is defined
-        'remarks': widget.invoiceData.remark,
-        'items_array': widget.invoiceData.searchResult,
       }),
     );
 
@@ -353,7 +341,7 @@ SliverToBoxAdapter(
                         ),
                       ],
                     ),
-                    for (final result in widget.invoiceData.searchResult)
+                    for (final result in searchResults)
                       TableRow(children: [
                         TableCell(
                           child: Padding(
