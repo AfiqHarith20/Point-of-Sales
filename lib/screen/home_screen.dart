@@ -480,52 +480,63 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
     });
   }
 
+  Future<Map<String, dynamic>> _postSavePosTransaction() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final url = Uri.parse(Constants.apiPosIndex);
+    final http.Response response = await http.post(url,
+        headers: {
+          'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'customer_id': prefs.getString('customer_id'),
+          'gross_price': prefs.getString('gross_price'),
+          'tax_id': prefs.getString('tax_id'),
+          'tax_amount': prefs.getString('tax_amount'),
+          'disc_id': prefs.getString('disc_id'),
+          'disc_amount': prefs.getString('disc_amount'),
+          'net_price': prefs.getDouble('net_price'),
+          'payment_type': paymentType.toString(),
+          'remarks': prefs.getString('remarks'),
+          'items_array': ItemsArray,
+        }));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      print("POS TRANSACTION SUCCESSFULLY SAVED");
+      setState(() {
+        isLoading = false;
+      });
+      return responseData;
+    } else {
+      throw Exception('Failed to save POS transaction');
+    }
+  }
+
   void _onCheckoutButtonPressed() async {
   try {
-    // Calculate subtotal based on your logic
-    double subtotal = calculateSubtotal(); // Replace with your calculation logic
+    // Calculate subtotal, tax, and other necessary data
+      double subtotal =
+          calculateSubtotal(); // Replace with your calculation logic
+      double discount = calculateDiscount();
+      double tax = calculateTax();
+      double total = grossPrice! - discount + tax; // Using grossPrice for total
 
-    // Fetch payment tax data from API
-    List<PaymentTax> paymentTaxList = await fetchPaymentTax();
+      // Prepare other data, such as payment type, remarks, etc.
+      String paymentType = _selectedPaymentType?.name ?? 'Cash';
+      String remarks = 'Your remark here'; // Replace with actual remark
 
-    // Find the relevant payment tax based on your logic
-    double taxAmount = 0.0;
-    for (PaymentTax paymentTax in paymentTaxList) {
-      if (paymentTax.id == taxid) {
-        // Calculate tax amount based on tax percentage and subtotal
-        taxAmount = subtotal * (paymentTax.taxPercentage / 100);
-        break;
-      }
-    }
+    // Make the API call to save the transaction and get posId
+      Map<String, dynamic> responseData = await _postSavePosTransaction();
 
-    // Calculate total including tax
-    double grossPrice = netPrice! + taxAmount;
-
-    // Get the selected payment type based on your logic
-    Future<List<PaymentType>> selectedPaymentType = fetchPaymentTypes(); // Replace with your logic
-
-    // Get other data
-    List<ItemsArray> searchResult = [];
-    String remark = "Your remark here"; // Replace with the actual remark
-
-    // Create an instance of InvoiceData
-    InvoiceData invoiceData = InvoiceData(
-        taxId: taxid!,
-        taxAmount: taxAmount,
-        netPrice: netPrice!,
-        grossPrice: grossPrice,
-        discountId: discountId!,
-        discountAmount: discountAmount!,
-        paymentType: selectedPaymentType as List<PaymentType>,
-        searchResult: searchResult,
-        remark: remark,
-      );
+      // Get the posId from the response data
+      int posId = responseData['posId'];
 
     // Navigate to the InvoicePage and pass the data
-    Navigator.push(
+      Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => InvoiceScreen(invoiceData: invoiceData),
+        builder: (context) => InvoiceScreen(posId: posId),
       ),
     );
   } catch (e) {
