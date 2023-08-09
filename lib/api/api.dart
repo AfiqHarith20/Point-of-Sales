@@ -17,6 +17,8 @@ class Constants {
   static String apiLogin = pos_baseurl + "/login";
   static String apiLogout = pos_baseurl + "/logout";
 
+  static String apiSearchCustomer = pos_baseurl + "/customer/search/dtls";
+
   static String apiPosIndex = pos_baseurl + "/pos";
   static String apiPosPayment = pos_baseurl + "/pos/trans/payment";
   static String apiSearchPosTransaction = pos_baseurl + "/pos/search/item";
