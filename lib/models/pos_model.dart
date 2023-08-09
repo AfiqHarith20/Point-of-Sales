@@ -263,6 +263,15 @@ class ItemsArray {
     this.quantity,
     required this.price,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'productId': productId,
+      'name': name,
+      'quantity': quantity,
+      'price': price,
+    };
+  }
 }
 
 class Product {

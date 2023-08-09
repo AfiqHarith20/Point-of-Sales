@@ -32,14 +32,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final skuController = TextEditingController();
+  final custNameController = TextEditingController();
   int quantity = 1;
   final TextEditingController quantityController = TextEditingController();
-  int? merchantId, userId, catId, taxid, payid, taxpercentage, status, discountId;
+  int? merchantId,
+      userId,
+      catId,
+      taxid,
+      payid,
+      taxpercentage,
+      status,
+      discountId,
+      customerId;
   String? userName,
       catName,
       userEmail,
       companyName,
-      customerId,
       posTxnNo,
       remarks,
       taxname,
@@ -380,6 +388,30 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
       print(response.reasonPhrase);
     }
   }
+
+    ////////////////////////// Search Customer //////////////////////////////////////////////
+  
+  Future<void> searchCustomer() async {
+    final url = Uri.parse(Constants.apiSearchCustomer);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final Map<String, dynamic> requestBody = {
+      "cust_name": custNameController.text,
+    };
+
+    final http.Response response = await http.post(
+      url,
+      body: jsonEncode(requestBody),
+      headers: {
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json'
+      },
+    );
+    if (response.statusCode == 200) {
+      print("Success Search Customer");
+    } else {
+      print("Could not find Customer Membership");
+    }
+  }
   
   ////////////////////////// Search SKU //////////////////////////////////////////////////
 
@@ -480,25 +512,63 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
     });
   }
 
-  Future<Map<String, dynamic>> _postSavePosTransaction() async {
+// Function to calculate the total price
+  double calculateTotals(double subtotal, double discount, double tax) {
+    return subtotal - discount + tax;
+  }
+
+// Function to handle the checkout process
+  Future<void> handleCheckout() async {
+    try {
+      // Calculate subtotal, discount, and tax
+      double subtotal = calculateSubtotal();
+      double discount = calculateDiscount();
+      double tax = calculateTax();
+      double total = calculateTotals(subtotal, discount, tax);
+
+      // Prepare payment type and remarks
+      String paymentType = _selectedPaymentType?.name ?? 'Cash';
+      String remarks = 'Your remark here'; // Replace with actual remark
+
+      // Call API to save the transaction
+      int posId =
+          await saveTransaction(total, tax, discount, paymentType, remarks);
+
+      // Navigate to the InvoicePage
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => InvoiceScreen(posId: posId),
+        ),
+      );
+    } catch (e) {
+      // Handle errors
+      print('Error during checkout: $e');
+    }
+  }
+
+// Function to save the transaction
+Future<int> saveTransaction(double total, double tax, double discount,
+      String paymentType, String remarks) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final url = Uri.parse(Constants.apiPosIndex);
+
     final http.Response response = await http.post(url,
         headers: {
           'Authorization': 'Bearer ' + prefs.getString('token').toString(),
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'customer_id': prefs.getString('customer_id'),
-          'gross_price': prefs.getString('gross_price'),
-          'tax_id': prefs.getString('tax_id'),
-          'tax_amount': prefs.getString('tax_amount'),
-          'disc_id': prefs.getString('disc_id'),
-          'disc_amount': prefs.getString('disc_amount'),
-          'net_price': prefs.getDouble('net_price'),
-          'payment_type': paymentType.toString(),
-          'remarks': prefs.getString('remarks'),
-          'items_array': ItemsArray,
+          'customer_id': customerId,
+          'gross_price': total,
+          'tax_id': _selectedPaymentTax?.id,
+          'tax_amount': tax,
+          'disc_id': discountId,
+          'disc_amount': discount,
+          'net_price': total,
+          'payment_type': _selectedPaymentType?.id,
+          'remarks': remarks,
+          'items_array': searchResults.map((item) => item.toJson()).toList(),
         }));
 
     if (response.statusCode == 200) {
@@ -507,43 +577,20 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
       setState(() {
         isLoading = false;
       });
-      return responseData;
+      return responseData['posId'];
     } else {
-      throw Exception('Failed to save POS transaction');
+      // Handle the error more gracefully, e.g., show an error message to the user
+      final Map<String, dynamic> errorResponseData = json.decode(response.body);
+      final String errorMessage =
+          errorResponseData['message'] ?? 'An error occurred';
+      throw Exception('Failed to save POS transaction: $errorMessage');
     }
   }
 
-  void _onCheckoutButtonPressed() async {
-  try {
-    // Calculate subtotal, tax, and other necessary data
-      double subtotal =
-          calculateSubtotal(); // Replace with your calculation logic
-      double discount = calculateDiscount();
-      double tax = calculateTax();
-      double total = grossPrice! - discount + tax; // Using grossPrice for total
-
-      // Prepare other data, such as payment type, remarks, etc.
-      String paymentType = _selectedPaymentType?.name ?? 'Cash';
-      String remarks = 'Your remark here'; // Replace with actual remark
-
-    // Make the API call to save the transaction and get posId
-      Map<String, dynamic> responseData = await _postSavePosTransaction();
-
-      // Get the posId from the response data
-      int posId = responseData['posId'];
-
-    // Navigate to the InvoicePage and pass the data
-      Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => InvoiceScreen(posId: posId),
-      ),
-    );
-  } catch (e) {
-    // Handle any errors that might occur during API call or calculations
-    print('Error during checkout: $e');
+// Function to handle the checkout button press
+  void _onCheckoutButtonPressed() {
+    handleCheckout();
   }
-}
 
   @override
   void initState() {
@@ -637,7 +684,7 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                             flex: 3,
                             child: Form(
                               child: Container(
-                                height: 70.h,
+                                height: 75.h,
                                 margin: kMargin,
                                 padding: kPadding,
                                 decoration: BoxDecoration(
@@ -674,7 +721,7 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                           },
                                           child: Column(
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                                CrossAxisAlignment.center,
                                             children: [
                                               Text(
                                                 "Product Code (SKU)",
@@ -780,7 +827,47 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                           onPressed: _decrementQuantity,
                                         ),
                                         SizedBox(
-                                          height: .5.h,
+                                          height: 1.h,
+                                        ),
+                                        
+                                            Text(
+                                              "Membership",
+                                              style: GoogleFonts.abel(
+                                            fontSize: 10.sp,
+                                            color: kTextColor,
+                                            fontWeight: FontWeight.w400,
+                                            letterSpacing: 1.0,
+                                          ),
+                                            ),
+                                            SizedBox(
+                                              height: 4.h,
+                                              child: TextField(
+                                                controller: custNameController,
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  fillColor: kTextColor,
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20.0),
+                                                    borderSide: BorderSide(
+                                                        width: 3,
+                                                        color:
+                                                            Colors.greenAccent),
+                                                  ),
+                                                ),
+                                                style: GoogleFonts.abel(
+                                                  fontSize: 11.sp,
+                                                  color: kScaffoldColor,
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: 1.0,
+                                                ),
+                                              ),
+                                            ),
+                                  
+                                        SizedBox(
+                                          height: 1.h,
                                         ),
                                         Row(
                                           children: [
@@ -1131,7 +1218,8 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                                                       );
                                                     },
                                                   );
-                                                })),
+                                                }),
+                                                ),
                                           ],
                                         ),
                                         SizedBox(
@@ -1189,20 +1277,19 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  height: 70.h,
+                                  height: 75.h,
                                   margin: kMargin,
                                   padding: kPadding,
                                   decoration: BoxDecoration(
                                     color: kPrimaryColor,
                                     borderRadius: kRadius,
                                   ),
-                                
                                     child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
                                       Container(
-                                        height: 51.h,
+                                        height: 61.h,
                                         margin: kMargin,
                                         padding: kPadding,
                                         decoration: BoxDecoration(
