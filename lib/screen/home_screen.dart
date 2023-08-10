@@ -53,7 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
       taxname,
       payname,
       paymentTypes,
-      selectedPayment;
+      selectedPayment,
+      customerEmail;
   double? grossPrice, netPrice, discountAmount;
   dynamic taxId, taxAmount, discId, discAmount;
   late String selectedCategory = "Consumer products";
@@ -67,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   PaymentTax? _selectedPaymentTax;
   bool _isLoader = false;
   double total = 0;
+  bool isCustomerFound = false;
 
   Category? selectedCategoryData;
   List<ProductList> productList = [];
@@ -394,8 +396,17 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
   Future<void> searchCustomer() async {
     final url = Uri.parse(Constants.apiSearchCustomer);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final String custName = custNameController.text.trim(); // Trim whitespace
+
+    if (custName.isEmpty) {
+      // Show an error message or update a flag to indicate the error
+      print("Customer name must be entered");
+      return;
+    }
+
     final Map<String, dynamic> requestBody = {
-      "cust_name": custNameController.text,
+      "cust_name": custName,
     };
 
     final http.Response response = await http.post(
@@ -406,8 +417,29 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
         'Content-Type': 'application/json'
       },
     );
+
     if (response.statusCode == 200) {
-      print("Success Search Customer");
+    final dynamic responseData = json.decode(response.body);
+
+    if (responseData is Map<String, dynamic> &&
+        responseData.containsKey('data')) {
+      final dynamic customerData = responseData['data']['customer'];
+
+      if (customerData is List && customerData.isNotEmpty) {
+          final Map<String, dynamic> customer = customerData[0];
+          customerEmail = customer['email'];
+          customerId = customer['id'];
+
+          setState(() {
+            isCustomerFound = true;
+          });
+        } else {
+          setState(() {
+            isCustomerFound = false;
+          });
+        }
+        print("searchCustomer function called");
+      }
     } else {
       print("Could not find Customer Membership");
     }
@@ -684,7 +716,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                             flex: 3,
                             child: Form(
                               child: Container(
-                                height: 75.h,
+                                height: 78.h,
                                 margin: kMargin,
                                 padding: kPadding,
                                 decoration: BoxDecoration(
@@ -829,43 +861,51 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                         SizedBox(
                                           height: 1.h,
                                         ),
-                                        
-                                            Text(
-                                              "Membership",
-                                              style: GoogleFonts.abel(
+                                        Text(
+                                          "Membership",
+                                          style: GoogleFonts.abel(
                                             fontSize: 10.sp,
                                             color: kTextColor,
                                             fontWeight: FontWeight.w400,
                                             letterSpacing: 1.0,
                                           ),
-                                            ),
-                                            SizedBox(
-                                              height: 4.h,
-                                              child: TextField(
-                                                controller: custNameController,
-                                                decoration: InputDecoration(
-                                                  filled: true,
-                                                  fillColor: kTextColor,
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20.0),
-                                                    borderSide: BorderSide(
-                                                        width: 3,
-                                                        color:
-                                                            Colors.greenAccent),
-                                                  ),
-                                                ),
-                                                style: GoogleFonts.abel(
-                                                  fontSize: 11.sp,
-                                                  color: kScaffoldColor,
-                                                  fontWeight: FontWeight.w500,
-                                                  letterSpacing: 1.0,
+                                        ),
+                                        SizedBox(
+                                          height: 4.h,
+                                          child: TextField(
+                                            controller: custNameController,
+                                            decoration: InputDecoration(
+                                              filled: true,
+                                              fillColor: kTextColor,
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20.0),
+                                                borderSide: BorderSide(
+                                                  width: 3,
+                                                  color: Colors.greenAccent,
                                                 ),
                                               ),
+                                              hintText: isCustomerFound
+                                                  ? custNameController
+                                                          .text.isNotEmpty
+                                                      ? custNameController.text
+                                                      : 'Customer not found'
+                                                  : 'Loading...',
+                                              contentPadding:
+                                                  EdgeInsets.symmetric(
+                                                vertical:
+                                                    4.0, // Adjust this value to control vertical alignment
+                                                horizontal: 16.0,
+                                              ),
                                             ),
-                                  
+                                            style: GoogleFonts.abel(
+                                              fontSize: 11.sp,
+                                              color: kScaffoldColor,
+                                              fontWeight: FontWeight.w500,
+                                              letterSpacing: 1.0,
+                                            ),
+                                          ),
+                                        ),
                                         SizedBox(
                                           height: 1.h,
                                         ),
@@ -914,9 +954,11 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                                   },
                                                 ),
                                               ),
-                                              onPressed: () {},
+                                              onPressed: () {
+                                                searchCustomer();
+                                              },
                                               child: Text(
-                                                "Edit",
+                                                "Membership",
                                                 style: GoogleFonts.manrope(
                                                   fontSize: 8.sp,
                                                   color: kTextColor,
@@ -933,6 +975,37 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                         Divider(
                                           color: Colors.red,
                                           thickness: 2.0,
+                                        ),
+                                        Column(
+                                          children: [
+                                            if (customerId != null)
+                                              Text(
+                                                'Customer ID: $customerId',
+                                                style: TextStyle(
+                                                  fontSize: 6.sp,
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            if (customerEmail != null)
+                                              Text(
+                                                'Customer Email: $customerEmail',
+                                                style: TextStyle(
+                                                  fontSize: 6.sp,
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              )
+                                            else
+                                              Text(
+                                                'Customer not registered',
+                                                style: TextStyle(
+                                                  fontSize: 9.sp,
+                                                  color: Colors.red,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                          ],
                                         ),
                                         Row(
                                           mainAxisAlignment:
@@ -1277,7 +1350,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  height: 75.h,
+                                  height: 78.h,
                                   margin: kMargin,
                                   padding: kPadding,
                                   decoration: BoxDecoration(
@@ -1289,7 +1362,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                         CrossAxisAlignment.start,
                                     children: [
                                       Container(
-                                        height: 61.h,
+                                        height: 63.h,
                                         margin: kMargin,
                                         padding: kPadding,
                                         decoration: BoxDecoration(
@@ -1297,192 +1370,195 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                           borderRadius: kRadius,
                                         ),
                                           child: SingleChildScrollView(
-                                            child: Table(
-                                              defaultVerticalAlignment:
-                                                  TableCellVerticalAlignment.middle,
-                                              border: TableBorder.all(
-                                                  color: Colors.transparent),
-                                              columnWidths: {
-                                                // 0: FlexColumnWidth(1),
-                                                0: FlexColumnWidth(4),
-                                                1: FlexColumnWidth(2),
-                                                2: FlexColumnWidth(1),
-                                                3: FlexColumnWidth(2),
-                                                4: FlexColumnWidth(1),
-                                              },
+                                            child: Column(
                                               children: [
-                                                TableRow(
+                                                Table(
+                                                  defaultVerticalAlignment:
+                                                      TableCellVerticalAlignment.middle,
+                                                  border: TableBorder.all(
+                                                      color: Colors.transparent),
+                                                  columnWidths: {
+                                                    // 0: FlexColumnWidth(1),
+                                                    0: FlexColumnWidth(4),
+                                                    1: FlexColumnWidth(2),
+                                                    2: FlexColumnWidth(1),
+                                                    3: FlexColumnWidth(2),
+                                                    4: FlexColumnWidth(1),
+                                                  },
                                                   children: [
-                                                    
-                                                    TableCell(
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.all(6),
-                                                        child: Text(
-                                                          "Name",
-                                                          style: GoogleFonts.aubrey(
-                                                            fontWeight: FontWeight.w600,
-                                                            color: kLabel,
-                                                            fontSize: 9.sp,
-                                                            letterSpacing: 1.0,
+                                                    TableRow(
+                                                      children: [
+                                                        TableCell(
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets.all(6),
+                                                            child: Text(
+                                                              "Name",
+                                                              style: GoogleFonts.aubrey(
+                                                                fontWeight: FontWeight.w600,
+                                                                color: kLabel,
+                                                                fontSize: 9.sp,
+                                                                letterSpacing: 1.0,
+                                                              ),
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ),
-                                                    TableCell(
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.all(6),
-                                                        child: Text(
-                                                          "Price (MYR)",
-                                                          style: GoogleFonts.aubrey(
-                                                            fontWeight: FontWeight.w600,
-                                                            color: kLabel,
-                                                            fontSize: 9.sp,
-                                                            letterSpacing: 1.0,
+                                                        TableCell(
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets.all(6),
+                                                            child: Text(
+                                                              "Price (MYR)",
+                                                              style: GoogleFonts.aubrey(
+                                                                fontWeight: FontWeight.w600,
+                                                                color: kLabel,
+                                                                fontSize: 9.sp,
+                                                                letterSpacing: 1.0,
+                                                              ),
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ),
-                                                    TableCell(
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.all(6),
-                                                        child: Text(
-                                                          "QTY",
-                                                          style: GoogleFonts.aubrey(
-                                                            fontWeight: FontWeight.w600,
-                                                            color: kLabel,
-                                                            fontSize: 9.sp,
-                                                            letterSpacing: 1.0,
+                                                        TableCell(
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets.all(6),
+                                                            child: Text(
+                                                              "QTY",
+                                                              style: GoogleFonts.aubrey(
+                                                                fontWeight: FontWeight.w600,
+                                                                color: kLabel,
+                                                                fontSize: 9.sp,
+                                                                letterSpacing: 1.0,
+                                                              ),
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ),
-                                                    TableCell(
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.all(6),
-                                                        child: Text(
-                                                          "Subtotal (MYR)",
-                                                          style: GoogleFonts.aubrey(
-                                                            fontWeight: FontWeight.w600,
-                                                            color: kLabel,
-                                                            fontSize: 9.sp,
-                                                            letterSpacing: 1.0,
+                                                        TableCell(
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets.all(6),
+                                                            child: Text(
+                                                              "Subtotal (MYR)",
+                                                              style: GoogleFonts.aubrey(
+                                                                fontWeight: FontWeight.w600,
+                                                                color: kLabel,
+                                                                fontSize: 9.sp,
+                                                                letterSpacing: 1.0,
+                                                              ),
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ),
-                                                    TableCell(
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              6),
-                                                      child: Text(
-                                                        "Del",
-                                                        style:
-                                                            GoogleFonts.aubrey(
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          color: kLabel,
-                                                          fontSize: 9.sp,
-                                                          letterSpacing: 1.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  ],
-                                                ),
-                                                for (final result in searchResults)
-                                                  TableRow(
-                                                    children: [
-                                                      
-                                                      TableCell(
+                                                        TableCell(
                                                         child: Padding(
                                                           padding:
-                                                              const EdgeInsets.all(6.0),
+                                                              const EdgeInsets.all(
+                                                                  6),
                                                           child: Text(
-                                                            result.name,
+                                                            "Del",
                                                             style:
-                                                                GoogleFonts.breeSerif(
+                                                                GoogleFonts.aubrey(
                                                               fontWeight:
-                                                                  FontWeight.w500,
-                                                              color: kTextColor,
-                                                              fontSize: 10.sp,
+                                                                  FontWeight.w600,
+                                                              color: kLabel,
+                                                              fontSize: 9.sp,
                                                               letterSpacing: 1.0,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
-                                                      TableCell(
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets.all(6.0),
-                                                          child: Text(
-                                                            result.price,
-                                                            style:
-                                                                GoogleFonts.breeSerif(
-                                                              fontWeight:
-                                                                  FontWeight.w500,
-                                                              color: kTextColor,
-                                                              fontSize: 10.sp,
-                                                              letterSpacing: 1.0,
+                                                      ],
+                                                    ),
+                                                    for (final result in searchResults)
+                                                      TableRow(
+                                                        children: [
+                                                          
+                                                          TableCell(
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets.all(6.0),
+                                                              child: Text(
+                                                                result.name,
+                                                                style:
+                                                                    GoogleFonts.breeSerif(
+                                                                  fontWeight:
+                                                                      FontWeight.w500,
+                                                                  color: kTextColor,
+                                                                  fontSize: 10.sp,
+                                                                  letterSpacing: 1.0,
+                                                                ),
+                                                              ),
                                                             ),
                                                           ),
-                                                        ),
-                                                      ),
-                                                      TableCell(
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets.all(6.0),
-                                                          child: Text(
-                                                            result.quantity as String,
-                                                            style:
-                                                                GoogleFonts.breeSerif(
-                                                              fontWeight:
-                                                                  FontWeight.w500,
-                                                              color: kTextColor,
-                                                              fontSize: 10.sp,
-                                                              letterSpacing: 1.0,
+                                                          TableCell(
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets.all(6.0),
+                                                              child: Text(
+                                                                result.price,
+                                                                style:
+                                                                    GoogleFonts.breeSerif(
+                                                                  fontWeight:
+                                                                      FontWeight.w500,
+                                                                  color: kTextColor,
+                                                                  fontSize: 10.sp,
+                                                                  letterSpacing: 1.0,
+                                                                ),
+                                                              ),
                                                             ),
                                                           ),
-                                                        ),
-                                                      ),
-                                                      TableCell(
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets.all(6.0),
-                                                          child: Text(
-                                                            '${(double.parse(result.quantity ?? '0') * double.parse(result.price)).toStringAsFixed(2)}',
-                                                            style:
-                                                                GoogleFonts.breeSerif(
-                                                              fontWeight:
-                                                                  FontWeight.w500,
-                                                              color: kTextColor,
-                                                              fontSize: 10.sp,
-                                                              letterSpacing: 1.0,
+                                                          TableCell(
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets.all(6.0),
+                                                              child: Text(
+                                                                result.quantity as String,
+                                                                style:
+                                                                    GoogleFonts.breeSerif(
+                                                                  fontWeight:
+                                                                      FontWeight.w500,
+                                                                  color: kTextColor,
+                                                                  fontSize: 10.sp,
+                                                                  letterSpacing: 1.0,
+                                                                ),
+                                                              ),
                                                             ),
                                                           ),
-                                                        ),
-                                                      ),
-                                                      TableCell(
-                                                        child: Padding(
-                                                          padding: const EdgeInsets.all(6.0),
-                                                          child: GestureDetector(
-                                                            onTap:() {
-                                                              handleDeleteProduct(result);
-                                                            },
-                                                            child: FaIcon(
-                                                              FontAwesomeIcons.trash,
-                                                              color: Colors.redAccent,
-                                                              size: 30
+                                                          TableCell(
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets.all(6.0),
+                                                              child: Text(
+                                                                '${(double.parse(result.quantity ?? '0') * double.parse(result.price)).toStringAsFixed(2)}',
+                                                                style:
+                                                                    GoogleFonts.breeSerif(
+                                                                  fontWeight:
+                                                                      FontWeight.w500,
+                                                                  color: kTextColor,
+                                                                  fontSize: 10.sp,
+                                                                  letterSpacing: 1.0,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          TableCell(
+                                                            child: Padding(
+                                                              padding: const EdgeInsets.all(6.0),
+                                                              child: GestureDetector(
+                                                                onTap:() {
+                                                                  handleDeleteProduct(result);
+                                                                },
+                                                                child: FaIcon(
+                                                                  FontAwesomeIcons.trash,
+                                                                  color: Colors.redAccent,
+                                                                  size: 30
+                                                                  ),
+                                                              ),
                                                               ),
                                                           ),
-                                                          ),
+                                                        ],
                                                       ),
-                                                    ],
-                                                  ),
+                                                  ],
+                                                ),
                                               ],
                                             ),
                                           ),
