@@ -181,10 +181,11 @@ class _DrawerScreenState extends State<DrawerScreen> {
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
             onTap: () async {
-              final SharedPreferences prefs =
-                  await SharedPreferences.getInstance();
-              prefs.clear();
-              logout(context);
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+                (Route<dynamic> route) => false, // Remove all existing routes
+              );
             },
           ),
         ],
