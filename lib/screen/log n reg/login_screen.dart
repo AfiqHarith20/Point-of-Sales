@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/screen/home_screen.dart';
-import 'package:pointofsales/screen/log%20n%20reg/register_screen.dart';
 import 'package:pointofsales/widget/login/login_textfield.dart';
 import 'package:pointofsales/widget/login/square_tile.dart';
 import 'package:pointofsales/widget/progressIndicator.dart';
@@ -47,15 +46,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (response.statusCode == 200) {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', responseData['data']['token']);
-        prefs.setString('email', responseData['data']['email']);
-        prefs.setString('fullname', responseData['data']['fullname']);
-        prefs.setInt('role_id', responseData['data']['role_id']);
-        prefs.setString('role_name', responseData['data']['role_name']);
+        final token = responseData['data']['token'] as String?;
+        final email = responseData['data']['email'] as String?;
         print(response);
 
         emailController.clear();
         passwordController.clear();
+
+        if(token != null && email != null) {
+          prefs.setString('token', token);
+          prefs.setString('email', email);
+        }else{
+          throw "Token or email is null in API response";
+        }
 
         setState(() {
           _isLoader = true;
@@ -255,12 +258,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 GestureDetector(
                   onTap: () => {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RegisterScreen(),
-                      ),
-                    ),
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => RegisterScreen(),
+                    //   ),
+                    // ),
                   },
                   child: Text(
                     "Register now",

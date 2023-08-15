@@ -9,11 +9,11 @@ class Constants {
     return prefs.getString('token');
   }
 
-  static String pos_baseurl = "http://template.gosini.xyz:8880/cspos/public/api";
+  static String pos_baseurl = "http://shopapp.gosini.xyz:8880/api";
 
   static String appName = "Point of Sales";
 
-  static String apiRegister = pos_baseurl + "/register";
+  // static String apiRegister = pos_baseurl + "/register";
   static String apiLogin = pos_baseurl + "/login";
   static String apiLogout = pos_baseurl + "/logout";
 

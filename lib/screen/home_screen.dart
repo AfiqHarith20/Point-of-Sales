@@ -32,7 +32,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final skuController = TextEditingController();
-  final custNameController = TextEditingController();
+  final custEmailController = TextEditingController();
   int quantity = 1;
   final TextEditingController quantityController = TextEditingController();
   int? merchantId,
@@ -299,16 +299,16 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
         /////////////////////////// User ////////////////////////////////////
 
         if (pos["data"] != null) {
-          var userData = pos['data'][0]['user'];
+          final userData = pos['data'][0]['user'];
           if (userData != null) {
-            var data = User(
-              userid: pos['data'][0]['user']['id'],
-              username: pos['data'][0]['user']['name'].toString(),
-              useremail: pos['data'][0]['user']['email'].toString(),
+            final user = User(
+              userid: userData['id'],
+              username: userData['name'].toString(),
+              useremail: userData['email'].toString(),
             );
-            userId = data.userid;
-            userName = data.username;
-            userEmail = data.useremail;
+            userId = userData.userid;
+            userName = userData.username;
+            userEmail = userData.useremail;
           } else {
             print("User data is null");
           }
@@ -316,20 +316,14 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
           ///////////////////// Product Category ///////////////////////////
 
           if (pos["data"] != null) {
-            var catData = pos['data'][0]['products'][0]['product_category'];
-            if (catData != null) {
-              var data = ProductsCategory(
-                catid: pos['data'][0]['products'][0]['product_category']['id'],
-                catname: pos['data'][0]['products'][0]['product_category']
-                        ['name']
-                    .toString(),
+            final categoryData =
+                pos['data'][0]['products'][0]['product_category'];
+            if (categoryData != null) {
+              final productsCategory = ProductsCategory(
+                catid: categoryData['id'],
+                catname: categoryData['name'].toString(),
               );
-              catId:
-              data.catid;
-              catName:
-              data.catname;
-
-              // print(catData);
+              // ... handle productsCategory ...
             } else {
               print("Category data is null");
             }
@@ -381,6 +375,13 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
             }
           }
 
+          // Parse Payment Type and Tax
+          if (pos["payment_type"] is Map<String, dynamic>) {
+            _parsePaymentTypeAndTax(pos["payment_type"]);
+          } else {
+            print("Payment type data is null or not a Map");
+          }
+
           print(paymentType);
         } else {
           print(response.reasonPhrase);
@@ -391,59 +392,84 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
     }
   }
 
-    ////////////////////////// Search Customer //////////////////////////////////////////////
-  
-  Future<void> searchCustomer() async {
-    final url = Uri.parse(Constants.apiSearchCustomer);
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    final String custName = custNameController.text.trim(); // Trim whitespace
-
-    if (custName.isEmpty) {
-      // Show an error message or update a flag to indicate the error
-      print("Customer name must be entered");
-      return;
+  void _parsePaymentTypeAndTax(Map<String, dynamic> paymentTypeData) {
+    final paymentTypeId = paymentTypeData["id"];
+    if (paymentTypeId is int) {
+      final paymentType = PaymentType(
+        id: paymentTypeId,
+        name: paymentTypeData["name"].toString(),
+      );
+      // ... handle paymentType ...
+    } else {
+      print("Invalid payment type ID: $paymentTypeId");
     }
 
-    final Map<String, dynamic> requestBody = {
-      "cust_name": custName,
-    };
-
-    final http.Response response = await http.post(
-      url,
-      body: jsonEncode(requestBody),
-      headers: {
-        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-        'Content-Type': 'application/json'
-      },
-    );
-
-    if (response.statusCode == 200) {
-    final dynamic responseData = json.decode(response.body);
-
-    if (responseData is Map<String, dynamic> &&
-        responseData.containsKey('data')) {
-      final dynamic customerData = responseData['data']['customer'];
-
-      if (customerData is List && customerData.isNotEmpty) {
-          final Map<String, dynamic> customer = customerData[0];
-          customerEmail = customer['email'];
-          customerId = customer['id'];
-
-          setState(() {
-            isCustomerFound = true;
-          });
-        } else {
-          setState(() {
-            isCustomerFound = false;
-          });
-        }
-        print("searchCustomer function called");
-      }
+    final paymentTaxId = paymentTypeData["payment_tax_id"];
+    if (paymentTaxId is int) {
+      final paymentTax = PaymentTax(
+        id: paymentTaxId,
+        name: paymentTypeData["payment_tax"]["name"].toString(),
+        taxPercentage: paymentTypeData["payment_tax"]["tax_percentage"],
+      );
+      // ... handle paymentTax ...
     } else {
-      print("Could not find Customer Membership");
+      print("Invalid payment tax ID: $paymentTaxId");
     }
   }
+
+    ////////////////////////// Search Customer //////////////////////////////////////////////
+  
+  // Future<void> searchCustomer() async {
+  //   final url = Uri.parse(Constants.apiSearchCustomer);
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  //   final String custName = custNameController.text.trim(); // Trim whitespace
+
+  //   if (custName.isEmpty) {
+  //     // Show an error message or update a flag to indicate the error
+  //     print("Customer name must be entered");
+  //     return;
+  //   }
+
+  //   final Map<String, dynamic> requestBody = {
+  //     "cust_name": custName,
+  //   };
+
+  //   final http.Response response = await http.post(
+  //     url,
+  //     body: jsonEncode(requestBody),
+  //     headers: {
+  //       'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+  //       'Content-Type': 'application/json'
+  //     },
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //   final dynamic responseData = json.decode(response.body);
+
+  //   if (responseData is Map<String, dynamic> &&
+  //       responseData.containsKey('data')) {
+  //     final dynamic customerData = responseData['data']['customer'];
+
+  //     if (customerData is List && customerData.isNotEmpty) {
+  //         final Map<String, dynamic> customer = customerData[0];
+  //         customerEmail = customer['email'];
+  //         customerId = customer['id'];
+
+  //         setState(() {
+  //           isCustomerFound = true;
+  //         });
+  //       } else {
+  //         setState(() {
+  //           isCustomerFound = false;
+  //         });
+  //       }
+  //       print("searchCustomer function called");
+  //     }
+  //   } else {
+  //     print("Could not find Customer Membership");
+  //   }
+  // }
   
   ////////////////////////// Search SKU //////////////////////////////////////////////////
 
@@ -862,7 +888,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                           height: 1.h,
                                         ),
                                         Text(
-                                          "Membership",
+                                          "Email",
                                           style: GoogleFonts.abel(
                                             fontSize: 10.sp,
                                             color: kTextColor,
@@ -873,7 +899,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                         SizedBox(
                                           height: 4.h,
                                           child: TextField(
-                                            controller: custNameController,
+                                            controller: custEmailController,
                                             decoration: InputDecoration(
                                               filled: true,
                                               fillColor: kTextColor,
@@ -885,12 +911,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                                   color: Colors.greenAccent,
                                                 ),
                                               ),
-                                              hintText: isCustomerFound
-                                                  ? custNameController
-                                                          .text.isNotEmpty
-                                                      ? custNameController.text
-                                                      : 'Customer not found'
-                                                  : 'Loading...',
+                                              hintText: 'Customer Email',
                                               contentPadding:
                                                   EdgeInsets.symmetric(
                                                 vertical:
@@ -940,33 +961,33 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                             SizedBox(
                                               width: 2.w,
                                             ),
-                                            ElevatedButton(
-                                              style: ButtonStyle(
-                                                overlayColor:
-                                                    MaterialStateProperty
-                                                        .resolveWith<Color?>(
-                                                  (Set<MaterialState> states) {
-                                                    if (states.contains(
-                                                        MaterialState.pressed))
-                                                      return Colors
-                                                          .purpleAccent;
-                                                    return null;
-                                                  },
-                                                ),
-                                              ),
-                                              onPressed: () {
-                                                searchCustomer();
-                                              },
-                                              child: Text(
-                                                "Membership",
-                                                style: GoogleFonts.manrope(
-                                                  fontSize: 8.sp,
-                                                  color: kTextColor,
-                                                  fontWeight: FontWeight.w400,
-                                                  letterSpacing: 1.0,
-                                                ),
-                                              ),
-                                            ),
+                                            // ElevatedButton(
+                                            //   style: ButtonStyle(
+                                            //     overlayColor:
+                                            //         MaterialStateProperty
+                                            //             .resolveWith<Color?>(
+                                            //       (Set<MaterialState> states) {
+                                            //         if (states.contains(
+                                            //             MaterialState.pressed))
+                                            //           return Colors
+                                            //               .purpleAccent;
+                                            //         return null;
+                                            //       },
+                                            //     ),
+                                            //   ),
+                                            //   onPressed: () {
+                                                
+                                            //   },
+                                            //   child: Text(
+                                            //     "Membership",
+                                            //     style: GoogleFonts.manrope(
+                                            //       fontSize: 8.sp,
+                                            //       color: kTextColor,
+                                            //       fontWeight: FontWeight.w400,
+                                            //       letterSpacing: 1.0,
+                                            //     ),
+                                            //   ),
+                                            // ),
                                             SizedBox(
                                               height: 2.h,
                                             ),
@@ -1613,7 +1634,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                             child: Text(
                               'Error fetching categories: ${snapshot.error}',
                               style: TextStyle(
-                                fontSize: 16.0,
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.w500,
                                 color: kTextColor,
                               ),
