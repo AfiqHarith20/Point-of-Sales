@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<User> _user;
   late List<String> categoryNames = [];
   late List<Category> categories;
-  late List<Product> products;
+  List<Product> productListState = [];
   late Future<List<String>> _prodCategory;
   PaymentType? _selectedPaymentType;
   PaymentTax? _selectedPaymentTax;
@@ -208,8 +208,8 @@ double calculateTax() {
     }
   }
 
-Future<List<ProductList>> fetchProductsForCategory(String category) async {
-    final url = Uri.parse(Constants.apiListCategory);
+Future<List<Product>> fetchProductsForCategory(String category) async {
+    final url = Uri.parse(Constants.apiPosIndex);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final http.Response response = await http.get(
       url,
@@ -220,31 +220,16 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> json = jsonDecode(response.body);
-      final List<dynamic> categoryList = json['data']['category'];
+      final Map<String, dynamic> pos = json.decode(response.body);
+      final List<dynamic> productListData = pos['data'][0]['products'];
 
-      // Find the category with the matching name
-      Map<String, dynamic>? selectedCategory;
-      for (var categoryData in categoryList) {
-        final categoryName = categoryData['name'].toString().trim();
-        if (categoryName == category) {
-          selectedCategory = categoryData;
-          break;
-        }
-      }
+      // Filter products based on the selected category name
+      List<Product> productList = productListData
+          .where((productData) => productData['category']['name'] == category)
+          .map((productData) => Product.fromJson(productData))
+          .toList();
 
-      if (selectedCategory != null) {
-        // Assuming ProductList is the data model class for products
-        final List<ProductList> productList = List<ProductList>.from(
-          selectedCategory['product_list']
-              .map((productJson) => ProductList.fromJson(productJson)),
-        );
-
-        return productList;
-      } else {
-        // Return an empty list if the category is not found or has no products
-        return [];
-      }
+      return productList;
     } else {
       // Return an empty list if there's an error fetching products
       print('Failed to fetch products from API');
@@ -254,15 +239,13 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
 
   Future<void> _fetchProductList(String selectedCategoryName) async {
     try {
-      List<String> categories = await fetchCategoryNames();
-
-      // Assuming you have a method to get the products from the selected category
-      List<ProductList> productList =
+      List<Product> productList =
           await fetchProductsForCategory(selectedCategoryName);
 
       setState(() {
         selectedCategory = selectedCategoryName;
-        productList = productList;
+        productListState =
+            productList; // Set the productListState to the fetched product list
         isLoading = false;
       });
     } catch (e) {
@@ -277,143 +260,77 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
 ///////////////////////////// fetch Get and Post ////////////////////////////////////////
 
   void fetchPos() async {
-    final url = Uri.parse(Constants.apiPosIndex);
+  final url = Uri.parse(Constants.apiPosIndex);
 
-    //GET Request
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final http.Response response = await http.get(
-      url,
-      headers: ({
-        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-        'Content-Type': 'application/json'
-      }),
-    );
-    print(response.statusCode);
+  //GET Request
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final http.Response response = await http.get(
+    url,
+    headers: ({
+      'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+      'Content-Type': 'application/json'
+    }),
+  );
+  print(response.statusCode);
+  if (response.statusCode == 200) {
     final Map<String, dynamic> pos = json.decode(response.body);
-    if (response.statusCode == 200) {
-      print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
-      // print(response.body);
-      setState(() {
-        isLoading = false;
+    print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
+    // print(response.body);
 
-        /////////////////////////// User ////////////////////////////////////
+    setState(() {
+      isLoading = false;
 
-        if (pos["data"] != null) {
-          final userData = pos['data'][0]['user'];
-          if (userData != null) {
-            final user = User(
-              userid: userData['id'],
-              username: userData['name'].toString(),
-              useremail: userData['email'].toString(),
-            );
-            userId = userData.userid;
-            userName = userData.username;
-            userEmail = userData.useremail;
-          } else {
-            print("User data is null");
-          }
+      /////////////////////////// User ////////////////////////////////////
 
-          ///////////////////// Product Category ///////////////////////////
+      final userData = pos['data'][0]['user'];
+      if (userData != null) {
+        final user = User(
+          userid: userData['id'],
+          username: userData['name'].toString(),
+          useremail: userData['email'].toString(),
+        );
+        userId = user.userid;
+        userName = user.username;
+        userEmail = user.useremail;
+      } else {
+        print("User data is null");
+      }
 
-          if (pos["data"] != null) {
-            final categoryData =
-                pos['data'][0]['products'][0]['product_category'];
-            if (categoryData != null) {
-              final productsCategory = ProductsCategory(
-                catid: categoryData['id'],
-                catname: categoryData['name'].toString(),
-              );
-              // ... handle productsCategory ...
-            } else {
-              print("Category data is null");
-            }
-          }
+      ///////////////////// Payment Type and Tax ////////////////////////////////
 
-          /////////////////////Payment Type ////////////////////////////////
+      _parsePaymentTypeAndTax(pos);
 
-          Future<List<PaymentType>> _paymentType = fetchPaymentTypes();
-          Future<List<PaymentTax>> _paymentTax = fetchPaymentTax();
-
-          var paymentTaxId = pos["payment_type"]?["id"];
-          if (paymentTaxId is int) {
-            _paymentTax.then((paymentTax) {
-              var parsedPaymentTaxId = paymentTaxId;
-              var data = PaymentTax(
-                id: parsedPaymentTaxId,
-                name: pos['payment_tax']['name'].toString(),
-                taxPercentage: pos['payment_tax']['tax_percentage'],
-              );
-              taxid = data.id;
-              taxname = data.name;
-              taxpercentage = data.taxPercentage;
-
-              setState(() {
-                _paymentTax = Future.value(paymentTax);
-              });
-            });
-
-            _paymentType.then((paymentTypes) {
-              var parsedPaymentTypeId = paymentTaxId;
-              var data = PaymentType(
-                id: parsedPaymentTypeId,
-                name: pos["payment_type"]["name"].toString(),
-              );
-              payid = data.id;
-              payname = data.name;
-
-              setState(() {
-                _paymentType = Future.value(paymentTypes);
-              });
-            });
-          } else {
-            // Handle the case when the value is not an integer or is null
-            if (pos["payment_type"] == null) {
-              print("Payment type data is null");
-            } else {
-              var idValue = pos["payment_type"]["id"];
-              print("Invalid payment type ID: $idValue");
-            }
-          }
-
-          // Parse Payment Type and Tax
-          if (pos["payment_type"] is Map<String, dynamic>) {
-            _parsePaymentTypeAndTax(pos["payment_type"]);
-          } else {
-            print("Payment type data is null or not a Map");
-          }
-
-          print(paymentType);
-        } else {
-          print(response.reasonPhrase);
-        }
-      });
-    } else {
-      print(response.reasonPhrase);
-    }
+      // Rest of your code...
+    });
+  } else {
+    print(response.reasonPhrase);
   }
+}
 
-  void _parsePaymentTypeAndTax(Map<String, dynamic> paymentTypeData) {
-    final paymentTypeId = paymentTypeData["id"];
-    if (paymentTypeId is int) {
-      final paymentType = PaymentType(
-        id: paymentTypeId,
-        name: paymentTypeData["name"].toString(),
-      );
-      // ... handle paymentType ...
+void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
+    final paymentTypeDataList = pos['payment_type'];
+    final paymentTaxDataList = pos['payment_tax'];
+
+    if (paymentTypeDataList != null && paymentTypeDataList is List) {
+      final List<PaymentType> paymentTypes = [];
+      for (var paymentTypeData in paymentTypeDataList) {
+        final paymentType = PaymentType.fromJson(paymentTypeData);
+        paymentTypes.add(paymentType);
+      }
+      // ... handle paymentTypes list ...
     } else {
-      print("Invalid payment type ID: $paymentTypeId");
+      print("Payment type data is null or not a List");
     }
 
-    final paymentTaxId = paymentTypeData["payment_tax_id"];
-    if (paymentTaxId is int) {
-      final paymentTax = PaymentTax(
-        id: paymentTaxId,
-        name: paymentTypeData["payment_tax"]["name"].toString(),
-        taxPercentage: paymentTypeData["payment_tax"]["tax_percentage"],
-      );
-      // ... handle paymentTax ...
+    if (paymentTaxDataList != null && paymentTaxDataList is List) {
+      final List<PaymentTax> paymentTaxes = [];
+      for (var paymentTaxData in paymentTaxDataList) {
+        final paymentTax = PaymentTax.fromJson(paymentTaxData);
+        paymentTaxes.add(paymentTax);
+      }
+      // ... handle paymentTaxes list ...
     } else {
-      print("Invalid payment tax ID: $paymentTaxId");
+      print("Payment tax data is null or not a List");
     }
   }
 
@@ -544,10 +461,11 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
 
 //////////////////////// Add Product ////////////////////////////////////////////////////
 
-  void addSelectedProduct(ProductList productList) {
+  void addSelectedProduct(Product product) {
     setState(() {
       final existingProductIndex = searchResults
-          .indexWhere((item) => item.productId == productList.id.toString());
+          .indexWhere((item) => item.productId == product.id.toString());
+
       if (existingProductIndex != -1) {
         // If the product already exists, update the quantity
         int currentQuantity =
@@ -558,13 +476,14 @@ Future<List<ProductList>> fetchProductsForCategory(String category) async {
         // If the product doesn't exist, add it to the search results
         searchResults.add(
           ItemsArray(
-            productId: productList.id.toString(),
-            name: productList.name,
+            productId: product.id.toString(),
+            name: product.name,
             quantity: '1',
-            price: productList.price.toString(),
+            price: product.price.toString(),
           ),
         );
       }
+
       // Calculate the new total price
       total = calculateTotal();
     });
@@ -997,37 +916,37 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                           color: Colors.red,
                                           thickness: 2.0,
                                         ),
-                                        Column(
-                                          children: [
-                                            if (customerId != null)
-                                              Text(
-                                                'Customer ID: $customerId',
-                                                style: TextStyle(
-                                                  fontSize: 6.sp,
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            if (customerEmail != null)
-                                              Text(
-                                                'Customer Email: $customerEmail',
-                                                style: TextStyle(
-                                                  fontSize: 6.sp,
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              )
-                                            else
-                                              Text(
-                                                'Customer not registered',
-                                                style: TextStyle(
-                                                  fontSize: 9.sp,
-                                                  color: Colors.red,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
+                                        // Column(
+                                        //   children: [
+                                        //     if (customerId != null)
+                                        //       Text(
+                                        //         'Customer ID: $customerId',
+                                        //         style: TextStyle(
+                                        //           fontSize: 6.sp,
+                                        //           color: Colors.black,
+                                        //           fontWeight: FontWeight.bold,
+                                        //         ),
+                                        //       ),
+                                        //     if (customerEmail != null)
+                                        //       Text(
+                                        //         'Customer Email: $customerEmail',
+                                        //         style: TextStyle(
+                                        //           fontSize: 6.sp,
+                                        //           color: Colors.black,
+                                        //           fontWeight: FontWeight.bold,
+                                        //         ),
+                                        //       )
+                                        //     else
+                                        //       Text(
+                                        //         'Customer not registered',
+                                        //         style: TextStyle(
+                                        //           fontSize: 9.sp,
+                                        //           color: Colors.red,
+                                        //           fontWeight: FontWeight.bold,
+                                        //         ),
+                                        //       ),
+                                        //   ],
+                                        // ),
                                         Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
@@ -1698,7 +1617,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                         color: kPrimaryColor,
                         borderRadius: kRadius,
                       ),
-                      child: FutureBuilder<List<ProductList>>(
+                      child: FutureBuilder<List<Product>>(
                               future:
                                   fetchProductsForCategory(selectedCategory),
                               builder: (context, snapshot) {
@@ -1724,7 +1643,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                 } else {
                                   isInitialLoading =
                                       false; // Set the flag to false after successful loading
-                                  List<ProductList> productList =
+                                  List<Product> productList =
                                       snapshot.data ?? [];
                                   if (productList.isEmpty) {
                                     return Center(

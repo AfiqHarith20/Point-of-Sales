@@ -154,7 +154,7 @@ class PaymentTax {
   factory PaymentTax.fromJson(Map<String, dynamic> json) => PaymentTax(
         id: json["id"],
         name: json["name"],
-        taxPercentage: json["tax_percentage"],
+        taxPercentage: int.parse(json["tax_percentage"]),
       );
 
   Map<String, dynamic> toJson() => {
