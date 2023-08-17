@@ -223,6 +223,9 @@ Future<List<Product>> fetchProductsForCategory(String category) async {
       final Map<String, dynamic> pos = json.decode(response.body);
       final List<dynamic> productListData = pos['data'][0]['products'];
 
+      // Print debug information
+      print('Product List Data: $productListData');
+
       // Filter products based on the selected category name
       List<Product> productList = productListData
           .where((productData) => productData['category']['name'] == category)
@@ -236,6 +239,7 @@ Future<List<Product>> fetchProductsForCategory(String category) async {
       return [];
     }
   }
+
 
   Future<void> _fetchProductList(String selectedCategoryName) async {
     try {
@@ -334,60 +338,6 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
     }
   }
 
-    ////////////////////////// Search Customer //////////////////////////////////////////////
-  
-  // Future<void> searchCustomer() async {
-  //   final url = Uri.parse(Constants.apiSearchCustomer);
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  //   final String custName = custNameController.text.trim(); // Trim whitespace
-
-  //   if (custName.isEmpty) {
-  //     // Show an error message or update a flag to indicate the error
-  //     print("Customer name must be entered");
-  //     return;
-  //   }
-
-  //   final Map<String, dynamic> requestBody = {
-  //     "cust_name": custName,
-  //   };
-
-  //   final http.Response response = await http.post(
-  //     url,
-  //     body: jsonEncode(requestBody),
-  //     headers: {
-  //       'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-  //       'Content-Type': 'application/json'
-  //     },
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //   final dynamic responseData = json.decode(response.body);
-
-  //   if (responseData is Map<String, dynamic> &&
-  //       responseData.containsKey('data')) {
-  //     final dynamic customerData = responseData['data']['customer'];
-
-  //     if (customerData is List && customerData.isNotEmpty) {
-  //         final Map<String, dynamic> customer = customerData[0];
-  //         customerEmail = customer['email'];
-  //         customerId = customer['id'];
-
-  //         setState(() {
-  //           isCustomerFound = true;
-  //         });
-  //       } else {
-  //         setState(() {
-  //           isCustomerFound = false;
-  //         });
-  //       }
-  //       print("searchCustomer function called");
-  //     }
-  //   } else {
-  //     print("Could not find Customer Membership");
-  //   }
-  // }
-  
   ////////////////////////// Search SKU //////////////////////////////////////////////////
 
   Future<void> searchProduct() async {
@@ -1618,116 +1568,110 @@ Future<int> saveTransaction(double total, double tax, double discount,
                         borderRadius: kRadius,
                       ),
                       child: FutureBuilder<List<Product>>(
-                              future:
-                                  fetchProductsForCategory(selectedCategory),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                        ConnectionState.waiting &&
-                                    isInitialLoading) {
-                                  return Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                } else if (snapshot.hasError) {
-                                  isInitialLoading =
-                                      false; // Set the flag to false to avoid circular loading when error occurs
-                                  return Center(
-                                    child: Text(
-                                      'Error fetching products: ${snapshot.error}',
-                                      style: TextStyle(
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.w500,
-                                        color: kTextColor,
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  isInitialLoading =
-                                      false; // Set the flag to false after successful loading
-                                  List<Product> productList =
-                                      snapshot.data ?? [];
-                                  if (productList.isEmpty) {
-                                    return Center(
-                                      child: Text(
-                                        'No products available',
-                                        style: TextStyle(
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.w500,
-                                          color: kTextColor,
-                                        ),
-                                      ),
-                                    );
-                                  } else {
-                                    return Wrap(
-                                      alignment: WrapAlignment.start,
-                                      children: productList
-                                          .map(
-                                            (product) => GestureDetector(
-                                              onTap: () {
-                                                addSelectedProduct(product);
-                                              },
-                                              child: Container(
-                                                width: 29.w,
-                                                alignment: Alignment.center,
-                                                margin: EdgeInsets.all(10.0),
-                                                padding: EdgeInsets.all(10.0),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Colors.grey
-                                                          .withOpacity(0.5),
-                                                      spreadRadius: 2,
-                                                      blurRadius: 5,
-                                                      offset: Offset(0, 3),
-                                                    ),
-                                                  ],
-                                                ),
-                                                child: Column(
-                                                  children: [
-                                                    SizedBox(height: 10.0),
-                                                    Text(
-                                                      product.name,
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 16.0,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 5.0),
-                                                    Text(
-                                                      '\RM${product.price}',
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 14.0,
-                                                        color: Colors.blue,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 10.0),
-                                                    Text(
-                                                      product.summary,
-                                                      style: TextStyle(
-                                                        fontSize: 14.0,
-                                                      ),
-                                                    ),
-                                                  ],
+                        future: fetchProductsForCategory(selectedCategory),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.waiting &&
+                              isInitialLoading) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (snapshot.hasError) {
+                            isInitialLoading = false;
+                            return Center(
+                              child: Text(
+                                'Error fetching products: ${snapshot.error}',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w500,
+                                  color: kTextColor,
+                                ),
+                              ),
+                            );
+                          } else {
+                            isInitialLoading = false;
+                            List<Product> productList = snapshot.data ?? [];
+                            if (productList.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  'No products available',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w500,
+                                    color: kTextColor,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return Wrap(
+                                alignment: WrapAlignment.start,
+                                children: productList
+                                    .map(
+                                      (product) => GestureDetector(
+                                        onTap: () {
+                                          addSelectedProduct(product);
+                                        },
+                                        child: Container(
+                                          width: 29.w,
+                                          alignment: Alignment.center,
+                                          margin: EdgeInsets.all(10.0),
+                                          padding: EdgeInsets.all(10.0),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey
+                                                    .withOpacity(0.5),
+                                                spreadRadius: 2,
+                                                blurRadius: 5,
+                                                offset: Offset(0, 3),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              SizedBox(height: 10.0),
+                                              Text(
+                                                product.name,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16.0,
                                                 ),
                                               ),
-                                            ),
-                                          )
-                                          .toList(),
-                                    );
-                                  }
-                                }
-                              },
-                            )
-                         
+                                              SizedBox(height: 5.0),
+                                              Text(
+                                                '\RM${product.price.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14.0,
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
+                                              SizedBox(height: 10.0),
+                                              Text(
+                                                product.summary,
+                                                style: TextStyle(
+                                                  fontSize: 14.0,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              );
+                            }
+                          }
+                        },
+                      )
                     ),
                   ],
                 ),
               ),
             ],
           ),
-        ));
+        ),
+        );
   }
 }

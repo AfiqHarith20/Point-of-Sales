@@ -298,15 +298,15 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
-        id: json["id"],
-        merchantId: json["merchant_id"],
+        id: int.parse(json["id"]),
+        merchantId: int.parse(json["merchant_id"]),
         sku: json["sku"],
         name: json["name"],
         summary: json["summary"],
-        categoryId: json["category_id"],
-        price: json["price"]?.toDouble(),
+        categoryId: int.parse(json["category_id"]),
+        price: double.parse(json["price"]),
         mainImage: json["main_image"],
-        productCategory: ProductsCategory.fromJson(json["product_category"]),
+        productCategory: ProductsCategory.fromJson(json["category"]),
       );
 
       Map<String, dynamic> toJson() => {
