@@ -276,14 +276,14 @@ class ItemsArray {
 
 class Product {
   final int id;
-  final int merchantId;
+  final String merchantId;
   final String sku;
   final String name;
   final String summary;
-  final int categoryId;
-  final double price;
-  final dynamic mainImage;
-  final ProductsCategory productCategory;
+  final String categoryId;
+  final String price;
+  final String mainImage;
+  final PaymentType category;
 
   Product({
     required this.id,
@@ -293,23 +293,23 @@ class Product {
     required this.summary,
     required this.categoryId,
     required this.price,
-    this.mainImage,
-    required this.productCategory,
+    required this.mainImage,
+    required this.category,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
-        id: int.parse(json["id"]),
-        merchantId: int.parse(json["merchant_id"]),
+        id: json["id"],
+        merchantId: json["merchant_id"],
         sku: json["sku"],
         name: json["name"],
         summary: json["summary"],
-        categoryId: int.parse(json["category_id"]),
-        price: double.parse(json["price"]),
+        categoryId: json["category_id"],
+        price: json["price"],
         mainImage: json["main_image"],
-        productCategory: ProductsCategory.fromJson(json["category"]),
+        category: PaymentType.fromJson(json["category"]),
       );
 
-      Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "id": id,
         "merchant_id": merchantId,
         "sku": sku,
@@ -318,7 +318,7 @@ class Product {
         "category_id": categoryId,
         "price": price,
         "main_image": mainImage,
-        "product_category": productCategory.toJson(),
+        "category": category.toJson(),
       };
 }
 
