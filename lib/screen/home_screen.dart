@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
       customerEmail;
   double? grossPrice, netPrice, discountAmount;
   dynamic taxId, taxAmount, discId, discAmount;
-  late String selectedCategory = "Consumer products";
+  late String selectedCategory = "Food & Beverages";
   bool isInitialLoading = true;
   late Future<User> _user;
   late List<String> categoryNames = [];
@@ -222,9 +222,6 @@ Future<List<Product>> fetchProductsForCategory(String category) async {
     if (response.statusCode == 200) {
       final Map<String, dynamic> pos = json.decode(response.body);
       final List<dynamic> productListData = pos['data'][0]['products'];
-
-      // Print debug information
-      print('Product List Data: $productListData');
 
       // Filter products based on the selected category name
       List<Product> productList = productListData
@@ -530,7 +527,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
     _user = fetchUser();
     _fetchProductList(selectedCategory);
     _prodCategory = fetchCategoryNames();
-    selectedCategory = "Consumer products";
+    selectedCategory = "Food & Beverages";
     quantityController.text = quantity.toString();
   }
 
@@ -1570,14 +1567,11 @@ Future<int> saveTransaction(double total, double tax, double discount,
                       child: FutureBuilder<List<Product>>(
                         future: fetchProductsForCategory(selectedCategory),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                                  ConnectionState.waiting &&
-                              isInitialLoading) {
+                          if (isLoading) {
                             return Center(
                               child: CircularProgressIndicator(),
                             );
                           } else if (snapshot.hasError) {
-                            isInitialLoading = false;
                             return Center(
                               child: Text(
                                 'Error fetching products: ${snapshot.error}',
@@ -1589,7 +1583,6 @@ Future<int> saveTransaction(double total, double tax, double discount,
                               ),
                             );
                           } else {
-                            isInitialLoading = false;
                             List<Product> productList = snapshot.data ?? [];
                             if (productList.isEmpty) {
                               return Center(
@@ -1640,7 +1633,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                               ),
                                               SizedBox(height: 5.0),
                                               Text(
-                                                '\RM${product.price.toStringAsFixed(2)}',
+                                                '\RM${product.price}',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 14.0,
