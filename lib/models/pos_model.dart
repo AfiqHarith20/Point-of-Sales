@@ -343,3 +343,48 @@ class ProductsCategory {
       };
 }
 
+///////////////////// class Pos Request Body /////////////////////////////////////////
+class PosRequestBody {
+  final int customerId;
+  final double grossPrice;
+  final int taxId;
+  final String custEmail;
+  final double taxAmount;
+  final int? discId;
+  final double discAmount;
+  final double netPrice;
+  final int paymentType;
+  final String remarks;
+  final List<ItemsArray> itemsArray;
+
+  PosRequestBody({
+    required this.customerId,
+    required this.grossPrice,
+    required this.taxId,
+    required this.custEmail,
+    required this.taxAmount,
+    required this.discId,
+    required this.discAmount,
+    required this.netPrice,
+    required this.paymentType,
+    required this.remarks,
+    required this.itemsArray,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'customer_id': customerId,
+      'gross_price': grossPrice,
+      'tax_id': taxId,
+      'cust_email': custEmail,
+      'tax_amount': taxAmount,
+      'disc_id': discId,
+      'disc_amount': discAmount,
+      'net_price': netPrice,
+      'payment_type': paymentType,
+      'remarks': remarks,
+      'items_array': itemsArray.map((item) => item.toJson()).toList(),
+    };
+  }
+}
+

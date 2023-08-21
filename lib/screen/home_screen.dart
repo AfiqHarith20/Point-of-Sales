@@ -85,8 +85,23 @@ class _HomeScreenState extends State<HomeScreen> {
   double taxPercentage = 3;
 
   double calculateDiscount() {
-    double total = calculateSubtotal();
-    return (total * discountPercentage) / 100;
+    // Check if user is registered and has valid email
+    if (custEmailController.text.isNotEmpty &&
+        isValidEmail(custEmailController.text)) {
+      // Apply discount logic for registered users
+      return 10.0; // For example, 10% discount for registered users
+    } else {
+      // No discount for unregistered users
+      return 0.0;
+    }
+  }
+
+  bool isValidEmail(String email) {
+    // You can use a regular expression or any other validation method to check email validity
+    // Return true if the email is valid, otherwise false
+    // Example validation using regular expression:
+    return RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+        .hasMatch(email);
   }
 
 double calculateTax() {
@@ -287,7 +302,7 @@ Future<List<Product>> fetchProductsForCategory(String category) async {
       if (userData != null) {
         final user = User(
           userid: userData['id'],
-          username: userData['name'].toString(),
+          username: userData['fullname'].toString(),
           useremail: userData['email'].toString(),
         );
         userId = user.userid;
@@ -452,7 +467,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
 
       // Prepare payment type and remarks
       String paymentType = _selectedPaymentType?.name ?? 'Cash';
-      String remarks = 'Your remark here'; // Replace with actual remark
+      String remarks = paymentType; // Set remarks to payment type name
 
       // Call API to save the transaction
       int posId =
@@ -465,35 +480,52 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
           builder: (context) => InvoiceScreen(posId: posId),
         ),
       );
-    } catch (e) {
+   } catch (e) {
       // Handle errors
       print('Error during checkout: $e');
+      print('Error type: ${e.runtimeType}');
+      if (e is http.Response) {
+        print('Response status code: ${e.statusCode}');
+        print('Response body: ${e.body}');
+      }
     }
   }
 
 // Function to save the transaction
-Future<int> saveTransaction(double total, double tax, double discount,
-      String paymentType, String remarks) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final url = Uri.parse(Constants.apiPosIndex);
+Future<int> saveTransaction(
+  double total,
+  double tax,
+  double discount,
+  String paymentType,
+  String remarks,
+) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final url = Uri.parse(Constants.apiPosIndex);
 
-    final http.Response response = await http.post(url,
-        headers: {
-          'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'customer_id': customerId,
-          'gross_price': total,
-          'tax_id': _selectedPaymentTax?.id,
-          'tax_amount': tax,
-          'disc_id': discountId,
-          'disc_amount': discount,
-          'net_price': total,
-          'payment_type': _selectedPaymentType?.id,
-          'remarks': remarks,
-          'items_array': searchResults.map((item) => item.toJson()).toList(),
-        }));
+  final requestBody = PosRequestBody(
+    customerId: 0,
+    grossPrice: total,
+    taxId: _selectedPaymentTax!.id,
+    custEmail: custEmailController.text,
+    taxAmount: tax,
+    discId: null,
+    discAmount: 0,
+    netPrice: total,
+    paymentType: _selectedPaymentType!.id,
+    remarks: remarks,
+    itemsArray: searchResults,
+  );
+  print("Request body: ${requestBody.toJson()}");
+
+  final http.Response response = await http.post(
+    url,
+    headers: {
+      'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(requestBody.toJson()),
+  );
+        
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
@@ -1606,6 +1638,7 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                         },
                                         child: Container(
                                           width: 29.w,
+                                          height: 8.h,
                                           alignment: Alignment.center,
                                           margin: EdgeInsets.all(10.0),
                                           padding: EdgeInsets.all(10.0),
@@ -1640,13 +1673,13 @@ Future<int> saveTransaction(double total, double tax, double discount,
                                                   color: Colors.blue,
                                                 ),
                                               ),
-                                              SizedBox(height: 10.0),
-                                              Text(
-                                                product.summary,
-                                                style: TextStyle(
-                                                  fontSize: 14.0,
-                                                ),
-                                              ),
+                                              // SizedBox(height: 10.0),
+                                              // Text(
+                                              //   product.summary,
+                                              //   style: TextStyle(
+                                              //     fontSize: 14.0,
+                                              //   ),
+                                              // ),
                                             ],
                                           ),
                                         ),
