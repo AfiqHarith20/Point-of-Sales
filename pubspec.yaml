@@ -40,6 +40,7 @@ dependencies:
   getwidget: ^3.1.1
   animated_button_bar: ^1.0.0
   syncfusion_flutter_datagrid: ^22.1.39
+  msh_checkbox: ^2.0.1
 
 dev_dependencies:
   flutter_test:

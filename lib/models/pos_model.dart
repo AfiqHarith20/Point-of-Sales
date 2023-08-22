@@ -225,32 +225,6 @@ class Customer {
   });
 }
 
-class Items {
-  final String customerId;
-  final String grossPrice;
-  final String taxId;
-  final String taxAmount;
-  final String discId;
-  final String discAmount;
-  final String netPrice;
-  final String paymentType;
-  final String remarks;
-  final List<ItemsArray> itemsArray;
-
-  Items({
-    required this.customerId,
-    required this.grossPrice,
-    required this.taxId,
-    required this.taxAmount,
-    required this.discId,
-    required this.discAmount,
-    required this.netPrice,
-    required this.paymentType,
-    required this.remarks,
-    required this.itemsArray,
-  });
-}
-
 class ItemsArray {
   final String productId;
   final String name;
@@ -355,6 +329,7 @@ class PosRequestBody {
   final double netPrice;
   final int paymentType;
   final String remarks;
+  final int? isReceipt;
   final List<ItemsArray> itemsArray;
 
   PosRequestBody({
@@ -367,6 +342,7 @@ class PosRequestBody {
     required this.discAmount,
     required this.netPrice,
     required this.paymentType,
+    required this.isReceipt,
     required this.remarks,
     required this.itemsArray,
   });
@@ -382,6 +358,7 @@ class PosRequestBody {
       'disc_amount': discAmount,
       'net_price': netPrice,
       'payment_type': paymentType,
+      'is_receipt': isReceipt,
       'remarks': remarks,
       'items_array': itemsArray.map((item) => item.toJson()).toList(),
     };

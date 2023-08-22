@@ -18,6 +18,7 @@ import 'package:pointofsales/models/pos_model.dart';
 import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/drawer_screen.dart';
 import 'package:pointofsales/screen/product_screen.dart';
+import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:pointofsales/widget/progressIndicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
@@ -43,7 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
       taxpercentage,
       status,
       discountId,
-      customerId;
+      customerId,
+      isReceipt;
   String? userName,
       catName,
       userEmail,
@@ -69,6 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoader = false;
   double total = 0;
   bool isCustomerFound = false;
+  bool isChecked = false;
+  bool isDisabled = false;
+  MSHCheckboxStyle style = MSHCheckboxStyle.stroke;
 
   Category? selectedCategoryData;
   List<ProductList> productList = [];
@@ -469,18 +474,35 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
       String paymentType = _selectedPaymentType?.name ?? 'Cash';
       String remarks = paymentType; // Set remarks to payment type name
 
-      // Call API to save the transaction
-      int posId =
-          await saveTransaction(total, tax, discount, paymentType, remarks);
+      // Calculate isReceipt value based on checkbox
+      int isReceiptValue = isChecked ? 1 : 0;
 
-      // Navigate to the InvoicePage
+      // Call API to save the transaction
+      int posId = await saveTransaction(
+        customerId: 0,
+        total: total,
+        taxId: _selectedPaymentTax!.id,
+        custEmail: custEmailController.text,
+        tax: tax,
+        discId: null,
+        discount: 0,
+        subtotal: subtotal,
+        paymentType: _selectedPaymentType!.id,
+        remarks: remarks,
+        isReceipt: isReceiptValue, // Use the calculated isReceiptValue
+        searchResults: searchResults,
+      );
+
+      print('POS ID: $posId'); // Print the posId
+
+      // Navigate to the InvoicePage using the retrieved posId
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => InvoiceScreen(posId: posId),
         ),
       );
-   } catch (e) {
+    } catch (e) {
       // Handle errors
       print('Error during checkout: $e');
       print('Error type: ${e.runtimeType}');
@@ -492,48 +514,56 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
   }
 
 // Function to save the transaction
-Future<int> saveTransaction(
-  double total,
-  double tax,
-  double discount,
-  String paymentType,
-  String remarks,
-) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final url = Uri.parse(Constants.apiPosIndex);
+  Future<int> saveTransaction({
+    required int customerId,
+    required double total,
+    required int taxId,
+    required String custEmail,
+    required double tax,
+    required int? discId,
+    required double discount,
+    required double subtotal,
+    required int paymentType,
+    required String remarks,
+    required int isReceipt,
+    required List<ItemsArray> searchResults,
+  }) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final url = Uri.parse(Constants.apiPosIndex);
 
-  final requestBody = PosRequestBody(
-    customerId: 0,
-    grossPrice: total,
-    taxId: _selectedPaymentTax!.id,
-    custEmail: custEmailController.text,
-    taxAmount: tax,
-    discId: null,
-    discAmount: 0,
-    netPrice: total,
-    paymentType: _selectedPaymentType!.id,
-    remarks: remarks,
-    itemsArray: searchResults,
-  );
-  print("Request body: ${requestBody.toJson()}");
+    final requestBody = PosRequestBody(
+      customerId: customerId,
+      grossPrice: total,
+      taxId: taxId,
+      custEmail: custEmail,
+      taxAmount: tax,
+      discId: discId,
+      discAmount: discount,
+      netPrice: subtotal,
+      paymentType: paymentType,
+      remarks: remarks,
+      isReceipt: isReceipt,
+      itemsArray: searchResults,
+    );
+    print("Request body: ${requestBody.toJson()}");
 
-  final http.Response response = await http.post(
-    url,
-    headers: {
-      'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode(requestBody.toJson()),
-  );
-        
+    final http.Response response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(requestBody.toJson()),
+    );
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
+      final int posId = responseData['data']['pos_data']['id'];
       print("POS TRANSACTION SUCCESSFULLY SAVED");
       setState(() {
         isLoading = false;
       });
-      return responseData['posId'];
+      return posId;
     } else {
       // Handle the error more gracefully, e.g., show an error message to the user
       final Map<String, dynamic> errorResponseData = json.decode(response.body);
@@ -640,7 +670,7 @@ Future<int> saveTransaction(
                             flex: 3,
                             child: Form(
                               child: Container(
-                                height: 78.h,
+                                height: 82.h,
                                 margin: kMargin,
                                 padding: kPadding,
                                 decoration: BoxDecoration(
@@ -859,33 +889,6 @@ Future<int> saveTransaction(
                                             SizedBox(
                                               width: 2.w,
                                             ),
-                                            // ElevatedButton(
-                                            //   style: ButtonStyle(
-                                            //     overlayColor:
-                                            //         MaterialStateProperty
-                                            //             .resolveWith<Color?>(
-                                            //       (Set<MaterialState> states) {
-                                            //         if (states.contains(
-                                            //             MaterialState.pressed))
-                                            //           return Colors
-                                            //               .purpleAccent;
-                                            //         return null;
-                                            //       },
-                                            //     ),
-                                            //   ),
-                                            //   onPressed: () {
-                                                
-                                            //   },
-                                            //   child: Text(
-                                            //     "Membership",
-                                            //     style: GoogleFonts.manrope(
-                                            //       fontSize: 8.sp,
-                                            //       color: kTextColor,
-                                            //       fontWeight: FontWeight.w400,
-                                            //       letterSpacing: 1.0,
-                                            //     ),
-                                            //   ),
-                                            // ),
                                             SizedBox(
                                               height: 2.h,
                                             ),
@@ -895,37 +898,6 @@ Future<int> saveTransaction(
                                           color: Colors.red,
                                           thickness: 2.0,
                                         ),
-                                        // Column(
-                                        //   children: [
-                                        //     if (customerId != null)
-                                        //       Text(
-                                        //         'Customer ID: $customerId',
-                                        //         style: TextStyle(
-                                        //           fontSize: 6.sp,
-                                        //           color: Colors.black,
-                                        //           fontWeight: FontWeight.bold,
-                                        //         ),
-                                        //       ),
-                                        //     if (customerEmail != null)
-                                        //       Text(
-                                        //         'Customer Email: $customerEmail',
-                                        //         style: TextStyle(
-                                        //           fontSize: 6.sp,
-                                        //           color: Colors.black,
-                                        //           fontWeight: FontWeight.bold,
-                                        //         ),
-                                        //       )
-                                        //     else
-                                        //       Text(
-                                        //         'Customer not registered',
-                                        //         style: TextStyle(
-                                        //           fontSize: 9.sp,
-                                        //           color: Colors.red,
-                                        //           fontWeight: FontWeight.bold,
-                                        //         ),
-                                        //       ),
-                                        //   ],
-                                        // ),
                                         Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
@@ -1215,6 +1187,38 @@ Future<int> saveTransaction(
                                           ],
                                         ),
                                         SizedBox(
+                                        height: 1.h,
+                                      ),
+                                        Row(
+                                          mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text("Receipt",
+                                            style: GoogleFonts.aubrey(
+                                              fontWeight: FontWeight.w600,
+                                              color: kLabel,
+                                              fontSize: 11.sp,
+                                              letterSpacing: 1.0,
+                                            ),
+                                          ),
+                                          MSHCheckbox(
+                                            size: 35,
+                                            value: isChecked, 
+                                            isDisabled: isDisabled,
+                                            colorConfig: MSHColorConfig
+                                                  .fromCheckedUncheckedDisabled(
+                                                checkedColor: Colors.greenAccent,
+                                              ),
+                                              style: style,
+                                            onChanged: (isReceipt) {
+                                              setState(() {
+                                                isChecked = isReceipt;
+                                              });
+                                            },
+                                            )
+                                          ],
+                                        ),
+                                        SizedBox(
                                           height: 2.h,
                                         ),
                                         ClipRRect(
@@ -1269,7 +1273,7 @@ Future<int> saveTransaction(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  height: 78.h,
+                                  height: 82.h,
                                   margin: kMargin,
                                   padding: kPadding,
                                   decoration: BoxDecoration(
