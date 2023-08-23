@@ -101,7 +101,7 @@ Future<void> _refreshPage() async {
   /////////////// POST Request ////////////////////////////////
 
 Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
-    final url = Uri.parse(Constants.apiPosPayment + '${widget.posId}'); // Use posId
+    final url = Uri.parse(Constants.apiPosPayment); // Only the base URL
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -113,20 +113,37 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'pos_id': widget.posId, // Use posId
+          'pos_id': posId, // Use posId
         }),
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         String customerEmail = responseData['data']['pos_trans']['cust_email'];
+        String discountAmount = responseData['data']['pos_trans']['disc_amount'];
+        String taxesAmount = responseData['data']['pos_trans']['tax_amount'];
+        String totalPrice = responseData['data']['pos_trans']['net_price'];
+        String paymentType = responseData['data']['pos_trans']['remarks'];
+        List<dynamic> products = responseData['data']['pos_trans']['products'];
 
-        print("POS TRANSACTION PAYMENT");
-        print("Response Data: $responseData");
+        // Process and update the searchResults list with fetched product data
+        List<ItemsArray> updatedSearchResults = products
+            .map((product) => ItemsArray(
+                  name: product['product_name'],
+                  price: product['price'],
+                  quantity: product['quantity'], 
+                  productId: product['productId'],
+                ))
+            .toList();
 
         setState(() {
           isLoading = false;
-          custEmail = customerEmail; 
+          custEmail = customerEmail;
+          searchResults = updatedSearchResults;
+          discAmount = discountAmount;
+          taxAmount = taxesAmount;
+          netPrice = totalPrice;
+          remarks = paymentType;
         });
 
         return responseData;
@@ -147,7 +164,6 @@ void initState() {
 }
 @override
   void dispose() {
-    
     super.dispose();
   }
 
@@ -395,7 +411,7 @@ void initState() {
                             child: Padding(
                               padding: const EdgeInsets.all(6.0),
                               child: Text(
-                                result.price ?? "",
+                                result.price,
                                 style: GoogleFonts.breeSerif(
                                   fontWeight: FontWeight.w500,
                                   color: kTextColor,
@@ -423,7 +439,7 @@ void initState() {
                             child: Padding(
                               padding: const EdgeInsets.all(6.0),
                               child: Text(
-                                (double.parse(result.price ?? "0") *
+                                (double.parse(result.price) *
                                         double.parse(result.quantity ?? "0"))
                                     .toStringAsFixed(2),
                                 style: GoogleFonts.breeSerif(
@@ -440,31 +456,31 @@ void initState() {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ProductScreen(), // Replace ProductPage with the actual product page widget
-                        ),
-                      );
-                    },
-                    child: Text(
-                      "Add Product",
-                      style: GoogleFonts.aubrey(
-                        fontWeight: FontWeight.w600,
-                        color: Color.fromARGB(255, 231, 96, 96),
-                        fontSize: 14.sp,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.symmetric(horizontal: 15),
+              //     child: TextButton(
+              //       onPressed: () {
+              //         Navigator.push(
+              //           context,
+              //           MaterialPageRoute(
+              //             builder: (context) =>
+              //                 ProductScreen(), // Replace ProductPage with the actual product page widget
+              //           ),
+              //         );
+              //       },
+              //       child: Text(
+              //         "Add Product",
+              //         style: GoogleFonts.aubrey(
+              //           fontWeight: FontWeight.w600,
+              //           color: Color.fromARGB(255, 231, 96, 96),
+              //           fontSize: 14.sp,
+              //           letterSpacing: 2.0,
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               SliverToBoxAdapter(
                 child: Divider(
                   color: Colors.redAccent,
@@ -487,7 +503,7 @@ void initState() {
                         ),
                       ),
                       Text(
-                        "\RM${calculateDiscount().toStringAsFixed(2)}",
+                        "\RM $discAmount",
                         style: GoogleFonts.breeSerif(
                           fontWeight: FontWeight.w500,
                           color: kTextColor,
@@ -516,7 +532,7 @@ void initState() {
                         ),
                       ),
                       Text(
-                        "\RM${calculateTax().toStringAsFixed(2)}",
+                        "\RM $taxAmount",
                         style: GoogleFonts.breeSerif(
                           fontWeight: FontWeight.w500,
                           color: kTextColor,
@@ -545,7 +561,7 @@ void initState() {
                         ),
                       ),
                       Text(
-                        "\RM${calculateTotal().toStringAsFixed(2)}",
+                        "\RM $netPrice",
                         style: GoogleFonts.breeSerif(
                           fontWeight: FontWeight.w500,
                           color: kTextColor,
@@ -573,31 +589,15 @@ void initState() {
                           letterSpacing: 2.0,
                         ),
                       ),
-                      DropdownButton<String>(
-                        dropdownColor: kPrimaryColor,
-                        iconEnabledColor: kLabel,
-                        value: selectedPayment,
-                        items: paymentOptions
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            child: Text(
-                              value,
-                              style: GoogleFonts.breeSerif(
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                                fontSize: 12.sp,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                            value: value,
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedPayment = newValue!;
-                          });
-                        },
-                      )
+                      Text(
+                        "$remarks",
+                        style: GoogleFonts.breeSerif(
+                          fontWeight: FontWeight.w500,
+                          color: kTextColor,
+                          fontSize: 12.sp,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
                     ],
                   ),
                 ),
