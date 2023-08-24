@@ -6,89 +6,179 @@ InvoiceData invoiceDataFromJson(String str) =>
 String invoiceDataToJson(InvoiceData data) => json.encode(data.toJson());
 
 class InvoiceData {
-  final PosTrans posTrans;
+  final List<PosTran> posTrans;
 
   InvoiceData({
     required this.posTrans,
   });
 
   factory InvoiceData.fromJson(Map<String, dynamic> json) => InvoiceData(
-        posTrans: PosTrans.fromJson(json["pos_trans"]),
+        posTrans: List<PosTran>.from(
+            json["pos_trans"].map((x) => PosTran.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
-        "pos_trans": posTrans.toJson(),
+        "pos_trans": List<dynamic>.from(posTrans.map((x) => x.toJson())),
       };
 }
 
-class PosTrans {
+class PosTran {
   final int id;
   final String merchantId;
-  final String customerId;
   final String posTxnNo;
-  final String grossPrice;
-  final String taxId;
-  final String taxAmount;
-  final dynamic discId;
-  final String discAmount;
   final String netPrice;
-  final String paymentType;
-  final String remarks;
-  final String status;
+  final PaymentType paymentType;
   final String custEmail;
-  final String isReceipt;
+  final List<PosDetail> posDetails;
+  final Merchant merchant;
 
-  PosTrans({
+  PosTran({
     required this.id,
     required this.merchantId,
-    required this.customerId,
     required this.posTxnNo,
-    required this.grossPrice,
-    required this.taxId,
-    required this.taxAmount,
-    required this.discId,
-    required this.discAmount,
     required this.netPrice,
     required this.paymentType,
-    required this.remarks,
-    required this.status,
     required this.custEmail,
-    required this.isReceipt,
+    required this.posDetails,
+    required this.merchant,
   });
 
-  factory PosTrans.fromJson(Map<String, dynamic> json) => PosTrans(
+  factory PosTran.fromJson(Map<String, dynamic> json) => PosTran(
         id: json["id"],
         merchantId: json["merchant_id"],
-        customerId: json["customer_id"],
         posTxnNo: json["pos_txn_no"],
-        grossPrice: json["gross_price"],
-        taxId: json["tax_id"],
-        taxAmount: json["tax_amount"],
-        discId: json["disc_id"],
-        discAmount: json["disc_amount"],
         netPrice: json["net_price"],
-        paymentType: json["payment_type"],
-        remarks: json["remarks"],
-        status: json["status"],
+        paymentType: PaymentType.fromJson(json["payment_type"]),
         custEmail: json["cust_email"],
-        isReceipt: json["is_receipt"],
+        posDetails: List<PosDetail>.from(
+            json["pos_details"].map((x) => PosDetail.fromJson(x))),
+        merchant: Merchant.fromJson(json["merchant"]),
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
         "merchant_id": merchantId,
-        "customer_id": customerId,
         "pos_txn_no": posTxnNo,
-        "gross_price": grossPrice,
-        "tax_id": taxId,
-        "tax_amount": taxAmount,
-        "disc_id": discId,
-        "disc_amount": discAmount,
         "net_price": netPrice,
-        "payment_type": paymentType,
-        "remarks": remarks,
-        "status": status,
+        "payment_type": paymentType.toJson(),
         "cust_email": custEmail,
-        "is_receipt": isReceipt,
+        "pos_details": List<dynamic>.from(posDetails.map((x) => x.toJson())),
+        "merchant": merchant.toJson(),
+      };
+}
+
+class Merchant {
+  final int id;
+  final String companyName;
+  final String logoUrl;
+
+  Merchant({
+    required this.id,
+    required this.companyName,
+    required this.logoUrl,
+  });
+
+  factory Merchant.fromJson(Map<String, dynamic> json) => Merchant(
+        id: json["id"],
+        companyName: json["company_name"],
+        logoUrl: json["logo_url"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "company_name": companyName,
+        "logo_url": logoUrl,
+      };
+}
+
+class PaymentType {
+  final int id;
+  final String name;
+  final String description;
+
+  PaymentType({
+    required this.id,
+    required this.name,
+    required this.description,
+  });
+
+  factory PaymentType.fromJson(Map<String, dynamic> json) => PaymentType(
+        id: json["id"],
+        name: json["name"],
+        description: json["description"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "description": description,
+      };
+}
+
+class PosDetail {
+  final int id;
+  final String posId;
+  final String productId;
+  final String quantity;
+  final String price;
+  final Product product;
+
+  PosDetail({
+    required this.id,
+    required this.posId,
+    required this.productId,
+    required this.quantity,
+    required this.price,
+    required this.product,
+  });
+
+  factory PosDetail.fromJson(Map<String, dynamic> json) => PosDetail(
+        id: json["id"],
+        posId: json["pos_id"],
+        productId: json["product_id"],
+        quantity: json["quantity"],
+        price: json["price"],
+        product: Product.fromJson(json["product"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "pos_id": posId,
+        "product_id": productId,
+        "quantity": quantity,
+        "price": price,
+        "product": product.toJson(),
+      };
+}
+
+class Product {
+  final int id;
+  final String sku;
+  final String name;
+  final String summary;
+  final String categoryId;
+
+  Product({
+    required this.id,
+    required this.sku,
+    required this.name,
+    required this.summary,
+    required this.categoryId,
+  });
+
+  factory Product.fromJson(Map<String, dynamic> json) => Product(
+        id: json["id"],
+        sku: json["sku"],
+        name: json["name"],
+        summary: json["summary"],
+        categoryId: json["category_id"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "sku": sku,
+        "name": name,
+        "summary": summary,
+        "category_id": categoryId,
       };
 }
