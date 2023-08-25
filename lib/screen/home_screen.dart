@@ -16,7 +16,7 @@ import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/models/pos_model.dart';
 import 'package:pointofsales/models/user_model.dart';
 import 'package:pointofsales/screen/drawer_screen.dart';
-import 'package:pointofsales/screen/product_screen.dart';
+import 'package:pointofsales/screen/product/add_product_dialog.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:pointofsales/widget/progressIndicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';

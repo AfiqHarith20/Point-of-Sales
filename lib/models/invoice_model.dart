@@ -29,7 +29,7 @@ class PosTran {
   final String netPrice;
   final PaymentType paymentType;
   final String custEmail;
-  final List<PosDetail> posDetails;
+  final List<PosDetail> itemsArray;
   final Merchant merchant;
 
   PosTran({
@@ -39,7 +39,7 @@ class PosTran {
     required this.netPrice,
     required this.paymentType,
     required this.custEmail,
-    required this.posDetails,
+    required this.itemsArray,
     required this.merchant,
   });
 
@@ -50,7 +50,7 @@ class PosTran {
         netPrice: json["net_price"],
         paymentType: PaymentType.fromJson(json["payment_type"]),
         custEmail: json["cust_email"],
-        posDetails: List<PosDetail>.from(
+        itemsArray: List<PosDetail>.from(
             json["pos_details"].map((x) => PosDetail.fromJson(x))),
         merchant: Merchant.fromJson(json["merchant"]),
       );
@@ -62,7 +62,7 @@ class PosTran {
         "net_price": netPrice,
         "payment_type": paymentType.toJson(),
         "cust_email": custEmail,
-        "pos_details": List<dynamic>.from(posDetails.map((x) => x.toJson())),
+        "pos_details": List<dynamic>.from(itemsArray.map((x) => x.toJson())),
         "merchant": merchant.toJson(),
       };
 }
