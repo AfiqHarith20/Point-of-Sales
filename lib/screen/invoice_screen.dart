@@ -100,8 +100,8 @@ Future<void> _refreshPage() async {
 
   /////////////// POST Request ////////////////////////////////
 
-Future<void> _postPaymentTransaction(int posId) async {
-    final url = Uri.parse(Constants.apiPosPayment);
+Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
+    final url = Uri.parse(Constants.apiPosPayment); // Only the base URL
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -113,27 +113,26 @@ Future<void> _postPaymentTransaction(int posId) async {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'pos_id': posId,
+          'pos_id': posId, // Use posId
         }),
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        final Map<String, dynamic> posTransData =
-            responseData['data']['pos_trans'][0];
+        String customerEmail = responseData['data']['pos_trans']['cust_email'];
+        String discountAmount = responseData['data']['pos_trans']['disc_amount'];
+        String taxesAmount = responseData['data']['pos_trans']['tax_amount'];
+        String totalPrice = responseData['data']['pos_trans']['net_price'];
+        String paymentType = responseData['data']['pos_trans']['remarks'];
+        List<dynamic> products = responseData['data']['pos_trans']['products'];
 
-        final customerEmail = posTransData['cust_email'];
-        final paymentTypes = posTransData['payment_type']['name'];
-        final products = posTransData['pos_details'];
-        final netPrices = posTransData['net_price'];
-        final merchant = posTransData['merchant'];
-
-        final updatedSearchResults = products
-            .map<ItemsArray>((product) => ItemsArray(
-                  name: product['product']['name'],
+        // Process and update the searchResults list with fetched product data
+        List<ItemsArray> updatedSearchResults = products
+            .map((product) => ItemsArray(
+                  name: product['product_name'],
                   price: product['price'],
-                  quantity: product['quantity'],
-                  productId: product['product_id'],
+                  quantity: product['quantity'], 
+                  productId: product['productId'],
                 ))
             .toList();
 
@@ -141,19 +140,21 @@ Future<void> _postPaymentTransaction(int posId) async {
           isLoading = false;
           custEmail = customerEmail;
           searchResults = updatedSearchResults;
-          paymentType = paymentTypes;
-          netPrice = netPrices;
-          merchantId = merchant['id'];
-          posTxnNo = posTransData['pos_txn_no'];
+          discAmount = discountAmount;
+          taxAmount = taxesAmount;
+          netPrice = totalPrice;
+          remarks = paymentType;
         });
+
+        return responseData;
       } else {
         print(
-            "Failed to fetch POS transaction. Response status code: ${response.statusCode}");
-        throw Exception('Failed to fetch POS transaction');
+            "Failed to save POS transaction. Response status code: ${response.statusCode}");
+        throw Exception('Failed to save POS transaction');
       }
     } catch (error) {
-      print("Error fetching POS transaction: $error");
-      throw Exception('Failed to fetch POS transaction');
+      print("Error saving POS transaction: $error");
+      throw Exception('Failed to save POS transaction');
     }
   }
 
