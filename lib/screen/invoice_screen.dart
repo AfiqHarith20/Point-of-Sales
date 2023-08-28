@@ -62,8 +62,8 @@ Future<void> _refreshPage() async {
 
   /////////////// POST Request ////////////////////////////////
 
-Future<void> _postPaymentTransaction(int posId) async {
-    final url = Uri.parse(Constants.apiPosPayment);
+Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
+    final url = Uri.parse(Constants.apiPosPayment); // Only the base URL
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -75,15 +75,12 @@ Future<void> _postPaymentTransaction(int posId) async {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'pos_id': posId,
+          'pos_id': posId, // Use posId
         }),
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        final Map<String, dynamic> posTransData =
-            responseData['data']['pos_trans'][0];
-
+        final Map<String, dynamic> posTransData = json.decode(response.body);
         final customerEmail = posTransData['cust_email'];
         final paymentTypes = posTransData['payment_type']['name'];
         final products = posTransData['pos_details'];
@@ -96,8 +93,8 @@ Future<void> _postPaymentTransaction(int posId) async {
             .map<ItemsArray>((product) => ItemsArray(
                   name: product['product']['name'],
                   price: product['price'],
-                  quantity: product['quantity'],
-                  productId: product['product_id'],
+                  quantity: product['quantity'], 
+                  productId: product['productId'],
                 ))
             .toList();
 
@@ -109,14 +106,16 @@ Future<void> _postPaymentTransaction(int posId) async {
           netPrice = netPrices;
           merchantId = merchant['id'];
         });
+
+        return posTransData;
       } else {
         print(
-            "Failed to fetch POS transaction. Response status code: ${response.statusCode}");
-        throw Exception('Failed to fetch POS transaction');
+            "Failed to save POS transaction. Response status code: ${response.statusCode}");
+        throw Exception('Failed to save POS transaction');
       }
     } catch (error) {
-      print("Error fetching POS transaction: $error");
-      throw Exception('Failed to fetch POS transaction');
+      print("Error saving POS transaction: $error");
+      throw Exception('Failed to save POS transaction');
     }
   }
 
