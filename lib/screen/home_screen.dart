@@ -356,7 +356,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
 
   ////////////////////////// Search SKU //////////////////////////////////////////////////
 
-  Future<void> searchProduct() async {
+Future<void> searchProduct() async {
     final url = Uri.parse(Constants.apiSearchProduct);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final Map<String, dynamic> requestBody = {
@@ -379,43 +379,45 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
           responseData.containsKey('data')) {
         final dynamic productData = responseData['data'];
 
-        if (productData.containsKey('products') &&
-            productData['products'] is Map<String, dynamic>) {
-          final dynamic product = productData['products'];
-          final ItemsArray result = ItemsArray(
-            productId: product['id'].toString(),
-            name: product['name'].toString(),
-            quantity: quantityController.text.isNotEmpty
-                ? quantityController.text
-                : '1',
-            price: product['price'].toString(),
-          );
+        if (productData.containsKey('pos') &&
+            productData['pos'] is List<dynamic>) {
+          final List<dynamic> posList = productData['pos'];
+          // Assuming you want to work with the first pos item in the list
+          if (posList.isNotEmpty) {
+            final dynamic firstPos = posList[0];
+            final dynamic product = firstPos['pos_details'][0]['product'];
 
-          setState(() {
-            final existingProductIndex = searchResults.indexWhere(
-              (item) => item.productId == result.productId,
+            final ItemsArray result = ItemsArray(
+              productId: product['id'].toString(),
+              name: product['name'].toString(),
+              quantity: '1', // You can customize this based on your requirement
+              price: product['price'].toString(),
             );
-            if (existingProductIndex != -1) {
-              // If the product already exists, update the quantity
-              int currentQuantity = int.parse(
-                  searchResults[existingProductIndex].quantity ?? '0');
-              int newQuantity =
-                  currentQuantity + int.parse(quantityController.text);
-              searchResults[existingProductIndex].quantity =
-                  newQuantity.toString();
-            } else {
-              // If the product doesn't exist, add it to the search results
-              searchResults.add(result);
-            }
 
-            // Reset the quantity controller to '1' after adding
-            quantityController.text = '1';
+            setState(() {
+              final existingProductIndex = searchResults.indexWhere(
+                (item) => item.productId == result.productId,
+              );
+              if (existingProductIndex != -1) {
+                // If the product already exists, update the quantity
+                int currentQuantity = int.parse(
+                    searchResults[existingProductIndex].quantity ?? '0');
+                int newQuantity = currentQuantity + 1;
+                searchResults[existingProductIndex].quantity =
+                    newQuantity.toString();
+              } else {
+                // If the product doesn't exist, add it to the search results
+                searchResults.add(result);
+              }
 
-            // Calculate the new total price after updating the quantity
-            total = calculateTotal();
-          });
+              // Calculate the new total price after updating the quantity
+              total = calculateTotal();
+            });
+          } else {
+            print('No matching transaction found');
+          }
         } else {
-          print('Invalid product data');
+          print('Invalid response format: $responseData');
         }
       } else {
         print('Invalid response format: $responseData');
@@ -455,19 +457,14 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
     });
   }
 
-// Function to calculate the total price
-  double calculateTotals(double subtotal, double discount, double tax) {
-    return subtotal - discount + tax;
-  }
-
 // Function to handle the checkout process
-  Future<void> handleCheckout() async {
+Future<void> handleCheckout() async {
     try {
       // Calculate subtotal, discount, and tax
       double subtotal = calculateSubtotal();
       double discount = calculateDiscount();
       double tax = calculateTax();
-      double total = calculateTotals(subtotal, discount, tax);
+      double total = calculateTotal();
 
       // Prepare payment type and remarks
       String paymentType = _selectedPaymentType?.name ?? 'Cash';
@@ -479,13 +476,13 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
       // Call API to save the transaction
       int posId = await saveTransaction(
         customerId: 0,
-        total: total,
+        total: total, // Pass the calculated total
         taxId: _selectedPaymentTax!.id,
         custEmail: custEmailController.text,
         tax: tax,
         discId: null,
         discount: 0,
-        subtotal: subtotal,
+        subtotal: total, // Pass the calculated total
         paymentType: _selectedPaymentType!.id,
         remarks: remarks,
         isReceipt: isReceiptValue, // Use the calculated isReceiptValue
@@ -511,6 +508,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
       }
     }
   }
+
 
 // Function to save the transaction
   Future<int> saveTransaction({
@@ -554,6 +552,9 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
       },
       body: jsonEncode(requestBody.toJson()),
     );
+    
+    print("Response status code: ${response.statusCode}");
+    print("Response body: ${response.body}");
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);

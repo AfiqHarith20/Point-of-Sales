@@ -47,16 +47,23 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
 Future<void> _refreshPage() async {
     try {
+      setState(() {
+        isLoading = true; // Set isLoading to true before making the API call
+      });
+
       final responseData = await _postPaymentTransaction(widget.posId);
 
       // Update the state with the new data
       setState(() {
-        isLoading = false;
+        isLoading = false; // Set isLoading to false after data is fetched
         // Update other relevant variables here based on the responseData
       });
     } catch (error) {
       print("Error refreshing page: $error");
       // Handle the error appropriately
+      setState(() {
+        isLoading = false; // Set isLoading to false if an error occurs
+      });
     }
   }
 
@@ -68,15 +75,19 @@ Future<void> _postPaymentTransaction(int posId) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
+      final Map<String, dynamic> requestBody = {
+        'pos_id': posId,
+      };
+
+      print("Request Body: ${jsonEncode(requestBody)}"); // Print request body
+
       final http.Response response = await http.post(
         url,
         headers: {
           'Authorization': 'Bearer ' + prefs.getString('token').toString(),
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'pos_id': posId,
-        }),
+        body: jsonEncode(requestBody),
       );
 
       if (response.statusCode == 200) {
@@ -120,10 +131,11 @@ Future<void> _postPaymentTransaction(int posId) async {
     }
   }
 
-void initState() {
-  super.initState();
-  _refreshPage(); // Call the method to fetch data using posId
-}
+@override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _refreshPage();
+  }
 @override
   void dispose() {
     super.dispose();
@@ -225,50 +237,57 @@ void initState() {
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final currentDate = DateTime.now();
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Table(
-                        columnWidths: const {
-                          0: FlexColumnWidth(1.0),
-                          1: FlexColumnWidth(1.0),
-                          2: FlexColumnWidth(2.0),
-                        },
-                        children: [
-                          TableRow(
-                            children: [
-                              Text(
-                                "${widget.posId}",
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
+                    if(isLoading) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }else{
+                      final currentDate = DateTime.now();
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Table(
+                          columnWidths: const {
+                            0: FlexColumnWidth(1.0),
+                            1: FlexColumnWidth(1.0),
+                            2: FlexColumnWidth(2.0),
+                          },
+                          children: [
+                            TableRow(
+                              children: [
+                                Text(
+                                  "${widget.posId}",
+                                  style: GoogleFonts.breeSerif(
+                                    fontWeight: FontWeight.w500,
+                                    color: kTextColor,
+                                    fontSize: 12.sp,
+                                    letterSpacing: 1.0,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                DateFormat('yyyy-MM-dd').format(currentDate),
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
+                                Text(
+                                  DateFormat('yyyy-MM-dd').format(currentDate),
+                                  style: GoogleFonts.breeSerif(
+                                    fontWeight: FontWeight.w500,
+                                    color: kTextColor,
+                                    fontSize: 12.sp,
+                                    letterSpacing: 1.0,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                custEmail ?? '',
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
+                                Text(
+                                  custEmail ?? 'null',
+                                  style: GoogleFonts.breeSerif(
+                                    fontWeight: FontWeight.w500,
+                                    color: kTextColor,
+                                    fontSize: 12.sp,
+                                    letterSpacing: 1.0,
+                                  ),
                                 ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    
                   },
                   childCount: 1,
                 ),
@@ -373,7 +392,9 @@ void initState() {
                             child: Padding(
                               padding: const EdgeInsets.all(6.0),
                               child: Text(
-                                result.price,
+                                result.price != null
+                                    ? "${double.tryParse(result.price)?.toStringAsFixed(2) ?? '0.00'}"
+                                    : "0.00",
                                 style: GoogleFonts.breeSerif(
                                   fontWeight: FontWeight.w500,
                                   color: kTextColor,
@@ -423,15 +444,15 @@ void initState() {
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: TextButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              AddPoductDialogContent(
-                                posId: widget
-                                    .posId) // Replace ProductPage with the actual product page widget
-                        ),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) =>
+                      //         AddPoductDialogContent(
+                      //           posId: widget
+                      //               .posId) // Replace ProductPage with the actual product page widget
+                      //   ),
+                      // );
                     },
                     child: Text(
                       "Add Product",
@@ -525,7 +546,9 @@ void initState() {
                         ),
                       ),
                       Text(
-                        "\RM $netPrice",
+                        netPrice != null
+                            ? "RM ${double.tryParse(netPrice!)?.toStringAsFixed(2) ?? '0.00'}"
+                            : "RM 0.00",
                         style: GoogleFonts.breeSerif(
                           fontWeight: FontWeight.w500,
                           color: kTextColor,
@@ -554,7 +577,7 @@ void initState() {
                         ),
                       ),
                       Text(
-                        paymentType!, // Use the paymentTypes variable directly
+                        paymentType ?? 'null', // Use the paymentTypes variable directly
                         style: GoogleFonts.breeSerif(
                           fontWeight: FontWeight.w500,
                           color: kTextColor,

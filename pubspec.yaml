@@ -42,6 +42,7 @@ dependencies:
   syncfusion_flutter_datagrid: ^22.1.39
   msh_checkbox: ^2.0.1
   device_info: ^2.0.3
+  flutter_screenutil: ^5.7.0
 
 dev_dependencies:
   flutter_test:
