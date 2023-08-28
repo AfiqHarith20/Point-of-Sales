@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:animated_button_bar/animated_button_bar.dart';
 import 'package:getwidget/components/loader/gf_loader.dart';
 import 'package:pointofsales/models/category_model.dart';
+import 'package:pointofsales/models/invoice_model.dart';
 import 'package:pointofsales/screen/invoice_screen.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:getwidget/types/gf_loader_type.dart';
@@ -669,7 +670,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                             flex: 3,
                             child: Form(
                               child: Container(
-                                height: 85.h,
+                                height: 82.h,
                                 margin: kMargin,
                                 padding: kPadding,
                                 decoration: BoxDecoration(
@@ -718,7 +719,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                 ),
                                               ),
                                               SizedBox(
-                                                height: 5.h,
+                                                height: 4.h,
                                                 child: TextField(
                                                   controller: skuController,
                                                   decoration: InputDecoration(
@@ -847,7 +848,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                               ),
                                             ),
                                             style: GoogleFonts.abel(
-                                              fontSize: 10.sp,
+                                              fontSize: 11.sp,
                                               color: kScaffoldColor,
                                               fontWeight: FontWeight.w500,
                                               letterSpacing: 1.0,
@@ -941,7 +942,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   color: kTextColor,
                                                 ),
                                                 width: 32.w,
-                                                height: 5.h,
+                                                height: 4.h,
                                                 alignment: Alignment.centerLeft,
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -1094,7 +1095,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   color: kTextColor,
                                                 ),
                                                 width: 32.w,
-                                                height: 5.h,
+                                                height: 4.h,
                                                 alignment: Alignment.centerLeft,
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -1272,7 +1273,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  height: 85.h,
+                                  height: 82.h,
                                   margin: kMargin,
                                   padding: kPadding,
                                   decoration: BoxDecoration(
@@ -1284,7 +1285,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Container(
-                                        height: 71.h,
+                                        height: 63.h,
                                         margin: kMargin,
                                         padding: kPadding,
                                         decoration: BoxDecoration(
@@ -1641,7 +1642,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                         },
                                         child: Container(
                                           width: 29.w,
-                                          height: 10.h,
+                                          height: 8.h,
                                           alignment: Alignment.center,
                                           margin: EdgeInsets.all(10.0),
                                           padding: EdgeInsets.all(10.0),
