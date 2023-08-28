@@ -11,6 +11,7 @@ import 'package:pointofsales/models/data.dart';
 import 'package:pointofsales/models/invoice_model.dart';
 import 'package:pointofsales/models/pos_model.dart';
 import 'package:pointofsales/screen/home_screen.dart';
+import 'package:pointofsales/screen/product/add_product_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
@@ -44,42 +45,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
   List<ItemsArray> searchResults = [];
 
-  double calculateDiscount() {
-    double total = calculateSubtotal();
-    return (total * discountPercentage) / 100;
-  }
-
-  double calculateTax() {
-    double total = calculateSubtotal();
-    return (total * taxPercentage) / 100;
-  }
-
-  double calculateSubtotal() {
-    double subtotal = 0;
-    for (int index = 0; index < invoice().length; index++) {
-      double price = double.parse(invoice()[index].price ?? "0");
-      double quantity = double.parse(invoice()[index].quantity ?? "0");
-      subtotal += price * quantity;
-    }
-    return subtotal;
-  }
-
-  double calculateTotal() {
-    double subtotal = calculateSubtotal();
-    double discount = calculateDiscount();
-    double tax = calculateTax();
-    return subtotal - discount + tax;
-  }
-
-  String selectedPayment = "Cash";
-  List<String> paymentOptions = [
-    "Cash",
-    "Credit Card",
-    "Debit Card",
-    "TNG",
-    "Online Payment",
-  ];
-
 Future<void> _refreshPage() async {
     try {
       final responseData = await _postPaymentTransaction(widget.posId);
@@ -94,8 +59,6 @@ Future<void> _refreshPage() async {
       // Handle the error appropriately
     }
   }
-
-
 
   /////////////// POST Request ////////////////////////////////
 
@@ -117,18 +80,18 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        String customerEmail = responseData['data']['pos_trans']['cust_email'];
-        String discountAmount = responseData['data']['pos_trans']['disc_amount'];
-        String taxesAmount = responseData['data']['pos_trans']['tax_amount'];
-        String totalPrice = responseData['data']['pos_trans']['net_price'];
-        String paymentType = responseData['data']['pos_trans']['remarks'];
-        List<dynamic> products = responseData['data']['pos_trans']['products'];
+        final Map<String, dynamic> posTransData = json.decode(response.body);
+        final customerEmail = posTransData['cust_email'];
+        final paymentTypes = posTransData['payment_type']['name'];
+        final products = posTransData['pos_details'];
+        final netPrices = posTransData['net_price'];
+        final merchant = posTransData['merchant'];
 
-        // Process and update the searchResults list with fetched product data
-        List<ItemsArray> updatedSearchResults = products
-            .map((product) => ItemsArray(
-                  name: product['product_name'],
+        // Calculate discount, tax, and other fields as needed
+
+        final updatedSearchResults = products
+            .map<ItemsArray>((product) => ItemsArray(
+                  name: product['product']['name'],
                   price: product['price'],
                   quantity: product['quantity'], 
                   productId: product['productId'],
@@ -139,13 +102,12 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
           isLoading = false;
           custEmail = customerEmail;
           searchResults = updatedSearchResults;
-          discAmount = discountAmount;
-          taxAmount = taxesAmount;
-          netPrice = totalPrice;
-          remarks = paymentType;
+          paymentType = paymentTypes;
+          netPrice = netPrices;
+          merchantId = merchant['id'];
         });
 
-        return responseData;
+        return posTransData;
       } else {
         print(
             "Failed to save POS transaction. Response status code: ${response.statusCode}");
@@ -455,94 +417,96 @@ void initState() {
                   ),
                 ),
               ),
-              // SliverToBoxAdapter(
-              //   child: Padding(
-              //     padding: const EdgeInsets.symmetric(horizontal: 15),
-              //     child: TextButton(
-              //       onPressed: () {
-              //         Navigator.push(
-              //           context,
-              //           MaterialPageRoute(
-              //             builder: (context) =>
-              //                 ProductScreen(), // Replace ProductPage with the actual product page widget
-              //           ),
-              //         );
-              //       },
-              //       child: Text(
-              //         "Add Product",
-              //         style: GoogleFonts.aubrey(
-              //           fontWeight: FontWeight.w600,
-              //           color: Color.fromARGB(255, 231, 96, 96),
-              //           fontSize: 14.sp,
-              //           letterSpacing: 2.0,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AddPoductDialogContent(
+                                posId: widget
+                                    .posId) // Replace ProductPage with the actual product page widget
+                        ),
+                      );
+                    },
+                    child: Text(
+                      "Add Product",
+                      style: GoogleFonts.aubrey(
+                        fontWeight: FontWeight.w600,
+                        color: Color.fromARGB(255, 231, 96, 96),
+                        fontSize: 14.sp,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               SliverToBoxAdapter(
                 child: Divider(
                   color: Colors.redAccent,
                   thickness: 1.0,
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Discount",
-                        style: GoogleFonts.aubrey(
-                          fontWeight: FontWeight.w600,
-                          color: kLabel,
-                          fontSize: 14.sp,
-                          letterSpacing: 2.0,
-                        ),
-                      ),
-                      Text(
-                        "\RM $discAmount",
-                        style: GoogleFonts.breeSerif(
-                          fontWeight: FontWeight.w500,
-                          color: kTextColor,
-                          fontSize: 12.sp,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Tax",
-                        style: GoogleFonts.aubrey(
-                          fontWeight: FontWeight.w600,
-                          color: kLabel,
-                          fontSize: 14.sp,
-                          letterSpacing: 2.0,
-                        ),
-                      ),
-                      Text(
-                        "\RM $taxAmount",
-                        style: GoogleFonts.breeSerif(
-                          fontWeight: FontWeight.w500,
-                          color: kTextColor,
-                          fontSize: 12.sp,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              //     child: Row(
+              //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //       children: [
+              //         Text(
+              //           "Discount",
+              //           style: GoogleFonts.aubrey(
+              //             fontWeight: FontWeight.w600,
+              //             color: kLabel,
+              //             fontSize: 14.sp,
+              //             letterSpacing: 2.0,
+              //           ),
+              //         ),
+              //         Text(
+              //           "\RM $discAmount",
+              //           style: GoogleFonts.breeSerif(
+              //             fontWeight: FontWeight.w500,
+              //             color: kTextColor,
+              //             fontSize: 12.sp,
+              //             letterSpacing: 1.0,
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding:
+              //         const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              //     child: Row(
+              //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //       children: [
+              //         Text(
+              //           "Tax",
+              //           style: GoogleFonts.aubrey(
+              //             fontWeight: FontWeight.w600,
+              //             color: kLabel,
+              //             fontSize: 14.sp,
+              //             letterSpacing: 2.0,
+              //           ),
+              //         ),
+              //         Text(
+              //           "\RM $taxAmount",
+              //           style: GoogleFonts.breeSerif(
+              //             fontWeight: FontWeight.w500,
+              //             color: kTextColor,
+              //             fontSize: 12.sp,
+              //             letterSpacing: 1.0,
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
               SliverToBoxAdapter(
                 child: Padding(
                   padding:
@@ -589,7 +553,7 @@ void initState() {
                         ),
                       ),
                       Text(
-                        "$remarks",
+                        paymentType!, // Use the paymentTypes variable directly
                         style: GoogleFonts.breeSerif(
                           fontWeight: FontWeight.w500,
                           color: kTextColor,
