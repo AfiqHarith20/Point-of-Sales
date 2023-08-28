@@ -11,7 +11,6 @@ import 'package:pointofsales/models/data.dart';
 import 'package:pointofsales/models/invoice_model.dart';
 import 'package:pointofsales/models/pos_model.dart';
 import 'package:pointofsales/screen/home_screen.dart';
-import 'package:pointofsales/screen/product_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 

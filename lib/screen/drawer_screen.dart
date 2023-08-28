@@ -10,7 +10,6 @@ import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/invoice_screen.dart';
 import 'package:pointofsales/screen/log%20n%20reg/login_screen.dart';
 import 'package:pointofsales/screen/merchant_screen.dart';
-import 'package:pointofsales/screen/product_screen.dart';
 import 'package:pointofsales/screen/report_screen.dart';
 import 'package:pointofsales/screen/setting_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -101,20 +100,6 @@ class _DrawerScreenState extends State<DrawerScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => MerchantScreen(),
-                ),
-              ),
-            },
-          ),
-          ListTile(
-            leading: FaIcon(
-              FontAwesomeIcons.basketShopping,
-            ),
-            title: Text('Product'),
-            onTap: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProductScreen(),
                 ),
               ),
             },
