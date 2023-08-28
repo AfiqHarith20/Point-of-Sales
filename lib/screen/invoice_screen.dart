@@ -47,16 +47,23 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
 Future<void> _refreshPage() async {
     try {
+      setState(() {
+        isLoading = true; // Set isLoading to true before making the API call
+      });
+
       final responseData = await _postPaymentTransaction(widget.posId);
 
       // Update the state with the new data
       setState(() {
-        isLoading = false;
+        isLoading = false; // Set isLoading to false after data is fetched
         // Update other relevant variables here based on the responseData
       });
     } catch (error) {
       print("Error refreshing page: $error");
       // Handle the error appropriately
+      setState(() {
+        isLoading = false; // Set isLoading to false if an error occurs
+      });
     }
   }
 
@@ -119,10 +126,11 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
     }
   }
 
-void initState() {
-  super.initState();
-  _refreshPage(); // Call the method to fetch data using posId
-}
+@override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _refreshPage();
+  }
 @override
   void dispose() {
     super.dispose();
@@ -224,50 +232,57 @@ void initState() {
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final currentDate = DateTime.now();
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Table(
-                        columnWidths: const {
-                          0: FlexColumnWidth(1.0),
-                          1: FlexColumnWidth(1.0),
-                          2: FlexColumnWidth(2.0),
-                        },
-                        children: [
-                          TableRow(
-                            children: [
-                              Text(
-                                "${widget.posId}",
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
+                    if (isLoading) {
+                      // Show circular progress indicator when loading
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }else {
+                      final currentDate = DateTime.now();
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Table(
+                          columnWidths: const {
+                            0: FlexColumnWidth(1.0),
+                            1: FlexColumnWidth(1.0),
+                            2: FlexColumnWidth(2.0),
+                          },
+                          children: [
+                            TableRow(
+                              children: [
+                                Text(
+                                  "${widget.posId}",
+                                  style: GoogleFonts.breeSerif(
+                                    fontWeight: FontWeight.w500,
+                                    color: kTextColor,
+                                    fontSize: 12.sp,
+                                    letterSpacing: 1.0,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                DateFormat('yyyy-MM-dd').format(currentDate),
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
+                                Text(
+                                  DateFormat('yyyy-MM-dd').format(currentDate),
+                                  style: GoogleFonts.breeSerif(
+                                    fontWeight: FontWeight.w500,
+                                    color: kTextColor,
+                                    fontSize: 12.sp,
+                                    letterSpacing: 1.0,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                custEmail ?? '',
-                                style: GoogleFonts.breeSerif(
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                  fontSize: 12.sp,
-                                  letterSpacing: 1.0,
+                                Text(
+                                  custEmail ?? '',
+                                  style: GoogleFonts.breeSerif(
+                                    fontWeight: FontWeight.w500,
+                                    color: kTextColor,
+                                    fontSize: 12.sp,
+                                    letterSpacing: 1.0,
+                                  ),
                                 ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   },
                   childCount: 1,
                 ),
@@ -372,7 +387,9 @@ void initState() {
                             child: Padding(
                               padding: const EdgeInsets.all(6.0),
                               child: Text(
-                                result.price,
+                                result.price != null
+                                    ? "RM ${double.tryParse(result.price)?.toStringAsFixed(2) ?? '0.00'}"
+                                    : "RM 0.00",
                                 style: GoogleFonts.breeSerif(
                                   fontWeight: FontWeight.w500,
                                   color: kTextColor,
@@ -553,7 +570,9 @@ void initState() {
                         ),
                       ),
                       Text(
-                        paymentType!, // Use the paymentTypes variable directly
+                        netPrice != null
+                            ? "RM ${double.tryParse(netPrice!)?.toStringAsFixed(2) ?? '0.00'}"
+                            : "RM 0.00",
                         style: GoogleFonts.breeSerif(
                           fontWeight: FontWeight.w500,
                           color: kTextColor,
