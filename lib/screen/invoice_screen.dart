@@ -69,25 +69,32 @@ Future<void> _refreshPage() async {
 
   /////////////// POST Request ////////////////////////////////
 
-Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
-    final url = Uri.parse(Constants.apiPosPayment); // Only the base URL
+  Future<void> _postPaymentTransaction(int posId) async {
+    final url = Uri.parse(Constants.apiPosPayment);
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
+      final Map<String, dynamic> requestBody = {
+        'pos_id': posId,
+      };
+
+      print("Request Body: ${jsonEncode(requestBody)}"); // Print request body
+
       final http.Response response = await http.post(
         url,
         headers: {
           'Authorization': 'Bearer ' + prefs.getString('token').toString(),
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'pos_id': posId, // Use posId
-        }),
+        body: jsonEncode(requestBody),
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> posTransData = json.decode(response.body);
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        final Map<String, dynamic> posTransData =
+            responseData['data']['pos_trans'][0];
+
         final customerEmail = posTransData['cust_email'];
         final paymentTypes = posTransData['payment_type']['name'];
         final products = posTransData['pos_details'];
@@ -100,8 +107,8 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
             .map<ItemsArray>((product) => ItemsArray(
                   name: product['product']['name'],
                   price: product['price'],
-                  quantity: product['quantity'], 
-                  productId: product['productId'],
+                  quantity: product['quantity'],
+                  productId: product['product_id'],
                 ))
             .toList();
 
@@ -113,16 +120,14 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
           netPrice = netPrices;
           merchantId = merchant['id'];
         });
-
-        return posTransData;
       } else {
         print(
-            "Failed to save POS transaction. Response status code: ${response.statusCode}");
-        throw Exception('Failed to save POS transaction');
+            "Failed to fetch POS transaction. Response status code: ${response.statusCode}");
+        throw Exception('Failed to fetch POS transaction');
       }
     } catch (error) {
-      print("Error saving POS transaction: $error");
-      throw Exception('Failed to save POS transaction');
+      print("Error fetching POS transaction: $error");
+      throw Exception('Failed to fetch POS transaction');
     }
   }
 
@@ -148,16 +153,12 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
                 color: kTextColor,
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => HomeScreen(),
-                  ),
-                );
+                Navigator.pop(context); // Navigate back to HomeScreen
               },
             );
           },
         ),
+        centerTitle: true,
         title: Text(
           "INVOICE",
           style: GoogleFonts.ubuntu(
@@ -170,11 +171,18 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
         actions: <Widget>[
           IconButton(
             icon: FaIcon(
-              FontAwesomeIcons.bell,
+              FontAwesomeIcons.circleXmark,
               color: Colors.white,
             ),
-            onPressed: () {},
-            tooltip: "Notifications Section",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomeScreen(),
+                ),
+              );
+            },
+            tooltip: "Delete Section",
           ),
         ],
       ),
@@ -269,7 +277,7 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
                                   ),
                                 ),
                                 Text(
-                                  custEmail ?? '',
+                                  custEmail ?? 'null',
                                   style: GoogleFonts.breeSerif(
                                     fontWeight: FontWeight.w500,
                                     color: kTextColor,
@@ -434,33 +442,33 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              AddPoductDialogContent(
-                                posId: widget
-                                    .posId) // Replace ProductPage with the actual product page widget
-                        ),
-                      );
-                    },
-                    child: Text(
-                      "Add Product",
-                      style: GoogleFonts.aubrey(
-                        fontWeight: FontWeight.w600,
-                        color: Color.fromARGB(255, 231, 96, 96),
-                        fontSize: 14.sp,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.symmetric(horizontal: 15),
+              //     child: TextButton(
+              //       onPressed: () {
+              //         Navigator.push(
+              //           context,
+              //           MaterialPageRoute(
+              //             builder: (context) =>
+              //                 AddPoductDialogContent(
+              //                   posId: widget
+              //                       .posId) // Replace ProductPage with the actual product page widget
+              //           ),
+              //         );
+              //       },
+              //       child: Text(
+              //         "Add Product",
+              //         style: GoogleFonts.aubrey(
+              //           fontWeight: FontWeight.w600,
+              //           color: Color.fromARGB(255, 231, 96, 96),
+              //           fontSize: 14.sp,
+              //           letterSpacing: 2.0,
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               SliverToBoxAdapter(
                 child: Divider(
                   color: Colors.redAccent,
@@ -541,7 +549,9 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
                         ),
                       ),
                       Text(
-                        "\RM $netPrice",
+                        netPrice != null
+                            ? "RM ${double.tryParse(netPrice!)?.toStringAsFixed(2) ?? '0.00'}"
+                            : "RM 0.00",
                         style: GoogleFonts.breeSerif(
                           fontWeight: FontWeight.w500,
                           color: kTextColor,
@@ -570,9 +580,8 @@ Future<Map<String, dynamic>> _postPaymentTransaction(int posId) async {
                         ),
                       ),
                       Text(
-                        netPrice != null
-                            ? "RM ${double.tryParse(netPrice!)?.toStringAsFixed(2) ?? '0.00'}"
-                            : "RM 0.00",
+                        paymentType ??
+                            'null', // Use the paymentTypes variable directly
                         style: GoogleFonts.breeSerif(
                           fontWeight: FontWeight.w500,
                           color: kTextColor,

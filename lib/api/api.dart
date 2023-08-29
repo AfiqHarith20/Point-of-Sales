@@ -21,10 +21,9 @@ class Constants {
 
   static String apiPosIndex = pos_baseurl + "/pos";
   static String apiPosPayment = pos_baseurl + "/pos/trans/payment";
-  static String apiSearchPosTransaction = pos_baseurl + "/pos/search/item";
+  static String apiSearchProduct = pos_baseurl + "/pos/search/item";
 
   static String apiProductIndex = pos_baseurl + "/product";
-  static String apiSearchProduct = pos_baseurl + "/product/search/item";
   static String apiListCategory = pos_baseurl + "/product/category/list";
 
 }
