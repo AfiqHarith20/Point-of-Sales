@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (custEmailController.text.isNotEmpty &&
         isValidEmail(custEmailController.text)) {
       // Apply discount logic for registered users
-      return 10.0; // For example, 10% discount for registered users
+      return 0.0; // For example, 10% discount for registered users
     } else {
       // No discount for unregistered users
       return 0.0;
@@ -632,6 +632,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
               );
             },
           ),
+          centerTitle: true,
           title: Text(
             "CartSini POS System",
             style: GoogleFonts.ubuntu(
@@ -641,16 +642,16 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
               color: kTextColor,
             ),
           ),
-          actions: <Widget>[
-            IconButton(
-              icon: FaIcon(
-                FontAwesomeIcons.bell,
-                color: Colors.white,
-              ),
-              onPressed: () {},
-              tooltip: "Notifications Section",
-            ),
-          ],
+          // actions: <Widget>[
+          //   IconButton(
+          //     icon: FaIcon(
+          //       FontAwesomeIcons.bell,
+          //       color: Colors.white,
+          //     ),
+          //     onPressed: () {},
+          //     tooltip: "Notifications Section",
+          //   ),
+          // ],
         ),
         body: SafeArea(
           child: CustomScrollView(
@@ -669,7 +670,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                             flex: 3,
                             child: Form(
                               child: Container(
-                                height: 82.h,
+                                height: 85.h,
                                 margin: kMargin,
                                 padding: kPadding,
                                 decoration: BoxDecoration(
@@ -941,7 +942,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   color: kTextColor,
                                                 ),
                                                 width: 32.w,
-                                                height: 4.h,
+                                                height: 5.h,
                                                 alignment: Alignment.centerLeft,
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -1065,7 +1066,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                       fontWeight:
                                                           FontWeight.w500,
                                                       color: kTextColor,
-                                                      fontSize: 8.sp,
+                                                      fontSize: 11.sp,
                                                       letterSpacing: 1.0,
                                                     ),
                                                   ),
@@ -1094,7 +1095,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   color: kTextColor,
                                                 ),
                                                 width: 32.w,
-                                                height: 4.h,
+                                                height: 5.h,
                                                 alignment: Alignment.centerLeft,
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -1221,7 +1222,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                           height: 2.h,
                                         ),
                                         ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(15),
                                           child: ElevatedButton(
                                             onPressed: () {
                                               if (searchResults.isNotEmpty) {
@@ -1272,7 +1273,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  height: 82.h,
+                                  height: 85.h,
                                   margin: kMargin,
                                   padding: kPadding,
                                   decoration: BoxDecoration(
@@ -1284,7 +1285,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Container(
-                                        height: 63.h,
+                                        height: 71.h,
                                         margin: kMargin,
                                         padding: kPadding,
                                         decoration: BoxDecoration(
@@ -1545,24 +1546,27 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                           // Check if data is available
                           List<String> categoryList = snapshot
                               .data!; // Data is not null, use ! to access
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          return Column(                         
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               AnimatedButtonBar(
                                 foregroundColor: Colors.blueGrey.shade400,
-                                radius: 8.0,
+                                radius: 10.0,
                                 padding: const EdgeInsets.all(16.0),
                                 invertedSelection: true,
                                 children: [
                                   for (var categoryName in categoryList)
                                     ButtonBarEntry(
-                                      child: Text(
-                                        categoryName,
-                                        style: GoogleFonts.breeSerif(
-                                          fontWeight: FontWeight.w400,
-                                          color: kTextColor,
-                                          fontSize: 8.sp,
-                                          letterSpacing: 1.0,
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          categoryName,
+                                          style: GoogleFonts.breeSerif(
+                                            fontWeight: FontWeight.w600,
+                                            color: kTextColor,
+                                            fontSize: 7.sp,
+                                            letterSpacing: 1.0,
+                                          ),
                                         ),
                                       ),
                                       onTap: () {
@@ -1604,7 +1608,9 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                         builder: (context, snapshot) {
                           if (isLoading) {
                             return Center(
-                              child: CircularProgressIndicator(),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
                             );
                           } else if (snapshot.hasError) {
                             return Center(
@@ -1640,12 +1646,13 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                           addSelectedProduct(product);
                                         },
                                         child: Container(
-                                          width: 29.w,
-                                          height: 8.h,
+                                          width: 32.w,
+                                          height: 13.h,
                                           alignment: Alignment.center,
                                           margin: EdgeInsets.all(10.0),
                                           padding: EdgeInsets.all(10.0),
                                           decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12),
                                             color: Colors.white,
                                             boxShadow: [
                                               BoxShadow(

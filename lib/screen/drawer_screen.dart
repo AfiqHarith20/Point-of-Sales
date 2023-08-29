@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:getwidget/components/drawer/gf_drawer.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
+import 'package:pointofsales/models/pos_model.dart';
 import 'package:pointofsales/screen/history_screen.dart';
 import 'package:pointofsales/screen/home_screen.dart';
 import 'package:pointofsales/screen/invoice_screen.dart';
@@ -23,6 +26,9 @@ class DrawerScreen extends StatefulWidget {
 }
 
 class _DrawerScreenState extends State<DrawerScreen> {
+  int? userId;
+  String? userName, userEmail;
+  late Future<User> _user;
 
   Future<void> logout(BuildContext context) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -52,6 +58,49 @@ class _DrawerScreenState extends State<DrawerScreen> {
     return logout(context);
   }
 
+    Future<User> fetchUser() async {
+    final url = Uri.parse(Constants.apiPosIndex);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final http.Response response = await http.get(
+      url,
+      headers: ({
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json'
+      }),
+    );
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> json = jsonDecode(response.body);
+      final user = User.fromJson(json);
+
+      setState(() {
+        /////////////////////////// User ////////////////////////////////////
+
+        final userData = json['data'][0]['user'];
+        if (userData != null) {
+          final user = User(
+            userid: userData['id'],
+            username: userData['fullname'].toString(),
+            useremail: userData['email'].toString(),
+          );
+          userId = user.userid;
+          userName = user.username;
+          userEmail = user.useremail;
+        } else {
+          print("User data is null");
+        }
+      });
+      return user;
+    } else {
+      throw Exception('Failed to fetch user');
+    }
+  }
+
+
+@override
+void initState() {
+  super.initState();
+   _user = fetchUser();
+}
   @override
   Widget build(BuildContext context) {
     return GFDrawer(
@@ -60,7 +109,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
         children: <Widget>[
           DrawerHeader(
             child: Text(
-              'Welcome Afiq harith',
+              'Welcome $userName',
               style: GoogleFonts.aBeeZee(
                 fontSize: 14.sp,
                 color: kTextColor,
@@ -90,20 +139,20 @@ class _DrawerScreenState extends State<DrawerScreen> {
               ),
             },
           ),
-          ListTile(
-            leading: FaIcon(
-              FontAwesomeIcons.building,
-            ),
-            title: Text('Merchant'),
-            onTap: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MerchantScreen(),
-                ),
-              ),
-            },
-          ),
+          // ListTile(
+          //   leading: FaIcon(
+          //     FontAwesomeIcons.building,
+          //   ),
+          //   title: Text('Merchant'),
+          //   onTap: () => {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => MerchantScreen(),
+          //       ),
+          //     ),
+          //   },
+          // ),
           // ListTile(
           //   leading: FaIcon(
           //     FontAwesomeIcons.fileInvoiceDollar,

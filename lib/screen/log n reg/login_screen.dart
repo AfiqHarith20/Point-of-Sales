@@ -124,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 5.h,
             ),
             Padding(
-              padding: const EdgeInsets.only(right: 338),
+              padding: const EdgeInsets.all(0),
               child: Text(
                 "Email:",
                 style: GoogleFonts.ubuntu(
@@ -144,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 1.h,
             ),
             Padding(
-              padding: const EdgeInsets.only(right: 300),
+              padding: const EdgeInsets.all(0),
               child: Text(
                 "Password:",
                 style: GoogleFonts.ubuntu(
