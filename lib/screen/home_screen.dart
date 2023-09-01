@@ -1319,7 +1319,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                               "Name",
                                                               style: GoogleFonts.aubrey(
                                                                 fontWeight: FontWeight.w600,
-                                                                color: kLabel,
+                                                                color: kScaffoldColor,
                                                                 fontSize: 9.sp,
                                                                 letterSpacing: 1.0,
                                                               ),
@@ -1334,7 +1334,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                               "Price (MYR)",
                                                               style: GoogleFonts.aubrey(
                                                                 fontWeight: FontWeight.w600,
-                                                                color: kLabel,
+                                                                color: kScaffoldColor,
                                                                 fontSize: 9.sp,
                                                                 letterSpacing: 1.0,
                                                               ),
@@ -1349,7 +1349,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                               "QTY",
                                                               style: GoogleFonts.aubrey(
                                                                 fontWeight: FontWeight.w600,
-                                                                color: kLabel,
+                                                                color: kScaffoldColor,
                                                                 fontSize: 9.sp,
                                                                 letterSpacing: 1.0,
                                                               ),
@@ -1364,7 +1364,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                               "Subtotal (MYR)",
                                                               style: GoogleFonts.aubrey(
                                                                 fontWeight: FontWeight.w600,
-                                                                color: kLabel,
+                                                                color: kScaffoldColor,
                                                                 fontSize: 9.sp,
                                                                 letterSpacing: 1.0,
                                                               ),
@@ -1382,7 +1382,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                                 GoogleFonts.aubrey(
                                                               fontWeight:
                                                                   FontWeight.w600,
-                                                              color: kLabel,
+                                                              color: kScaffoldColor,
                                                               fontSize: 9.sp,
                                                               letterSpacing: 1.0,
                                                             ),
@@ -1646,7 +1646,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                           addSelectedProduct(product);
                                         },
                                         child: Container(
-                                          width: 32.w,
+                                          width: 29.w,
                                           height: 13.h,
                                           alignment: Alignment.center,
                                           margin: EdgeInsets.all(10.0),
@@ -1669,17 +1669,19 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                               SizedBox(height: 10.0),
                                               Text(
                                                 product.name,
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16.0,
+                                                style: GoogleFonts.breeSerif(
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.black,
+                                                  fontSize: 6.sp,
+                                                  letterSpacing: 1.0,
                                                 ),
                                               ),
                                               SizedBox(height: 5.0),
                                               Text(
                                                 '\RM${product.price}',
                                                 style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14.0,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 6.sp,
                                                   color: Colors.blue,
                                                 ),
                                               ),
