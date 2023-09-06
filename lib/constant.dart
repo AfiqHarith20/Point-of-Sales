@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
-const Color kScaffoldColor = Color(0xFF1C2833);
-const Color kPrimaryColor = Color(0xFF4A84C7);
+const Color kScaffoldColor = Color.fromARGB(255, 187, 214, 240);
+const Color kPrimaryColor = Color.fromARGB(255, 255, 255, 255);
 const Color kSecondaryColor = Color(0xFF2BB1EA);
-const Color kTextColor = Color(0xFFFFFFFF);
-const Color kTextColorShade = Color.fromARGB(199, 187, 184, 184);
-const Color kLabel = Color.fromARGB(255, 58, 247, 203);
-const Color kForm = Color(0xFF384F64);
-const Color kHint = Color.fromARGB(255, 156, 156, 156);
+const Color kTextColor = Color.fromARGB(255, 0, 0, 0);
+const Color kTextFilled = Color.fromARGB(255, 217, 245, 245);
+const Color kTextColorShade = Color.fromARGB(198, 255, 250, 250);
+const Color kLabel = Color.fromARGB(255, 45, 45, 45);
+const Color kForm = Color.fromARGB(255, 0, 0, 0);
+const Color kHint = Color.fromARGB(255, 139, 139, 139);
 
 final kMargin = EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h);
 final kPadding = EdgeInsets.all(2.h);
