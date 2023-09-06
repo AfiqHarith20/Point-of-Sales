@@ -639,7 +639,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
               fontSize: 16.sp,
               letterSpacing: 1.0,
               fontWeight: FontWeight.w500,
-              color: kTextColor,
+              color: Colors.red.shade600,
             ),
           ),
           // actions: <Widget>[
@@ -724,7 +724,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   controller: skuController,
                                                   decoration: InputDecoration(
                                                     filled: true,
-                                                    fillColor: kTextColor,
+                                                    fillColor: kTextFilled,
                                                     enabledBorder:
                                                         OutlineInputBorder(
                                                       borderRadius:
@@ -738,7 +738,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   ),
                                                   style: GoogleFonts.abel(
                                                     fontSize: 11.sp,
-                                                    color: kScaffoldColor,
+                                                    color: kTextColor,
                                                     fontWeight: FontWeight.w500,
                                                     letterSpacing: 1.0,
                                                   ),
@@ -777,7 +777,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                             keyboardType: TextInputType.number,
                                             decoration: InputDecoration(
                                               filled: true,
-                                              fillColor: kTextColor,
+                                              fillColor: kTextFilled,
                                               enabledBorder: OutlineInputBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(20.0),
@@ -789,7 +789,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                             ),
                                             style: GoogleFonts.abel(
                                               fontSize: 11.sp,
-                                              color: kScaffoldColor,
+                                              color: kHint,
                                               fontWeight: FontWeight.w500,
                                               letterSpacing: 1.0,
                                             ),
@@ -830,7 +830,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                             controller: custEmailController,
                                             decoration: InputDecoration(
                                               filled: true,
-                                              fillColor: kTextColor,
+                                              fillColor: kTextFilled,
                                               enabledBorder: OutlineInputBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(20.0),
@@ -849,7 +849,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                             ),
                                             style: GoogleFonts.abel(
                                               fontSize: 11.sp,
-                                              color: kScaffoldColor,
+                                              color: kTextColor,
                                               fontWeight: FontWeight.w500,
                                               letterSpacing: 1.0,
                                             ),
@@ -880,7 +880,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                 "Enter",
                                                 style: GoogleFonts.manrope(
                                                   fontSize: 8.sp,
-                                                  color: kTextColor,
+                                                  color: kPrimaryColor,
                                                   fontWeight: FontWeight.w400,
                                                   letterSpacing: 1.0,
                                                 ),
@@ -939,7 +939,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                 decoration: BoxDecoration(
                                                   borderRadius:
                                                       BorderRadius.circular(10),
-                                                  color: kTextColor,
+                                                  color: kTextFilled,
                                                 ),
                                                 width: 32.w,
                                                 height: 5.h,
@@ -1092,7 +1092,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                 decoration: BoxDecoration(
                                                   borderRadius:
                                                       BorderRadius.circular(10),
-                                                  color: kTextColor,
+                                                  color: kTextFilled,
                                                 ),
                                                 width: 32.w,
                                                 height: 5.h,
@@ -1255,7 +1255,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                               style: GoogleFonts.ubuntu(
                                                 fontSize: 14.sp,
                                                 letterSpacing: 1.0,
-                                                fontWeight: FontWeight.w500,
+                                                fontWeight: FontWeight.w600,
                                               ),
                                             ),
                                           ),
@@ -1319,7 +1319,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                               "Name",
                                                               style: GoogleFonts.aubrey(
                                                                 fontWeight: FontWeight.w600,
-                                                                color: kScaffoldColor,
+                                                                color: kLabel,
                                                                 fontSize: 9.sp,
                                                                 letterSpacing: 1.0,
                                                               ),
@@ -1334,7 +1334,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                               "Price (MYR)",
                                                               style: GoogleFonts.aubrey(
                                                                 fontWeight: FontWeight.w600,
-                                                                color: kScaffoldColor,
+                                                                color: kLabel,
                                                                 fontSize: 9.sp,
                                                                 letterSpacing: 1.0,
                                                               ),
@@ -1349,7 +1349,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                               "QTY",
                                                               style: GoogleFonts.aubrey(
                                                                 fontWeight: FontWeight.w600,
-                                                                color: kScaffoldColor,
+                                                                color: kLabel,
                                                                 fontSize: 9.sp,
                                                                 letterSpacing: 1.0,
                                                               ),
@@ -1364,7 +1364,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                               "Subtotal (MYR)",
                                                               style: GoogleFonts.aubrey(
                                                                 fontWeight: FontWeight.w600,
-                                                                color: kScaffoldColor,
+                                                                color: kLabel,
                                                                 fontSize: 9.sp,
                                                                 letterSpacing: 1.0,
                                                               ),
@@ -1382,7 +1382,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                                 GoogleFonts.aubrey(
                                                               fontWeight:
                                                                   FontWeight.w600,
-                                                              color: kScaffoldColor,
+                                                              color: kLabel,
                                                               fontSize: 9.sp,
                                                               letterSpacing: 1.0,
                                                             ),
