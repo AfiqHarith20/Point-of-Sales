@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
             FaIcon(
               FontAwesomeIcons.shopLock,
               size: 100,
-              color: kScaffoldColor,
+              color: Color.fromARGB(255, 232, 100, 70),
             ),
             SizedBox(
               height: 5.h,
@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 fontSize: 14.sp,
                 letterSpacing: 1.0,
                 fontWeight: FontWeight.w500,
-                color: kScaffoldColor,
+                color: kTextColor,
               ),
             ),
             SizedBox(
@@ -131,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontSize: 14.sp,
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.w500,
-                  color: kScaffoldColor,
+                  color: kTextColor,
                 ),
               ),
             ),
@@ -151,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontSize: 14.sp,
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.w500,
-                  color: kScaffoldColor,
+                  color: kTextColor,
                 ),
               ),
             ),
