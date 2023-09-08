@@ -619,6 +619,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
     return Scaffold(
         drawer: DrawerScreen(),
         appBar: AppBar(
+          backgroundColor: kPrimaryColor,
           leading: Builder(
             builder: (context) {
               return IconButton(
@@ -750,6 +751,40 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                         SizedBox(
                                           height: 1.h,
                                         ),
+                                        Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          ElevatedButton(
+                                            style: ButtonStyle(
+                                              overlayColor:
+                                                  MaterialStateProperty
+                                                      .resolveWith<Color?>(
+                                                (Set<MaterialState> states) {
+                                                  if (states.contains(
+                                                      MaterialState.pressed))
+                                                    return Colors.greenAccent;
+                                                  return null;
+                                                },
+                                              ),
+                                            ),
+                                            onPressed: () => _isLoader
+                                                ? buildCircularProgressIndicator()
+                                                : searchProduct(),
+                                            child: Text(
+                                              "Enter",
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 9.sp,
+                                                color: kPrimaryColor,
+                                                fontWeight: FontWeight.w600,
+                                                letterSpacing: 1.0,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                        SizedBox(
+                                          height: 1.h,
+                                        ),
                                         Text(
                                           "Quantity",
                                           style: GoogleFonts.abel(
@@ -858,42 +893,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                         SizedBox(
                                           height: 1.h,
                                         ),
-                                        Row(
-                                          children: [
-                                            ElevatedButton(
-                                              style: ButtonStyle(
-                                                overlayColor:
-                                                    MaterialStateProperty
-                                                        .resolveWith<Color?>(
-                                                  (Set<MaterialState> states) {
-                                                    if (states.contains(
-                                                        MaterialState.pressed))
-                                                      return Colors.greenAccent;
-                                                    return null;
-                                                  },
-                                                ),
-                                              ),
-                                              onPressed: () => _isLoader
-                                                  ? buildCircularProgressIndicator()
-                                                  : searchProduct(),
-                                              child: Text(
-                                                "Enter",
-                                                style: GoogleFonts.manrope(
-                                                  fontSize: 8.sp,
-                                                  color: kPrimaryColor,
-                                                  fontWeight: FontWeight.w400,
-                                                  letterSpacing: 1.0,
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 2.w,
-                                            ),
-                                            SizedBox(
-                                              height: 2.h,
-                                            ),
-                                          ],
-                                        ),
+                                        
                                         Divider(
                                           color: Colors.red,
                                           thickness: 2.0,
