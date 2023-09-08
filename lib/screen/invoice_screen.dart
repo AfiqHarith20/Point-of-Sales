@@ -601,7 +601,7 @@ Future<void> _refreshPage() async {
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: kPrimaryColor,
+                      backgroundColor: kSecondaryColor,
                       padding: const EdgeInsets.symmetric(vertical: 15),
                     ),
                     child: Text(
@@ -610,6 +610,7 @@ Future<void> _refreshPage() async {
                         fontSize: 16.sp,
                         letterSpacing: 1.0,
                         fontWeight: FontWeight.w500,
+                        color: kTextColor,
                       ),
                     ),
                   ),
