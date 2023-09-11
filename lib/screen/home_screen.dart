@@ -675,7 +675,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                 margin: kMargin,
                                 padding: kPadding,
                                 decoration: BoxDecoration(
-                                  color: kPrimaryColor,
+                                  color: Color.fromARGB(255, 220, 247, 255),
                                   borderRadius: kRadius,
                                 ),
                                 child: Column(
@@ -1277,7 +1277,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                   margin: kMargin,
                                   padding: kPadding,
                                   decoration: BoxDecoration(
-                                    color: kPrimaryColor,
+                                    color: Color.fromARGB(255, 220, 247, 255),
                                     borderRadius: kRadius,
                                   ),
                                     child: Column(
@@ -1600,7 +1600,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                       margin: kMargin,
                       padding: kPadding,
                       decoration: BoxDecoration(
-                        color: kPrimaryColor,
+                        color: Color.fromARGB(255, 220, 247, 255),
                         borderRadius: kRadius,
                       ),
                       child: FutureBuilder<List<Product>>(
@@ -1653,7 +1653,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                           padding: EdgeInsets.all(10.0),
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(12),
-                                            color: Colors.white,
+                                            color: Color.fromARGB(255, 201, 252, 255),
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.grey
