@@ -10,6 +10,8 @@ const Color kTextColorShade = Color.fromARGB(198, 255, 250, 250);
 const Color kLabel = Color.fromARGB(255, 45, 45, 45);
 const Color kForm = Color.fromARGB(255, 0, 0, 0);
 const Color kHint = Color.fromARGB(255, 139, 139, 139);
+const Color kContainer = Color.fromARGB(255, 220, 247, 255);
+const Color kProduct = Color.fromARGB(255, 142, 240, 255);
 
 final kMargin = EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h);
 final kPadding = EdgeInsets.all(2.h);

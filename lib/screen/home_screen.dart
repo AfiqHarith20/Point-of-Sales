@@ -619,7 +619,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
     return Scaffold(
         drawer: DrawerScreen(),
         appBar: AppBar(
-          backgroundColor: kPrimaryColor,
+          backgroundColor: kContainer,
           leading: Builder(
             builder: (context) {
               return IconButton(
@@ -675,7 +675,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                 margin: kMargin,
                                 padding: kPadding,
                                 decoration: BoxDecoration(
-                                  color: Color.fromARGB(255, 220, 247, 255),
+                                  color: kContainer,
                                   borderRadius: kRadius,
                                 ),
                                 child: Column(
@@ -1207,7 +1207,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                             isDisabled: isDisabled,
                                             colorConfig: MSHColorConfig
                                                   .fromCheckedUncheckedDisabled(
-                                                checkedColor: Colors.greenAccent,
+                                                checkedColor: Colors.redAccent,
                                               ),
                                               style: style,
                                             onChanged: (isReceipt) {
@@ -1277,17 +1277,112 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                   margin: kMargin,
                                   padding: kPadding,
                                   decoration: BoxDecoration(
-                                    color: Color.fromARGB(255, 220, 247, 255),
+                                    color: kContainer,
                                     borderRadius: kRadius,
                                   ),
                                     child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
+                                      Table(
+                                        defaultVerticalAlignment:
+                                          TableCellVerticalAlignment.middle,
+                                      border: TableBorder.all(
+                                          color: Colors.transparent),
+                                      columnWidths: {
+                                        // 0: FlexColumnWidth(1),
+                                        0: FlexColumnWidth(4),
+                                        1: FlexColumnWidth(2),
+                                        2: FlexColumnWidth(1),
+                                        3: FlexColumnWidth(2),
+                                        4: FlexColumnWidth(1),
+                                      },
+                                      children: [
+                                        TableRow(
+                                          children: [
+                                            TableCell(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(6),
+                                                child: Text(
+                                                  "Name",
+                                                  style: GoogleFonts.aubrey(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: kLabel,
+                                                    fontSize: 9.sp,
+                                                    letterSpacing: 1.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            TableCell(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(6),
+                                                child: Text(
+                                                  "Price (MYR)",
+                                                  style: GoogleFonts.aubrey(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: kLabel,
+                                                    fontSize: 9.sp,
+                                                    letterSpacing: 1.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            TableCell(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(6),
+                                                child: Text(
+                                                  "QTY",
+                                                  style: GoogleFonts.aubrey(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: kLabel,
+                                                    fontSize: 9.sp,
+                                                    letterSpacing: 1.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            TableCell(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(6),
+                                                child: Text(
+                                                  "Subtotal (MYR)",
+                                                  style: GoogleFonts.aubrey(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: kLabel,
+                                                    fontSize: 9.sp,
+                                                    letterSpacing: 1.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            TableCell(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(6),
+                                                child: Text(
+                                                  "Del",
+                                                  style: GoogleFonts.aubrey(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: kLabel,
+                                                    fontSize: 9.sp,
+                                                    letterSpacing: 1.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                      ),
                                       Container(
-                                        height: 71.h,
-                                        margin: kMargin,
-                                        padding: kPadding,
+                                        height: 66.h,
+                                        // margin: kMargin,
+                                        // padding: kPadding,
                                         decoration: BoxDecoration(
                                           color: kPrimaryColor,
                                           borderRadius: kRadius,
@@ -1309,88 +1404,88 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                     4: FlexColumnWidth(1),
                                                   },
                                                   children: [
-                                                    TableRow(
-                                                      children: [
-                                                        TableCell(
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets.all(6),
-                                                            child: Text(
-                                                              "Name",
-                                                              style: GoogleFonts.aubrey(
-                                                                fontWeight: FontWeight.w600,
-                                                                color: kLabel,
-                                                                fontSize: 9.sp,
-                                                                letterSpacing: 1.0,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        TableCell(
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets.all(6),
-                                                            child: Text(
-                                                              "Price (MYR)",
-                                                              style: GoogleFonts.aubrey(
-                                                                fontWeight: FontWeight.w600,
-                                                                color: kLabel,
-                                                                fontSize: 9.sp,
-                                                                letterSpacing: 1.0,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        TableCell(
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets.all(6),
-                                                            child: Text(
-                                                              "QTY",
-                                                              style: GoogleFonts.aubrey(
-                                                                fontWeight: FontWeight.w600,
-                                                                color: kLabel,
-                                                                fontSize: 9.sp,
-                                                                letterSpacing: 1.0,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        TableCell(
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets.all(6),
-                                                            child: Text(
-                                                              "Subtotal (MYR)",
-                                                              style: GoogleFonts.aubrey(
-                                                                fontWeight: FontWeight.w600,
-                                                                color: kLabel,
-                                                                fontSize: 9.sp,
-                                                                letterSpacing: 1.0,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        TableCell(
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets.all(
-                                                                  6),
-                                                          child: Text(
-                                                            "Del",
-                                                            style:
-                                                                GoogleFonts.aubrey(
-                                                              fontWeight:
-                                                                  FontWeight.w600,
-                                                              color: kLabel,
-                                                              fontSize: 9.sp,
-                                                              letterSpacing: 1.0,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      ],
-                                                    ),
+                                                    // TableRow(
+                                                    //   children: [
+                                                    //     TableCell(
+                                                    //       child: Padding(
+                                                    //         padding:
+                                                    //             const EdgeInsets.all(6),
+                                                    //         child: Text(
+                                                    //           "Name",
+                                                    //           style: GoogleFonts.aubrey(
+                                                    //             fontWeight: FontWeight.w600,
+                                                    //             color: kLabel,
+                                                    //             fontSize: 9.sp,
+                                                    //             letterSpacing: 1.0,
+                                                    //           ),
+                                                    //         ),
+                                                    //       ),
+                                                    //     ),
+                                                    //     TableCell(
+                                                    //       child: Padding(
+                                                    //         padding:
+                                                    //             const EdgeInsets.all(6),
+                                                    //         child: Text(
+                                                    //           "Price (MYR)",
+                                                    //           style: GoogleFonts.aubrey(
+                                                    //             fontWeight: FontWeight.w600,
+                                                    //             color: kLabel,
+                                                    //             fontSize: 9.sp,
+                                                    //             letterSpacing: 1.0,
+                                                    //           ),
+                                                    //         ),
+                                                    //       ),
+                                                    //     ),
+                                                    //     TableCell(
+                                                    //       child: Padding(
+                                                    //         padding:
+                                                    //             const EdgeInsets.all(6),
+                                                    //         child: Text(
+                                                    //           "QTY",
+                                                    //           style: GoogleFonts.aubrey(
+                                                    //             fontWeight: FontWeight.w600,
+                                                    //             color: kLabel,
+                                                    //             fontSize: 9.sp,
+                                                    //             letterSpacing: 1.0,
+                                                    //           ),
+                                                    //         ),
+                                                    //       ),
+                                                    //     ),
+                                                    //     TableCell(
+                                                    //       child: Padding(
+                                                    //         padding:
+                                                    //             const EdgeInsets.all(6),
+                                                    //         child: Text(
+                                                    //           "Subtotal (MYR)",
+                                                    //           style: GoogleFonts.aubrey(
+                                                    //             fontWeight: FontWeight.w600,
+                                                    //             color: kLabel,
+                                                    //             fontSize: 9.sp,
+                                                    //             letterSpacing: 1.0,
+                                                    //           ),
+                                                    //         ),
+                                                    //       ),
+                                                    //     ),
+                                                    //     TableCell(
+                                                    //     child: Padding(
+                                                    //       padding:
+                                                    //           const EdgeInsets.all(
+                                                    //               6),
+                                                    //       child: Text(
+                                                    //         "Del",
+                                                    //         style:
+                                                    //             GoogleFonts.aubrey(
+                                                    //           fontWeight:
+                                                    //               FontWeight.w600,
+                                                    //           color: kLabel,
+                                                    //           fontSize: 9.sp,
+                                                    //           letterSpacing: 1.0,
+                                                    //         ),
+                                                    //       ),
+                                                    //     ),
+                                                    //   ),
+                                                    //   ],
+                                                    // ),
                                                     for (final result in searchResults)
                                                       TableRow(
                                                         children: [
@@ -1600,7 +1695,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                       margin: kMargin,
                       padding: kPadding,
                       decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 220, 247, 255),
+                        color: kContainer,
                         borderRadius: kRadius,
                       ),
                       child: FutureBuilder<List<Product>>(
@@ -1653,7 +1748,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                           padding: EdgeInsets.all(10.0),
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(12),
-                                            color: Color.fromARGB(255, 201, 252, 255),
+                                            color: kProduct,
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.grey
