@@ -10,7 +10,6 @@ import 'package:http/http.dart' as http;
 import 'package:sizer/sizer.dart';
 
 import '../../models/product_model.dart';
-
 class AddPoductDialogContent extends StatefulWidget {
   final int posId;
   const AddPoductDialogContent({required this.posId});
