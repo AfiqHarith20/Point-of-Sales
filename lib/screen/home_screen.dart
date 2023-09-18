@@ -1079,13 +1079,15 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              "Payment",
-                                              style: GoogleFonts.aubrey(
-                                                fontWeight: FontWeight.w600,
-                                                color: kLabel,
-                                                fontSize: 11.sp,
-                                                letterSpacing: 1.0,
+                                            Expanded(
+                                              child: Text(
+                                                "Payment",
+                                                style: GoogleFonts.aubrey(
+                                                  fontWeight: FontWeight.w600,
+                                                  color: kLabel,
+                                                  fontSize: 11.sp,
+                                                  letterSpacing: 1.0,
+                                                ),
                                               ),
                                             ),
                                             Container(
