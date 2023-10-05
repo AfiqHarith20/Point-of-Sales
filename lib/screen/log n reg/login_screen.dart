@@ -97,23 +97,15 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: kSecondaryColor,
       body: SafeArea(
-          child: Center(
         child: SingleChildScrollView(
-          child: Column(children: [
-            SizedBox(
-              height: 5.h,
-            ),
-            FaIcon(
-              FontAwesomeIcons.shopLock,
-              size: 100,
-              color: Color.fromARGB(255, 232, 100, 70),
-            ),
+          child: Column(
+            children: [
             SizedBox(
               height: 5.h,
             ),
             Text(
-              "Welcome back you\'ve been missed!",
-              style: GoogleFonts.ubuntu(
+              "Cartsini Point of Sales",
+              style: GoogleFonts.inder(
                 fontSize: 14.sp,
                 letterSpacing: 1.0,
                 fontWeight: FontWeight.w500,
@@ -121,72 +113,106 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             SizedBox(
-              height: 5.h,
+              height: 3.h,
             ),
-            Padding(
-              padding: const EdgeInsets.all(0),
-              child: Text(
-                "Email:",
-                style: GoogleFonts.ubuntu(
-                  fontSize: 14.sp,
-                  letterSpacing: 1.0,
-                  fontWeight: FontWeight.w500,
-                  color: kTextColor,
-                ),
+            Text(
+              "LOGIN",
+              style: GoogleFonts.inder(
+                fontSize: 16.sp,
+                letterSpacing: 1.0,
+                fontWeight: FontWeight.w600,
+                color: kTextColor,
               ),
             ),
-            LoginTextfield(
-              controller: emailController,
-              hintText: 'Please Enter Email',
-              obscureText: false,
-            ),
-            SizedBox(
-              height: 1.h,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(0),
-              child: Text(
-                "Password:",
-                style: GoogleFonts.ubuntu(
-                  fontSize: 14.sp,
-                  letterSpacing: 1.0,
-                  fontWeight: FontWeight.w500,
-                  color: kTextColor,
-                ),
+            Container(
+              width: 80.w,
+              height: 35.h,
+              alignment: Alignment.center,
+              margin: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: kPrimaryColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-            ),
-            LoginTextfield(
-              controller: passwordController,
-              hintText: 'Please Enter Password',
-              obscureText: true,
-            ),
-            SizedBox(
-              height: 1.h,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Forgot Password?",
-                    style: GoogleFonts.ubuntu(
-                      fontSize: 10.sp,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w500,
-                      color: kScaffoldColor,
+                  Padding(
+                    padding: const EdgeInsets.all(0),
+                    child: Text(
+                      "Email:",
+                      style: GoogleFonts.ubuntu(
+                        fontSize: 14.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
+                        color: kTextColor,
+                      ),
                     ),
-                  )
+                  ),
+                  LoginTextfield(
+                    controller: emailController,
+                    hintText: 'Please Enter Email',
+                    obscureText: false,
+                  ),
+                  SizedBox(
+                    height: 1.h,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(0),
+                    child: Text(
+                      "Password:",
+                      style: GoogleFonts.ubuntu(
+                        fontSize: 14.sp,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
+                        color: kTextColor,
+                      ),
+                    ),
+                  ),
+                  PasswordTextField(
+                    controller: passwordController,
+                    hintText: 'Please Enter Password',
+                    obscureText: true,
+                  ),
+                  SizedBox(
+                    height: 1.h,
+                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.end,
+                  //     children: [
+                  //       Text(
+                  //         "Forgot Password?",
+                  //         style: GoogleFonts.ubuntu(
+                  //           fontSize: 10.sp,
+                  //           letterSpacing: 1.0,
+                  //           fontWeight: FontWeight.w500,
+                  //           color: kScaffoldColor,
+                  //         ),
+                  //       )
+                  //     ],
+                  //   ),
+                  // ),
+                  SizedBox(
+                    height: 1.h,
+                  ),
+                  _loginButton(context),
+                  // LoginButton(
+                  //   onTap: userLogin,
+                  // ),
                 ],
               ),
             ),
-            SizedBox(
-              height: 1.h,
-            ),
-            _loginButton(context),
-            // LoginButton(
-            //   onTap: userLogin,
-            // ),
+            
             SizedBox(
               height: 5.h,
             ),
@@ -279,7 +305,7 @@ class _LoginScreenState extends State<LoginScreen> {
             )
           ]),
         ),
-      )),
+      ),
     );
   }
 
@@ -290,7 +316,7 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: EdgeInsets.all(25),
         margin: EdgeInsets.symmetric(horizontal: 25),
         decoration: BoxDecoration(
-          color: kScaffoldColor,
+          color: kSecondaryColor,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(

@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .hasMatch(email);
   }
 
-double calculateTax() {
+  double calculateTax() {
     double netPrice = calculateSubtotal();
     num taxPercentage =
         _selectedPaymentTax != null ? _selectedPaymentTax!.taxPercentage : 0;
@@ -125,7 +125,7 @@ double calculateTax() {
     return netPrice;
   }
 
- double calculateTotal() {
+  double calculateTotal() {
     double netPrice = calculateSubtotal();
     double discount = calculateDiscount();
     double tax =
@@ -167,7 +167,7 @@ double calculateTax() {
         'Content-Type': 'application/json'
       }),
     );
-    
+
     if (response.statusCode == 200) {
       final Map<String, dynamic> json = jsonDecode(response.body);
       final payTax = Payment.fromJson(json);
@@ -227,7 +227,7 @@ double calculateTax() {
     }
   }
 
-Future<List<Product>> fetchProductsForCategory(String category) async {
+  Future<List<Product>> fetchProductsForCategory(String category) async {
     final url = Uri.parse(Constants.apiPosIndex);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final http.Response response = await http.get(
@@ -256,7 +256,6 @@ Future<List<Product>> fetchProductsForCategory(String category) async {
     }
   }
 
-
   Future<void> _fetchProductList(String selectedCategoryName) async {
     try {
       List<Product> productList =
@@ -280,54 +279,54 @@ Future<List<Product>> fetchProductsForCategory(String category) async {
 ///////////////////////////// fetch Get and Post ////////////////////////////////////////
 
   void fetchPos() async {
-  final url = Uri.parse(Constants.apiPosIndex);
+    final url = Uri.parse(Constants.apiPosIndex);
 
-  //GET Request
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final http.Response response = await http.get(
-    url,
-    headers: ({
-      'Authorization': 'Bearer ' + prefs.getString('token').toString(),
-      'Content-Type': 'application/json'
-    }),
-  );
-  print(response.statusCode);
-  if (response.statusCode == 200) {
-    final Map<String, dynamic> pos = json.decode(response.body);
-    print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
-    // print(response.body);
+    //GET Request
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final http.Response response = await http.get(
+      url,
+      headers: ({
+        'Authorization': 'Bearer ' + prefs.getString('token').toString(),
+        'Content-Type': 'application/json'
+      }),
+    );
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> pos = json.decode(response.body);
+      print("INDEX POS >>>>>>>>>>>>>>>>>>>>>");
+      // print(response.body);
 
-    setState(() {
-      isLoading = false;
+      setState(() {
+        isLoading = false;
 
-      /////////////////////////// User ////////////////////////////////////
+        /////////////////////////// User ////////////////////////////////////
 
-      final userData = pos['data'][0]['user'];
-      if (userData != null) {
-        final user = User(
-          userid: userData['id'],
-          username: userData['fullname'].toString(),
-          useremail: userData['email'].toString(),
-        );
-        userId = user.userid;
-        userName = user.username;
-        userEmail = user.useremail;
-      } else {
-        print("User data is null");
-      }
+        final userData = pos['data'][0]['user'];
+        if (userData != null) {
+          final user = User(
+            userid: userData['id'],
+            username: userData['fullname'].toString(),
+            useremail: userData['email'].toString(),
+          );
+          userId = user.userid;
+          userName = user.username;
+          userEmail = user.useremail;
+        } else {
+          print("User data is null");
+        }
 
-      ///////////////////// Payment Type and Tax ////////////////////////////////
+        ///////////////////// Payment Type and Tax ////////////////////////////////
 
-      _parsePaymentTypeAndTax(pos);
+        _parsePaymentTypeAndTax(pos);
 
-      // Rest of your code...
-    });
-  } else {
-    print(response.reasonPhrase);
+        // Rest of your code...
+      });
+    } else {
+      print(response.reasonPhrase);
+    }
   }
-}
 
-void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
+  void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
     final paymentTypeDataList = pos['payment_type'];
     final paymentTaxDataList = pos['payment_tax'];
 
@@ -617,61 +616,952 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: DrawerScreen(),
-        appBar: AppBar(
-          backgroundColor: kContainer,
-          leading: Builder(
-            builder: (context) {
-              return IconButton(
-                icon: const FaIcon(
-                  FontAwesomeIcons.bars,
-                  color: kTextColor,
-                ),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              );
-            },
-          ),
-          centerTitle: true,
-          title: Text(
-            "CartSini POS System",
-            style: GoogleFonts.ubuntu(
-              fontSize: 16.sp,
-              letterSpacing: 1.0,
-              fontWeight: FontWeight.w500,
-              color: Colors.red.shade600,
-            ),
-          ),
-          // actions: <Widget>[
-          //   IconButton(
-          //     icon: FaIcon(
-          //       FontAwesomeIcons.bell,
-          //       color: Colors.white,
-          //     ),
-          //     onPressed: () {},
-          //     tooltip: "Notifications Section",
-          //   ),
-          // ],
+      drawer: DrawerScreen(),
+      appBar: AppBar(
+        backgroundColor: kContainer,
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: const FaIcon(
+                FontAwesomeIcons.bars,
+                color: kTextColor,
+              ),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
         ),
-        body: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 2.h,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Form(
-                              child: Container(
-                                height: 85.h,
+        centerTitle: true,
+        title: Text(
+          "CartSini POS System",
+          style: GoogleFonts.ubuntu(
+            fontSize: 16.sp,
+            letterSpacing: 1.0,
+            fontWeight: FontWeight.w500,
+            color: Colors.red.shade600,
+          ),
+        ),
+        // actions: <Widget>[
+        //   IconButton(
+        //     icon: FaIcon(
+        //       FontAwesomeIcons.bell,
+        //       color: Colors.white,
+        //     ),
+        //     onPressed: () {},
+        //     tooltip: "Notifications Section",
+        //   ),
+        // ],
+      ),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 2.h,
+                  ),
+                  FutureBuilder<List<String>>(
+                    future: fetchCategoryNames(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Error fetching categories: ${snapshot.error}',
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                            ),
+                          ),
+                        );
+                      } else if (snapshot.hasData) {
+                        // Check if data is available
+                        List<String> categoryList =
+                            snapshot.data!; // Data is not null, use ! to access
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            AnimatedButtonBar(
+                              foregroundColor: Colors.blueGrey.shade400,
+                              radius: 10.0,
+                              padding: const EdgeInsets.all(16.0),
+                              invertedSelection: true,
+                              children: [
+                                for (var categoryName in categoryList)
+                                  ButtonBarEntry(
+                                    child: Align(
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        categoryName,
+                                        style: GoogleFonts.breeSerif(
+                                          fontWeight: FontWeight.w600,
+                                          color: kTextColor,
+                                          fontSize: 7.sp,
+                                          letterSpacing: 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        selectedCategory = categoryName;
+                                      });
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ],
+                        );
+                      } else {
+                        // Handle the case when snapshot.data is null
+                        return Center(
+                          child: Text(
+                            'No categories available',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w500,
+                              color: kTextColor,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Container(
+                            height: 115.h,
+                            // width: 200.w,
+                            margin: kMargin,
+                            padding: kPadding,
+                            decoration: BoxDecoration(
+                              color: kContainer,
+                              borderRadius: kRadius,
+                            ),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 4.h,
+                                  child: TextField(
+                                    textAlignVertical: TextAlignVertical.bottom,
+                                    controller: skuController,
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor: kTextFilled,
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
+                                        borderSide: BorderSide(
+                                            width: 3,
+                                            color: Color.fromARGB(
+                                                255, 196, 224, 249),
+                                                ),
+                                      ),
+                                      suffixIcon: IconButton(
+                                        icon: FaIcon(
+                                            FontAwesomeIcons.magnifyingGlass),
+                                        onPressed: () => _isLoader
+                                            ? buildCircularProgressIndicator()
+                                            : searchProduct(),
+                                      ),
+                                      hintText: "Enter SKU Number",
+                                      hintStyle: GoogleFonts.abel(
+                                        fontSize: 10.sp,
+                                        color: kTextColor,
+                                        fontWeight: FontWeight.w500,
+                                        letterSpacing: 1.0,
+                                      ),
+                                    ),
+                                    style: GoogleFonts.abel(
+                                      fontSize: 10.sp,
+                                      color: kTextColor,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 1.h,
+                                ),
+                                SizedBox(
+                                  height: 4.h,
+                                  child: TextField(
+                                    controller: custEmailController,
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor: kTextFilled,
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
+                                        borderSide: BorderSide(
+                                          width: 3,
+                                          color: Color.fromARGB(255, 196, 224, 249),
+                                        ),
+                                      ),
+                                      hintText: 'Customer Email',
+                                      contentPadding: EdgeInsets.symmetric(
+                                        vertical:
+                                            4.0, // Adjust this value to control vertical alignment
+                                        horizontal: 16.0,
+                                      ),
+                                    ),
+                                    style: GoogleFonts.abel(
+                                      fontSize: 11.sp,
+                                      color: kTextColor,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                    height: 54.h,
+                                    width: 200.w,
+                                    margin: kMargin,
+                                    padding: kPadding,
+                                    decoration: BoxDecoration(
+                                      color: kContainer,
+                                      borderRadius: kRadius,
+                                    ),
+                                    child: FutureBuilder<List<Product>>(
+                                      future: fetchProductsForCategory(
+                                          selectedCategory),
+                                      builder: (context, snapshot) {
+                                        if (isLoading) {
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                            ),
+                                          );
+                                        } else if (snapshot.hasError) {
+                                          return Center(
+                                            child: Text(
+                                              'Error fetching products: ${snapshot.error}',
+                                              style: TextStyle(
+                                                fontSize: 16.0,
+                                                fontWeight: FontWeight.w500,
+                                                color: kTextColor,
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          List<Product> productList =
+                                              snapshot.data ?? [];
+                                          if (productList.isEmpty) {
+                                            return Center(
+                                              child: Text(
+                                                'No products available',
+                                                style: TextStyle(
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: kTextColor,
+                                                ),
+                                              ),
+                                            );
+                                          } else {
+                                            return Wrap(
+                                              alignment: WrapAlignment.start,
+                                              children: productList
+                                                  .map(
+                                                    (product) =>
+                                                        GestureDetector(
+                                                      onTap: () {
+                                                        addSelectedProduct(
+                                                            product);
+                                                      },
+                                                      child: Container(
+                                                        width: 20.w,
+                                                        height: 13.h,
+                                                        alignment:
+                                                            Alignment.center,
+                                                        margin: EdgeInsets.all(
+                                                            10.0),
+                                                        padding: EdgeInsets.all(
+                                                            10.0),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(12),
+                                                          color: kProduct,
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: Colors.grey
+                                                                  .withOpacity(
+                                                                      0.5),
+                                                              spreadRadius: 2,
+                                                              blurRadius: 5,
+                                                              offset:
+                                                                  Offset(0, 3),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(
+                                                                height: 10.0),
+                                                            Text(
+                                                              product.name,
+                                                              style: GoogleFonts
+                                                                  .breeSerif(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 6.sp,
+                                                                letterSpacing:
+                                                                    1.0,
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                                height: 5.0),
+                                                            Text(
+                                                              '\RM${product.price}',
+                                                              style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                fontSize: 6.sp,
+                                                                color:
+                                                                    Colors.blue,
+                                                              ),
+                                                            ),
+                                                            // SizedBox(height: 10.0),
+                                                            // Text(
+                                                            //   product.summary,
+                                                            //   style: TextStyle(
+                                                            //     fontSize: 14.0,
+                                                            //   ),
+                                                            // ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  )
+                                                  .toList(),
+                                            );
+                                          }
+                                        }
+                                      },
+                                    )),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Expanded(
+                        //   flex: 3,
+                        //   child: Form(
+                        //     child: Container(
+                        //       height: 85.h,
+                        //       margin: kMargin,
+                        //       padding: kPadding,
+                        //       decoration: BoxDecoration(
+                        //         color: kContainer,
+                        //         borderRadius: kRadius,
+                        //       ),
+                        //       child: Column(
+                        //         children: [
+                        //           SingleChildScrollView(
+                        //             padding: EdgeInsets.symmetric(
+                        //                 vertical: 10, horizontal: 10),
+                        //             child: Column(children: [
+                        //               Column(
+                        //                 children: [
+                        //                   Text(
+                        //                     "Welcome $userName",
+                        //                     style: GoogleFonts.rubik(
+                        //                       fontSize: 12.sp,
+                        //                       color: kTextColor,
+                        //                       fontWeight: FontWeight.w500,
+                        //                       letterSpacing: 1.0,
+                        //                     ),
+                        //                   ),
+                        //                 ],
+                        //               ),
+                        //               SizedBox(
+                        //                 height: 1.h,
+                        //               ),
+                        //               GestureDetector(
+                        //                 onTap: () {
+                        //                   // Remove focus from TextField when tapped outside
+                        //                   FocusScope.of(context)
+                        //                       .requestFocus(FocusNode());
+                        //                 },
+                        //                 child: Column(
+                        //                   crossAxisAlignment:
+                        //                       CrossAxisAlignment.center,
+                        //                   children: [
+                        //                     Text(
+                        //                       "Product Code (SKU)",
+                        //                       style: GoogleFonts.abel(
+                        //                         fontSize: 10.sp,
+                        //                         color: kTextColor,
+                        //                         fontWeight: FontWeight.w400,
+                        //                         letterSpacing: 1.0,
+                        //                       ),
+                        //                     ),
+                        //                     SizedBox(
+                        //                       height: 4.h,
+                        //                       child: TextField(
+                        //                         controller: skuController,
+                        //                         decoration: InputDecoration(
+                        //                           filled: true,
+                        //                           fillColor: kTextFilled,
+                        //                           enabledBorder:
+                        //                               OutlineInputBorder(
+                        //                             borderRadius:
+                        //                                 BorderRadius.circular(
+                        //                                     20.0),
+                        //                             borderSide: BorderSide(
+                        //                                 width: 3,
+                        //                                 color: Colors
+                        //                                     .greenAccent),
+                        //                           ),
+                        //                         ),
+                        //                         style: GoogleFonts.abel(
+                        //                           fontSize: 11.sp,
+                        //                           color: kTextColor,
+                        //                           fontWeight: FontWeight.w500,
+                        //                           letterSpacing: 1.0,
+                        //                         ),
+                        //                       ),
+                        //                     ),
+                        //                   ],
+                        //                 ),
+                        //               ),
+                        //               SizedBox(
+                        //                 height: 1.h,
+                        //               ),
+                        //               Row(
+                        //               mainAxisAlignment: MainAxisAlignment.end,
+                        //               children: [
+                        //                 ElevatedButton(
+                        //                   style: ButtonStyle(
+                        //                     overlayColor:
+                        //                         MaterialStateProperty
+                        //                             .resolveWith<Color?>(
+                        //                       (Set<MaterialState> states) {
+                        //                         if (states.contains(
+                        //                             MaterialState.pressed))
+                        //                           return Colors.greenAccent;
+                        //                         return null;
+                        //                       },
+                        //                     ),
+                        //                   ),
+                        //                   onPressed: () => _isLoader
+                        //                       ? buildCircularProgressIndicator()
+                        //                       : searchProduct(),
+                        //                   child: Text(
+                        //                     "Enter",
+                        //                     style: GoogleFonts.manrope(
+                        //                       fontSize: 9.sp,
+                        //                       color: kPrimaryColor,
+                        //                       fontWeight: FontWeight.w600,
+                        //                       letterSpacing: 1.0,
+                        //                     ),
+                        //                   ),
+                        //                 ),
+                        //               ],
+                        //             ),
+                        //               SizedBox(
+                        //                 height: 1.h,
+                        //               ),
+                        //               Text(
+                        //                 "Quantity",
+                        //                 style: GoogleFonts.abel(
+                        //                   fontSize: 10.sp,
+                        //                   color: kTextColor,
+                        //                   fontWeight: FontWeight.w400,
+                        //                   letterSpacing: 1.0,
+                        //                 ),
+                        //               ),
+                        //               IconButton(
+                        //                 icon: FaIcon(
+                        //                   FontAwesomeIcons.chevronUp,
+                        //                   size: 40.0,
+                        //                   color: Colors.black,
+                        //                 ),
+                        //                 onPressed: _incrementQuantity,
+                        //               ),
+                        //               SizedBox(
+                        //                 height: 1.h,
+                        //               ),
+                        //               SizedBox(
+                        //                 width: 40.w,
+                        //                 child: TextField(
+                        //                   controller: quantityController,
+                        //                   keyboardType: TextInputType.number,
+                        //                   decoration: InputDecoration(
+                        //                     filled: true,
+                        //                     fillColor: kTextFilled,
+                        //                     enabledBorder: OutlineInputBorder(
+                        //                       borderRadius:
+                        //                           BorderRadius.circular(20.0),
+                        //                       borderSide: BorderSide(
+                        //                         width: 3,
+                        //                         color: Colors.greenAccent,
+                        //                       ),
+                        //                     ),
+                        //                   ),
+                        //                   style: GoogleFonts.abel(
+                        //                     fontSize: 11.sp,
+                        //                     color: kHint,
+                        //                     fontWeight: FontWeight.w500,
+                        //                     letterSpacing: 1.0,
+                        //                   ),
+                        //                   textAlign: TextAlign.center,
+                        //                   onChanged: (value) {
+                        //                     setState(() {
+                        //                       quantity = int.parse(value);
+                        //                     });
+                        //                   },
+                        //                 ),
+                        //               ),
+                        //               SizedBox(
+                        //                 height: 1.h,
+                        //               ),
+                        //               IconButton(
+                        //                 icon: FaIcon(
+                        //                   FontAwesomeIcons.chevronDown,
+                        //                   size: 40.0,
+                        //                   color: Colors.black,
+                        //                 ),
+                        //                 onPressed: _decrementQuantity,
+                        //               ),
+                        //               SizedBox(
+                        //                 height: 1.h,
+                        //               ),
+                        //               Text(
+                        //                 "Email",
+                        //                 style: GoogleFonts.abel(
+                        //                   fontSize: 10.sp,
+                        //                   color: kTextColor,
+                        //                   fontWeight: FontWeight.w400,
+                        //                   letterSpacing: 1.0,
+                        //                 ),
+                        //               ),
+                        //               SizedBox(
+                        //                 height: 4.h,
+                        //                 child: TextField(
+                        //                   controller: custEmailController,
+                        //                   decoration: InputDecoration(
+                        //                     filled: true,
+                        //                     fillColor: kTextFilled,
+                        //                     enabledBorder: OutlineInputBorder(
+                        //                       borderRadius:
+                        //                           BorderRadius.circular(20.0),
+                        //                       borderSide: BorderSide(
+                        //                         width: 3,
+                        //                         color: Colors.greenAccent,
+                        //                       ),
+                        //                     ),
+                        //                     hintText: 'Customer Email',
+                        //                     contentPadding:
+                        //                         EdgeInsets.symmetric(
+                        //                       vertical:
+                        //                           4.0, // Adjust this value to control vertical alignment
+                        //                       horizontal: 16.0,
+                        //                     ),
+                        //                   ),
+                        //                   style: GoogleFonts.abel(
+                        //                     fontSize: 11.sp,
+                        //                     color: kTextColor,
+                        //                     fontWeight: FontWeight.w500,
+                        //                     letterSpacing: 1.0,
+                        //                   ),
+                        //                 ),
+                        //               ),
+                        //               SizedBox(
+                        //                 height: 1.h,
+                        //               ),
+
+                        //               Divider(
+                        //                 color: Colors.red,
+                        //                 thickness: 2.0,
+                        //               ),
+                        //               Row(
+                        //                 mainAxisAlignment:
+                        //                     MainAxisAlignment.spaceBetween,
+                        //                 children: [
+                        //                   Text(
+                        //                     "Discount",
+                        //                     style: GoogleFonts.aubrey(
+                        //                       fontWeight: FontWeight.w600,
+                        //                       color: kLabel,
+                        //                       fontSize: 11.sp,
+                        //                       letterSpacing: 1.0,
+                        //                     ),
+                        //                   ),
+                        //                   Text(
+                        //                     "\RM${calculateDiscount().toStringAsFixed(2)}",
+                        //                     style: GoogleFonts.breeSerif(
+                        //                       fontWeight: FontWeight.w500,
+                        //                       color: kTextColor,
+                        //                       fontSize: 11.sp,
+                        //                       letterSpacing: 1.0,
+                        //                     ),
+                        //                   ),
+                        //                 ],
+                        //               ),
+                        //               Row(
+                        //                 mainAxisAlignment:
+                        //                     MainAxisAlignment.spaceBetween,
+                        //                 children: [
+                        //                   Text(
+                        //                     "Tax",
+                        //                     style: GoogleFonts.aubrey(
+                        //                       fontWeight: FontWeight.w600,
+                        //                       color: kLabel,
+                        //                       fontSize: 11.sp,
+                        //                       letterSpacing: 1.0,
+                        //                     ),
+                        //                   ),
+                        //                   Container(
+                        //                       decoration: BoxDecoration(
+                        //                         borderRadius:
+                        //                             BorderRadius.circular(10),
+                        //                         color: kTextFilled,
+                        //                       ),
+                        //                       width: 32.w,
+                        //                       height: 5.h,
+                        //                       alignment: Alignment.centerLeft,
+                        //                       padding:
+                        //                           const EdgeInsets.symmetric(
+                        //                         horizontal: 15,
+                        //                         vertical: 15,
+                        //                       ),
+                        //                       child: LayoutBuilder(builder:
+                        //                           (context, constraints) {
+                        //                         return FutureBuilder<
+                        //                             List<PaymentTax>>(
+                        //                           future: _paymentTax,
+                        //                           builder:
+                        //                               (context, snapshot) {
+                        //                             if (snapshot.hasError) {
+                        //                               return Text(
+                        //                                   'Error: ${snapshot.error}');
+                        //                             }
+                        //                             if (snapshot
+                        //                                     .connectionState ==
+                        //                                 ConnectionState
+                        //                                     .waiting) {
+                        //                               return const CircularProgressIndicator();
+                        //                             }
+                        //                             return DropdownButtonHideUnderline(
+                        //                             child: DropdownButton<
+                        //                                 PaymentTax>(
+                        //                               icon: FaIcon(
+                        //                                 FontAwesomeIcons
+                        //                                     .chevronDown,
+                        //                                 size: 15,
+                        //                               ),
+                        //                               borderRadius:
+                        //                                   BorderRadius
+                        //                                       .circular(20),
+                        //                               isExpanded: true,
+                        //                               hint: Text(
+                        //                                 "Select Tax Type",
+                        //                                 style: TextStyle(
+                        //                                   color: kHint,
+                        //                                   fontSize: 6.5.sp,
+                        //                                   letterSpacing: 0.5,
+                        //                                   fontWeight:
+                        //                                       FontWeight.w500,
+                        //                                 ),
+                        //                               ),
+                        //                               items: [
+                        //                                 ...snapshot.data!.map(
+                        //                                   (tax) =>
+                        //                                       DropdownMenuItem(
+                        //                                     value: tax,
+                        //                                     child: Row(
+                        //                                       children: [
+                        //                                         Text(
+                        //                                           '${tax.name}',
+                        //                                           style:
+                        //                                               TextStyle(
+                        //                                             color:
+                        //                                                 kForm,
+                        //                                             fontSize:
+                        //                                                 5.sp,
+                        //                                             letterSpacing:
+                        //                                                 1.0,
+                        //                                             fontWeight:
+                        //                                                 FontWeight
+                        //                                                     .w600,
+                        //                                           ),
+                        //                                         ),
+                        //                                       ],
+                        //                                     ),
+                        //                                   ),
+                        //                                 ),
+                        //                               ],
+                        //                                 onChanged: (type) {
+                        //                                 setState(() {
+                        //                                   _selectedPaymentTax =
+                        //                                       type; // Update _selectedPaymentTax when a tax type is selected
+                        //                                 });
+                        //                               },
+                        //                               value:
+                        //                                   _selectedPaymentTax,
+
+                        //                               ),
+                        //                             );
+                        //                           },
+                        //                         );
+                        //                       }),),
+                        //                 ],
+                        //               ),
+                        //               SizedBox(
+                        //                 height: 1.h,
+                        //               ),
+                        //               Row(
+                        //                 mainAxisAlignment:
+                        //                     MainAxisAlignment.spaceBetween,
+                        //                 children: [
+                        //                   Text(
+                        //                     "Tax Amount",
+                        //                     style: GoogleFonts.aubrey(
+                        //                       fontWeight: FontWeight.w600,
+                        //                       color: kLabel,
+                        //                       fontSize: 11.sp,
+                        //                       letterSpacing: 1.0,
+                        //                     ),
+                        //                   ),
+                        //                   _selectedPaymentTax != null
+                        //                       ? Text(
+                        //                           "${_selectedPaymentTax!.taxPercentage}%", // Access taxPercentage from _selectedPaymentTax
+                        //                           style:
+                        //                               GoogleFonts.breeSerif(
+                        //                             fontWeight:
+                        //                                 FontWeight.w500,
+                        //                             color: kTextColor,
+                        //                             fontSize: 11.sp,
+                        //                             letterSpacing: 1.0,
+                        //                           ),
+                        //                         )
+                        //                       : Text(
+                        //                           "0", // Show this when no tax type is selected
+                        //                           style:
+                        //                               GoogleFonts.breeSerif(
+                        //                             fontWeight:
+                        //                                 FontWeight.w500,
+                        //                             color: kTextColor,
+                        //                             fontSize: 11.sp,
+                        //                             letterSpacing: 1.0,
+                        //                           ),
+                        //                         ),
+                        //                 ],
+                        //               ),
+                        //               SizedBox(
+                        //                 height: 1.h,
+                        //               ),
+                        //               Row(
+                        //                 mainAxisAlignment:
+                        //                     MainAxisAlignment.spaceBetween,
+                        //                 children: [
+                        //                   Expanded(
+                        //                     child: Text(
+                        //                       "Payment",
+                        //                       style: GoogleFonts.aubrey(
+                        //                         fontWeight: FontWeight.w600,
+                        //                         color: kLabel,
+                        //                         fontSize: 11.sp,
+                        //                         letterSpacing: 1.0,
+                        //                       ),
+                        //                     ),
+                        //                   ),
+                        //                   Container(
+                        //                       decoration: BoxDecoration(
+                        //                         borderRadius:
+                        //                             BorderRadius.circular(10),
+                        //                         color: kTextFilled,
+                        //                       ),
+                        //                       width: 32.w,
+                        //                       height: 5.h,
+                        //                       alignment: Alignment.centerLeft,
+                        //                       padding:
+                        //                           const EdgeInsets.symmetric(
+                        //                         horizontal: 15,
+                        //                         vertical: 15,
+                        //                       ),
+                        //                       child: LayoutBuilder(builder:
+                        //                           (context, constraints) {
+                        //                         return FutureBuilder<
+                        //                             List<PaymentType>>(
+                        //                           future: _paymentType,
+                        //                           builder:
+                        //                               (context, snapshot) {
+                        //                             if (snapshot.hasError) {
+                        //                               return Text(
+                        //                                   'Error: ${snapshot.error}');
+                        //                             }
+                        //                             if (snapshot
+                        //                                     .connectionState ==
+                        //                                 ConnectionState
+                        //                                     .waiting) {
+                        //                               return const CircularProgressIndicator();
+                        //                             }
+                        //                             return DropdownButtonHideUnderline(
+                        //                               child: DropdownButton<
+                        //                                   PaymentType>(
+                        //                                 icon: FaIcon(
+                        //                                   FontAwesomeIcons
+                        //                                       .chevronDown,
+                        //                                   size: 15,
+                        //                                 ),
+                        //                                 borderRadius:
+                        //                                     BorderRadius
+                        //                                         .circular(20),
+                        //                                 isExpanded: true,
+                        //                                 hint: Text(
+                        //                                   "Select Payment Type",
+                        //                                   style: TextStyle(
+                        //                                     color: kHint,
+                        //                                     fontSize: 6.5.sp,
+                        //                                     letterSpacing:
+                        //                                         0.5,
+                        //                                     fontWeight:
+                        //                                         FontWeight
+                        //                                             .w500,
+                        //                                   ),
+                        //                                 ),
+                        //                                 items: [
+                        //                                   ...snapshot.data!
+                        //                                       .map(
+                        //                                     (type) =>
+                        //                                         DropdownMenuItem(
+                        //                                       value: type,
+                        //                                       child: Row(
+                        //                                         children: [
+                        //                                           Text(
+                        //                                             '${type.name}',
+                        //                                             style:
+                        //                                                 TextStyle(
+                        //                                               color:
+                        //                                                   kForm,
+                        //                                               fontSize:
+                        //                                                   5.sp,
+                        //                                               letterSpacing:
+                        //                                                   1.0,
+                        //                                               fontWeight:
+                        //                                                   FontWeight.w600,
+                        //                                             ),
+                        //                                           ),
+                        //                                         ],
+                        //                                       ),
+                        //                                     ),
+                        //                                   ),
+                        //                                 ],
+                        //                                 onChanged: (type) {
+                        //                                   setState(() {
+                        //                                     _selectedPaymentType =
+                        //                                         type;
+                        //                                   });
+                        //                                 },
+                        //                                 value:
+                        //                                     _selectedPaymentType,
+                        //                               ),
+                        //                             );
+                        //                           },
+                        //                         );
+                        //                       }),
+                        //                       ),
+                        //                 ],
+                        //               ),
+                        //               SizedBox(
+                        //               height: 1.h,
+                        //             ),
+                        //               Row(
+                        //                 mainAxisAlignment:
+                        //                   MainAxisAlignment.spaceBetween,
+                        //                 children: [
+                        //                   Text("Receipt",
+                        //                   style: GoogleFonts.aubrey(
+                        //                     fontWeight: FontWeight.w600,
+                        //                     color: kLabel,
+                        //                     fontSize: 11.sp,
+                        //                     letterSpacing: 1.0,
+                        //                   ),
+                        //                 ),
+                        //                 MSHCheckbox(
+                        //                   size: 35,
+                        //                   value: isChecked,
+                        //                   isDisabled: isDisabled,
+                        //                   colorConfig: MSHColorConfig
+                        //                         .fromCheckedUncheckedDisabled(
+                        //                       checkedColor: Colors.redAccent,
+                        //                     ),
+                        //                     style: style,
+                        //                   onChanged: (isReceipt) {
+                        //                     setState(() {
+                        //                       isChecked = isReceipt;
+                        //                     });
+                        //                   },
+                        //                   )
+                        //                 ],
+                        //               ),
+                        //               SizedBox(
+                        //                 height: 2.h,
+                        //               ),
+                        //               ClipRRect(
+                        //                 borderRadius: BorderRadius.circular(15),
+                        //                 child: ElevatedButton(
+                        //                   onPressed: () {
+                        //                     if (searchResults.isNotEmpty) {
+                        //                       _onCheckoutButtonPressed();
+                        //                     } else {
+                        //                       showDialog(
+                        //                         context: context,
+                        //                         builder:
+                        //                             (BuildContext context) {
+                        //                           return AlertDialog(
+                        //                             title: Text("No Items"),
+                        //                             content: Text(
+                        //                                 "You must add items before proceeding."),
+                        //                             actions: [
+                        //                               TextButton(
+                        //                                 onPressed: () {
+                        //                                   Navigator.pop(
+                        //                                       context);
+                        //                                 },
+                        //                                 child: Text("OK"),
+                        //                               ),
+                        //                             ],
+                        //                           );
+                        //                         },
+                        //                       );
+                        //                     }
+                        //                   },
+                        //                   child: Text(
+                        //                     "CHECKOUT",
+                        //                     style: GoogleFonts.ubuntu(
+                        //                       fontSize: 14.sp,
+                        //                       letterSpacing: 1.0,
+                        //                       fontWeight: FontWeight.w600,
+                        //                     ),
+                        //                   ),
+                        //                 ),
+                        //               )
+                        //             ]),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 115.h,
                                 margin: kMargin,
                                 padding: kPadding,
                                 decoration: BoxDecoration(
@@ -679,615 +1569,10 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                   borderRadius: kRadius,
                                 ),
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    SingleChildScrollView(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 10, horizontal: 10),
-                                      child: Column(children: [
-                                        Column(
-                                          children: [
-                                            Text(
-                                              "Welcome $userName",
-                                              style: GoogleFonts.rubik(
-                                                fontSize: 12.sp,
-                                                color: kTextColor,
-                                                fontWeight: FontWeight.w500,
-                                                letterSpacing: 1.0,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 1.h,
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            // Remove focus from TextField when tapped outside
-                                            FocusScope.of(context)
-                                                .requestFocus(FocusNode());
-                                          },
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                "Product Code (SKU)",
-                                                style: GoogleFonts.abel(
-                                                  fontSize: 10.sp,
-                                                  color: kTextColor,
-                                                  fontWeight: FontWeight.w400,
-                                                  letterSpacing: 1.0,
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                height: 4.h,
-                                                child: TextField(
-                                                  controller: skuController,
-                                                  decoration: InputDecoration(
-                                                    filled: true,
-                                                    fillColor: kTextFilled,
-                                                    enabledBorder:
-                                                        OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20.0),
-                                                      borderSide: BorderSide(
-                                                          width: 3,
-                                                          color: Colors
-                                                              .greenAccent),
-                                                    ),
-                                                  ),
-                                                  style: GoogleFonts.abel(
-                                                    fontSize: 11.sp,
-                                                    color: kTextColor,
-                                                    fontWeight: FontWeight.w500,
-                                                    letterSpacing: 1.0,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 1.h,
-                                        ),
-                                        Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          ElevatedButton(
-                                            style: ButtonStyle(
-                                              overlayColor:
-                                                  MaterialStateProperty
-                                                      .resolveWith<Color?>(
-                                                (Set<MaterialState> states) {
-                                                  if (states.contains(
-                                                      MaterialState.pressed))
-                                                    return Colors.greenAccent;
-                                                  return null;
-                                                },
-                                              ),
-                                            ),
-                                            onPressed: () => _isLoader
-                                                ? buildCircularProgressIndicator()
-                                                : searchProduct(),
-                                            child: Text(
-                                              "Enter",
-                                              style: GoogleFonts.manrope(
-                                                fontSize: 9.sp,
-                                                color: kPrimaryColor,
-                                                fontWeight: FontWeight.w600,
-                                                letterSpacing: 1.0,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                        SizedBox(
-                                          height: 1.h,
-                                        ),
-                                        Text(
-                                          "Quantity",
-                                          style: GoogleFonts.abel(
-                                            fontSize: 10.sp,
-                                            color: kTextColor,
-                                            fontWeight: FontWeight.w400,
-                                            letterSpacing: 1.0,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: FaIcon(
-                                            FontAwesomeIcons.chevronUp,
-                                            size: 40.0,
-                                            color: Colors.black,
-                                          ),
-                                          onPressed: _incrementQuantity,
-                                        ),
-                                        SizedBox(
-                                          height: 1.h,
-                                        ),
-                                        SizedBox(
-                                          width: 40.w,
-                                          child: TextField(
-                                            controller: quantityController,
-                                            keyboardType: TextInputType.number,
-                                            decoration: InputDecoration(
-                                              filled: true,
-                                              fillColor: kTextFilled,
-                                              enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20.0),
-                                                borderSide: BorderSide(
-                                                  width: 3,
-                                                  color: Colors.greenAccent,
-                                                ),
-                                              ),
-                                            ),
-                                            style: GoogleFonts.abel(
-                                              fontSize: 11.sp,
-                                              color: kHint,
-                                              fontWeight: FontWeight.w500,
-                                              letterSpacing: 1.0,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            onChanged: (value) {
-                                              setState(() {
-                                                quantity = int.parse(value);
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 1.h,
-                                        ),
-                                        IconButton(
-                                          icon: FaIcon(
-                                            FontAwesomeIcons.chevronDown,
-                                            size: 40.0,
-                                            color: Colors.black,
-                                          ),
-                                          onPressed: _decrementQuantity,
-                                        ),
-                                        SizedBox(
-                                          height: 1.h,
-                                        ),
-                                        Text(
-                                          "Email",
-                                          style: GoogleFonts.abel(
-                                            fontSize: 10.sp,
-                                            color: kTextColor,
-                                            fontWeight: FontWeight.w400,
-                                            letterSpacing: 1.0,
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 4.h,
-                                          child: TextField(
-                                            controller: custEmailController,
-                                            decoration: InputDecoration(
-                                              filled: true,
-                                              fillColor: kTextFilled,
-                                              enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20.0),
-                                                borderSide: BorderSide(
-                                                  width: 3,
-                                                  color: Colors.greenAccent,
-                                                ),
-                                              ),
-                                              hintText: 'Customer Email',
-                                              contentPadding:
-                                                  EdgeInsets.symmetric(
-                                                vertical:
-                                                    4.0, // Adjust this value to control vertical alignment
-                                                horizontal: 16.0,
-                                              ),
-                                            ),
-                                            style: GoogleFonts.abel(
-                                              fontSize: 11.sp,
-                                              color: kTextColor,
-                                              fontWeight: FontWeight.w500,
-                                              letterSpacing: 1.0,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 1.h,
-                                        ),
-                                        
-                                        Divider(
-                                          color: Colors.red,
-                                          thickness: 2.0,
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Discount",
-                                              style: GoogleFonts.aubrey(
-                                                fontWeight: FontWeight.w600,
-                                                color: kLabel,
-                                                fontSize: 11.sp,
-                                                letterSpacing: 1.0,
-                                              ),
-                                            ),
-                                            Text(
-                                              "\RM${calculateDiscount().toStringAsFixed(2)}",
-                                              style: GoogleFonts.breeSerif(
-                                                fontWeight: FontWeight.w500,
-                                                color: kTextColor,
-                                                fontSize: 11.sp,
-                                                letterSpacing: 1.0,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Tax",
-                                              style: GoogleFonts.aubrey(
-                                                fontWeight: FontWeight.w600,
-                                                color: kLabel,
-                                                fontSize: 11.sp,
-                                                letterSpacing: 1.0,
-                                              ),
-                                            ),
-                                            Container(
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  color: kTextFilled,
-                                                ),
-                                                width: 32.w,
-                                                height: 5.h,
-                                                alignment: Alignment.centerLeft,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 15,
-                                                  vertical: 15,
-                                                ),
-                                                child: LayoutBuilder(builder:
-                                                    (context, constraints) {
-                                                  return FutureBuilder<
-                                                      List<PaymentTax>>(
-                                                    future: _paymentTax,
-                                                    builder:
-                                                        (context, snapshot) {
-                                                      if (snapshot.hasError) {
-                                                        return Text(
-                                                            'Error: ${snapshot.error}');
-                                                      }
-                                                      if (snapshot
-                                                              .connectionState ==
-                                                          ConnectionState
-                                                              .waiting) {
-                                                        return const CircularProgressIndicator();
-                                                      }
-                                                      return DropdownButtonHideUnderline(
-                                                      child: DropdownButton<
-                                                          PaymentTax>(
-                                                        icon: FaIcon(
-                                                          FontAwesomeIcons
-                                                              .chevronDown,
-                                                          size: 15,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20),
-                                                        isExpanded: true,
-                                                        hint: Text(
-                                                          "Select Tax Type",
-                                                          style: TextStyle(
-                                                            color: kHint,
-                                                            fontSize: 6.5.sp,
-                                                            letterSpacing: 0.5,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                        items: [
-                                                          ...snapshot.data!.map(
-                                                            (tax) =>
-                                                                DropdownMenuItem(
-                                                              value: tax,
-                                                              child: Row(
-                                                                children: [
-                                                                  Text(
-                                                                    '${tax.name}',
-                                                                    style:
-                                                                        TextStyle(
-                                                                      color:
-                                                                          kForm,
-                                                                      fontSize:
-                                                                          5.sp,
-                                                                      letterSpacing:
-                                                                          1.0,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w600,
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                          onChanged: (type) {
-                                                          setState(() {
-                                                            _selectedPaymentTax =
-                                                                type; // Update _selectedPaymentTax when a tax type is selected
-                                                          });
-                                                        },
-                                                        value:
-                                                            _selectedPaymentTax,
-
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                }),),
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 1.h,
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Tax Amount",
-                                              style: GoogleFonts.aubrey(
-                                                fontWeight: FontWeight.w600,
-                                                color: kLabel,
-                                                fontSize: 11.sp,
-                                                letterSpacing: 1.0,
-                                              ),
-                                            ),
-                                            _selectedPaymentTax != null
-                                                ? Text(
-                                                    "${_selectedPaymentTax!.taxPercentage}%", // Access taxPercentage from _selectedPaymentTax
-                                                    style:
-                                                        GoogleFonts.breeSerif(
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: kTextColor,
-                                                      fontSize: 11.sp,
-                                                      letterSpacing: 1.0,
-                                                    ),
-                                                  )
-                                                : Text(
-                                                    "0", // Show this when no tax type is selected
-                                                    style:
-                                                        GoogleFonts.breeSerif(
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: kTextColor,
-                                                      fontSize: 11.sp,
-                                                      letterSpacing: 1.0,
-                                                    ),
-                                                  ),
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 1.h,
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                "Payment",
-                                                style: GoogleFonts.aubrey(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: kLabel,
-                                                  fontSize: 11.sp,
-                                                  letterSpacing: 1.0,
-                                                ),
-                                              ),
-                                            ),
-                                            Container(
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  color: kTextFilled,
-                                                ),
-                                                width: 32.w,
-                                                height: 5.h,
-                                                alignment: Alignment.centerLeft,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 15,
-                                                  vertical: 15,
-                                                ),
-                                                child: LayoutBuilder(builder:
-                                                    (context, constraints) {
-                                                  return FutureBuilder<
-                                                      List<PaymentType>>(
-                                                    future: _paymentType,
-                                                    builder:
-                                                        (context, snapshot) {
-                                                      if (snapshot.hasError) {
-                                                        return Text(
-                                                            'Error: ${snapshot.error}');
-                                                      }
-                                                      if (snapshot
-                                                              .connectionState ==
-                                                          ConnectionState
-                                                              .waiting) {
-                                                        return const CircularProgressIndicator();
-                                                      }
-                                                      return DropdownButtonHideUnderline(
-                                                        child: DropdownButton<
-                                                            PaymentType>(
-                                                          icon: FaIcon(
-                                                            FontAwesomeIcons
-                                                                .chevronDown,
-                                                            size: 15,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(20),
-                                                          isExpanded: true,
-                                                          hint: Text(
-                                                            "Select Payment Type",
-                                                            style: TextStyle(
-                                                              color: kHint,
-                                                              fontSize: 6.5.sp,
-                                                              letterSpacing:
-                                                                  0.5,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                          ),
-                                                          items: [
-                                                            ...snapshot.data!
-                                                                .map(
-                                                              (type) =>
-                                                                  DropdownMenuItem(
-                                                                value: type,
-                                                                child: Row(
-                                                                  children: [
-                                                                    Text(
-                                                                      '${type.name}',
-                                                                      style:
-                                                                          TextStyle(
-                                                                        color:
-                                                                            kForm,
-                                                                        fontSize:
-                                                                            5.sp,
-                                                                        letterSpacing:
-                                                                            1.0,
-                                                                        fontWeight:
-                                                                            FontWeight.w600,
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                          onChanged: (type) {
-                                                            setState(() {
-                                                              _selectedPaymentType =
-                                                                  type;
-                                                            });
-                                                          },
-                                                          value:
-                                                              _selectedPaymentType,
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                }),
-                                                ),
-                                          ],
-                                        ),
-                                        SizedBox(
-                                        height: 1.h,
-                                      ),
-                                        Row(
-                                          mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text("Receipt",
-                                            style: GoogleFonts.aubrey(
-                                              fontWeight: FontWeight.w600,
-                                              color: kLabel,
-                                              fontSize: 11.sp,
-                                              letterSpacing: 1.0,
-                                            ),
-                                          ),
-                                          MSHCheckbox(
-                                            size: 35,
-                                            value: isChecked, 
-                                            isDisabled: isDisabled,
-                                            colorConfig: MSHColorConfig
-                                                  .fromCheckedUncheckedDisabled(
-                                                checkedColor: Colors.redAccent,
-                                              ),
-                                              style: style,
-                                            onChanged: (isReceipt) {
-                                              setState(() {
-                                                isChecked = isReceipt;
-                                              });
-                                            },
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 2.h,
-                                        ),
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(15),
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              if (searchResults.isNotEmpty) {
-                                                _onCheckoutButtonPressed();
-                                              } else {
-                                                showDialog(
-                                                  context: context,
-                                                  builder:
-                                                      (BuildContext context) {
-                                                    return AlertDialog(
-                                                      title: Text("No Items"),
-                                                      content: Text(
-                                                          "You must add items before proceeding."),
-                                                      actions: [
-                                                        TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                          },
-                                                          child: Text("OK"),
-                                                        ),
-                                                      ],
-                                                    );
-                                                  },
-                                                );
-                                              }
-                                            },
-                                            child: Text(
-                                              "CHECKOUT",
-                                              style: GoogleFonts.ubuntu(
-                                                fontSize: 14.sp,
-                                                letterSpacing: 1.0,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                      ]),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 4,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 85.h,
-                                  margin: kMargin,
-                                  padding: kPadding,
-                                  decoration: BoxDecoration(
-                                    color: kContainer,
-                                    borderRadius: kRadius,
-                                  ),
-                                    child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Table(
-                                        defaultVerticalAlignment:
+                                    Table(
+                                      defaultVerticalAlignment:
                                           TableCellVerticalAlignment.middle,
                                       border: TableBorder.all(
                                           color: Colors.transparent),
@@ -1311,7 +1596,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   style: GoogleFonts.aubrey(
                                                     fontWeight: FontWeight.w600,
                                                     color: kLabel,
-                                                    fontSize: 9.sp,
+                                                    fontSize: 8.sp,
                                                     letterSpacing: 1.0,
                                                   ),
                                                 ),
@@ -1326,7 +1611,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   style: GoogleFonts.aubrey(
                                                     fontWeight: FontWeight.w600,
                                                     color: kLabel,
-                                                    fontSize: 9.sp,
+                                                    fontSize: 8.sp,
                                                     letterSpacing: 1.0,
                                                   ),
                                                 ),
@@ -1341,7 +1626,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   style: GoogleFonts.aubrey(
                                                     fontWeight: FontWeight.w600,
                                                     color: kLabel,
-                                                    fontSize: 9.sp,
+                                                    fontSize: 8.sp,
                                                     letterSpacing: 1.0,
                                                   ),
                                                 ),
@@ -1356,7 +1641,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   style: GoogleFonts.aubrey(
                                                     fontWeight: FontWeight.w600,
                                                     color: kLabel,
-                                                    fontSize: 9.sp,
+                                                    fontSize: 8.sp,
                                                     letterSpacing: 1.0,
                                                   ),
                                                 ),
@@ -1371,7 +1656,7 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   style: GoogleFonts.aubrey(
                                                     fontWeight: FontWeight.w600,
                                                     color: kLabel,
-                                                    fontSize: 9.sp,
+                                                    fontSize: 8.sp,
                                                     letterSpacing: 1.0,
                                                   ),
                                                 ),
@@ -1380,231 +1665,305 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                           ],
                                         ),
                                       ],
+                                    ),
+                                    Container(
+                                      height: 66.h,
+                                      // margin: kMargin,
+                                      // padding: kPadding,
+                                      decoration: BoxDecoration(
+                                        color: kPrimaryColor,
+                                        borderRadius: kRadius,
                                       ),
-                                      Container(
-                                        height: 66.h,
-                                        // margin: kMargin,
-                                        // padding: kPadding,
-                                        decoration: BoxDecoration(
-                                          color: kPrimaryColor,
-                                          borderRadius: kRadius,
-                                        ),
-                                          child: SingleChildScrollView(
-                                            child: Column(
+                                      child: SingleChildScrollView(
+                                        child: Column(
+                                          children: [
+                                            Table(
+                                              defaultVerticalAlignment:
+                                                  TableCellVerticalAlignment
+                                                      .middle,
+                                              border: TableBorder.all(
+                                                  color: Colors.transparent),
+                                              columnWidths: {
+                                                // 0: FlexColumnWidth(1),
+                                                0: FlexColumnWidth(4),
+                                                1: FlexColumnWidth(2),
+                                                2: FlexColumnWidth(1),
+                                                3: FlexColumnWidth(2),
+                                                4: FlexColumnWidth(1),
+                                              },
                                               children: [
-                                                Table(
-                                                  defaultVerticalAlignment:
-                                                      TableCellVerticalAlignment.middle,
-                                                  border: TableBorder.all(
-                                                      color: Colors.transparent),
-                                                  columnWidths: {
-                                                    // 0: FlexColumnWidth(1),
-                                                    0: FlexColumnWidth(4),
-                                                    1: FlexColumnWidth(2),
-                                                    2: FlexColumnWidth(1),
-                                                    3: FlexColumnWidth(2),
-                                                    4: FlexColumnWidth(1),
-                                                  },
-                                                  children: [
-                                                    // TableRow(
-                                                    //   children: [
-                                                    //     TableCell(
-                                                    //       child: Padding(
-                                                    //         padding:
-                                                    //             const EdgeInsets.all(6),
-                                                    //         child: Text(
-                                                    //           "Name",
-                                                    //           style: GoogleFonts.aubrey(
-                                                    //             fontWeight: FontWeight.w600,
-                                                    //             color: kLabel,
-                                                    //             fontSize: 9.sp,
-                                                    //             letterSpacing: 1.0,
-                                                    //           ),
-                                                    //         ),
-                                                    //       ),
-                                                    //     ),
-                                                    //     TableCell(
-                                                    //       child: Padding(
-                                                    //         padding:
-                                                    //             const EdgeInsets.all(6),
-                                                    //         child: Text(
-                                                    //           "Price (MYR)",
-                                                    //           style: GoogleFonts.aubrey(
-                                                    //             fontWeight: FontWeight.w600,
-                                                    //             color: kLabel,
-                                                    //             fontSize: 9.sp,
-                                                    //             letterSpacing: 1.0,
-                                                    //           ),
-                                                    //         ),
-                                                    //       ),
-                                                    //     ),
-                                                    //     TableCell(
-                                                    //       child: Padding(
-                                                    //         padding:
-                                                    //             const EdgeInsets.all(6),
-                                                    //         child: Text(
-                                                    //           "QTY",
-                                                    //           style: GoogleFonts.aubrey(
-                                                    //             fontWeight: FontWeight.w600,
-                                                    //             color: kLabel,
-                                                    //             fontSize: 9.sp,
-                                                    //             letterSpacing: 1.0,
-                                                    //           ),
-                                                    //         ),
-                                                    //       ),
-                                                    //     ),
-                                                    //     TableCell(
-                                                    //       child: Padding(
-                                                    //         padding:
-                                                    //             const EdgeInsets.all(6),
-                                                    //         child: Text(
-                                                    //           "Subtotal (MYR)",
-                                                    //           style: GoogleFonts.aubrey(
-                                                    //             fontWeight: FontWeight.w600,
-                                                    //             color: kLabel,
-                                                    //             fontSize: 9.sp,
-                                                    //             letterSpacing: 1.0,
-                                                    //           ),
-                                                    //         ),
-                                                    //       ),
-                                                    //     ),
-                                                    //     TableCell(
-                                                    //     child: Padding(
-                                                    //       padding:
-                                                    //           const EdgeInsets.all(
-                                                    //               6),
-                                                    //       child: Text(
-                                                    //         "Del",
-                                                    //         style:
-                                                    //             GoogleFonts.aubrey(
-                                                    //           fontWeight:
-                                                    //               FontWeight.w600,
-                                                    //           color: kLabel,
-                                                    //           fontSize: 9.sp,
-                                                    //           letterSpacing: 1.0,
-                                                    //         ),
-                                                    //       ),
-                                                    //     ),
-                                                    //   ),
-                                                    //   ],
-                                                    // ),
-                                                    for (final result in searchResults)
-                                                      TableRow(
-                                                        children: [
-                                                          
-                                                          TableCell(
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets.all(6.0),
-                                                              child: Text(
-                                                                result.name,
-                                                                style:
-                                                                    GoogleFonts.breeSerif(
-                                                                  fontWeight:
-                                                                      FontWeight.w500,
-                                                                  color: kTextColor,
-                                                                  fontSize: 10.sp,
-                                                                  letterSpacing: 1.0,
-                                                                ),
-                                                              ),
+                                                for (final result
+                                                    in searchResults)
+                                                  TableRow(
+                                                    children: [
+                                                      TableCell(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(6.0),
+                                                          child: Text(
+                                                            result.name,
+                                                            style: GoogleFonts
+                                                                .breeSerif(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: kTextColor,
+                                                              fontSize: 10.sp,
+                                                              letterSpacing:
+                                                                  1.0,
                                                             ),
                                                           ),
-                                                          TableCell(
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets.all(6.0),
-                                                              child: Text(
-                                                                result.price,
-                                                                style:
-                                                                    GoogleFonts.breeSerif(
-                                                                  fontWeight:
-                                                                      FontWeight.w500,
-                                                                  color: kTextColor,
-                                                                  fontSize: 10.sp,
-                                                                  letterSpacing: 1.0,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          TableCell(
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets.all(6.0),
-                                                              child: Text(
-                                                                result.quantity as String,
-                                                                style:
-                                                                    GoogleFonts.breeSerif(
-                                                                  fontWeight:
-                                                                      FontWeight.w500,
-                                                                  color: kTextColor,
-                                                                  fontSize: 10.sp,
-                                                                  letterSpacing: 1.0,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          TableCell(
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets.all(6.0),
-                                                              child: Text(
-                                                                '${(double.parse(result.quantity ?? '0') * double.parse(result.price)).toStringAsFixed(2)}',
-                                                                style:
-                                                                    GoogleFonts.breeSerif(
-                                                                  fontWeight:
-                                                                      FontWeight.w500,
-                                                                  color: kTextColor,
-                                                                  fontSize: 10.sp,
-                                                                  letterSpacing: 1.0,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          TableCell(
-                                                            child: Padding(
-                                                              padding: const EdgeInsets.all(6.0),
-                                                              child: GestureDetector(
-                                                                onTap:() {
-                                                                  handleDeleteProduct(result);
-                                                                },
-                                                                child: FaIcon(
-                                                                  FontAwesomeIcons.trash,
-                                                                  color: Colors.redAccent,
-                                                                  size: 30
-                                                                  ),
-                                                              ),
-                                                              ),
-                                                          ),
-                                                        ],
+                                                        ),
                                                       ),
-                                                  ],
-                                                ),
+                                                      TableCell(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(6.0),
+                                                          child: Text(
+                                                            result.price,
+                                                            style: GoogleFonts
+                                                                .breeSerif(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: kTextColor,
+                                                              fontSize: 10.sp,
+                                                              letterSpacing:
+                                                                  1.0,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      TableCell(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(6.0),
+                                                          child: Text(
+                                                            result.quantity
+                                                                as String,
+                                                            style: GoogleFonts
+                                                                .breeSerif(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: kTextColor,
+                                                              fontSize: 10.sp,
+                                                              letterSpacing:
+                                                                  1.0,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      TableCell(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(6.0),
+                                                          child: Text(
+                                                            '${(double.parse(result.quantity ?? '0') * double.parse(result.price)).toStringAsFixed(2)}',
+                                                            style: GoogleFonts
+                                                                .breeSerif(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: kTextColor,
+                                                              fontSize: 10.sp,
+                                                              letterSpacing:
+                                                                  1.0,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      TableCell(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(6.0),
+                                                          child:
+                                                              GestureDetector(
+                                                            onTap: () {
+                                                              handleDeleteProduct(
+                                                                  result);
+                                                            },
+                                                            child: FaIcon(
+                                                                FontAwesomeIcons
+                                                                    .trash,
+                                                                color: Colors
+                                                                    .redAccent,
+                                                                size: 30),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                               ],
                                             ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Divider(
+                                      color: Colors.red,
+                                      thickness: 2.0,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Discount",
+                                          style: GoogleFonts.aubrey(
+                                            fontWeight: FontWeight.w600,
+                                            color: kLabel,
+                                            fontSize: 11.sp,
+                                            letterSpacing: 1.0,
                                           ),
                                         ),
-                                        Divider(
-                                          color: Colors.red,
-                                          thickness: 2.0,
+                                        Text(
+                                          "\RM${calculateDiscount().toStringAsFixed(2)}",
+                                          style: GoogleFonts.breeSerif(
+                                            fontWeight: FontWeight.w500,
+                                            color: kTextColor,
+                                            fontSize: 11.sp,
+                                            letterSpacing: 1.0,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Tax",
+                                          style: GoogleFonts.aubrey(
+                                            fontWeight: FontWeight.w600,
+                                            color: kLabel,
+                                            fontSize: 11.sp,
+                                            letterSpacing: 1.0,
+                                          ),
                                         ),
                                         Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color: kTextFilled,
+                                          ),
+                                          width: 32.w,
+                                          height: 5.h,
+                                          alignment: Alignment.centerLeft,
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 15, vertical: 15),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                "Total",
-                                                style: GoogleFonts.aubrey(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: kLabel,
+                                            horizontal: 15,
+                                            vertical: 15,
+                                          ),
+                                          child: LayoutBuilder(
+                                              builder: (context, constraints) {
+                                            return FutureBuilder<
+                                                List<PaymentTax>>(
+                                              future: _paymentTax,
+                                              builder: (context, snapshot) {
+                                                if (snapshot.hasError) {
+                                                  return Text(
+                                                      'Error: ${snapshot.error}');
+                                                }
+                                                if (snapshot.connectionState ==
+                                                    ConnectionState.waiting) {
+                                                  return const CircularProgressIndicator();
+                                                }
+                                                return DropdownButtonHideUnderline(
+                                                  child: DropdownButton<
+                                                      PaymentTax>(
+                                                    icon: FaIcon(
+                                                      FontAwesomeIcons
+                                                          .chevronDown,
+                                                      size: 15,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                    isExpanded: true,
+                                                    hint: Text(
+                                                      "Select Tax Type",
+                                                      style: TextStyle(
+                                                        color: kHint,
+                                                        fontSize: 6.5.sp,
+                                                        letterSpacing: 0.5,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                    items: [
+                                                      ...snapshot.data!.map(
+                                                        (tax) =>
+                                                            DropdownMenuItem(
+                                                          value: tax,
+                                                          child: Row(
+                                                            children: [
+                                                              Text(
+                                                                '${tax.name}',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: kForm,
+                                                                  fontSize:
+                                                                      5.sp,
+                                                                  letterSpacing:
+                                                                      1.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                    onChanged: (type) {
+                                                      setState(() {
+                                                        _selectedPaymentTax =
+                                                            type; // Update _selectedPaymentTax when a tax type is selected
+                                                      });
+                                                    },
+                                                    value: _selectedPaymentTax,
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          }),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 1.h,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Tax Amount",
+                                          style: GoogleFonts.aubrey(
+                                            fontWeight: FontWeight.w600,
+                                            color: kLabel,
+                                            fontSize: 11.sp,
+                                            letterSpacing: 1.0,
+                                          ),
+                                        ),
+                                        _selectedPaymentTax != null
+                                            ? Text(
+                                                "${_selectedPaymentTax!.taxPercentage}%", // Access taxPercentage from _selectedPaymentTax
+                                                style: GoogleFonts.breeSerif(
+                                                  fontWeight: FontWeight.w500,
+                                                  color: kTextColor,
                                                   fontSize: 11.sp,
                                                   letterSpacing: 1.0,
                                                 ),
-                                              ),
-                                              Text(
-                                                calculateTotal().toStringAsFixed(2),
+                                              )
+                                            : Text(
+                                                "0", // Show this when no tax type is selected
                                                 style: GoogleFonts.breeSerif(
                                                   fontWeight: FontWeight.w500,
                                                   color: kTextColor,
@@ -1612,201 +1971,411 @@ void _parsePaymentTypeAndTax(Map<String, dynamic> pos) {
                                                   letterSpacing: 1.0,
                                                 ),
                                               ),
-                                            ],
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 1.h,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            "Payment",
+                                            style: GoogleFonts.aubrey(
+                                              fontWeight: FontWeight.w600,
+                                              color: kLabel,
+                                              fontSize: 11.sp,
+                                              letterSpacing: 1.0,
+                                            ),
                                           ),
+                                        ),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color: kTextFilled,
+                                          ),
+                                          width: 32.w,
+                                          height: 5.h,
+                                          alignment: Alignment.centerLeft,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 15,
+                                            vertical: 15,
+                                          ),
+                                          child: LayoutBuilder(
+                                              builder: (context, constraints) {
+                                            return FutureBuilder<
+                                                List<PaymentType>>(
+                                              future: _paymentType,
+                                              builder: (context, snapshot) {
+                                                if (snapshot.hasError) {
+                                                  return Text(
+                                                      'Error: ${snapshot.error}');
+                                                }
+                                                if (snapshot.connectionState ==
+                                                    ConnectionState.waiting) {
+                                                  return const CircularProgressIndicator();
+                                                }
+                                                return DropdownButtonHideUnderline(
+                                                  child: DropdownButton<
+                                                      PaymentType>(
+                                                    icon: FaIcon(
+                                                      FontAwesomeIcons
+                                                          .chevronDown,
+                                                      size: 15,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                    isExpanded: true,
+                                                    hint: Text(
+                                                      "Select Payment Type",
+                                                      style: TextStyle(
+                                                        color: kHint,
+                                                        fontSize: 6.5.sp,
+                                                        letterSpacing: 0.5,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                    items: [
+                                                      ...snapshot.data!.map(
+                                                        (type) =>
+                                                            DropdownMenuItem(
+                                                          value: type,
+                                                          child: Row(
+                                                            children: [
+                                                              Text(
+                                                                '${type.name}',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: kForm,
+                                                                  fontSize:
+                                                                      5.sp,
+                                                                  letterSpacing:
+                                                                      1.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                    onChanged: (type) {
+                                                      setState(() {
+                                                        _selectedPaymentType =
+                                                            type;
+                                                      });
+                                                    },
+                                                    value: _selectedPaymentType,
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          }),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                // ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    FutureBuilder<List<String>>(
-                      future: fetchCategoryNames(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return Center(
-                            child: Text(
-                              'Error fetching categories: ${snapshot.error}',
-                              style: TextStyle(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                              ),
-                            ),
-                          );
-                        } else if (snapshot.hasData) {
-                          // Check if data is available
-                          List<String> categoryList = snapshot
-                              .data!; // Data is not null, use ! to access
-                          return Column(                         
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              AnimatedButtonBar(
-                                foregroundColor: Colors.blueGrey.shade400,
-                                radius: 10.0,
-                                padding: const EdgeInsets.all(16.0),
-                                invertedSelection: true,
-                                children: [
-                                  for (var categoryName in categoryList)
-                                    ButtonBarEntry(
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          categoryName,
-                                          style: GoogleFonts.breeSerif(
+                                    SizedBox(
+                                      height: 1.h,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Receipt",
+                                          style: GoogleFonts.aubrey(
                                             fontWeight: FontWeight.w600,
-                                            color: kTextColor,
-                                            fontSize: 7.sp,
+                                            color: kLabel,
+                                            fontSize: 11.sp,
                                             letterSpacing: 1.0,
                                           ),
                                         ),
-                                      ),
-                                      onTap: () {
-                                        setState(() {
-                                          selectedCategory = categoryName;
-                                        });
-                                      },
-                                    ),
-                                ],
-                              ),
-                            ],
-                          );
-                        } else {
-                          // Handle the case when snapshot.data is null
-                          return Center(
-                            child: Text(
-                              'No categories available',
-                              style: TextStyle(
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    Container(
-                      height: 54.h,
-                      width: 200.w,
-                      margin: kMargin,
-                      padding: kPadding,
-                      decoration: BoxDecoration(
-                        color: kContainer,
-                        borderRadius: kRadius,
-                      ),
-                      child: FutureBuilder<List<Product>>(
-                        future: fetchProductsForCategory(selectedCategory),
-                        builder: (context, snapshot) {
-                          if (isLoading) {
-                            return Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            );
-                          } else if (snapshot.hasError) {
-                            return Center(
-                              child: Text(
-                                'Error fetching products: ${snapshot.error}',
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w500,
-                                  color: kTextColor,
-                                ),
-                              ),
-                            );
-                          } else {
-                            List<Product> productList = snapshot.data ?? [];
-                            if (productList.isEmpty) {
-                              return Center(
-                                child: Text(
-                                  'No products available',
-                                  style: TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500,
-                                    color: kTextColor,
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return Wrap(
-                                alignment: WrapAlignment.start,
-                                children: productList
-                                    .map(
-                                      (product) => GestureDetector(
-                                        onTap: () {
-                                          addSelectedProduct(product);
-                                        },
-                                        child: Container(
-                                          width: 29.w,
-                                          height: 13.h,
-                                          alignment: Alignment.center,
-                                          margin: EdgeInsets.all(10.0),
-                                          padding: EdgeInsets.all(10.0),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(12),
-                                            color: kProduct,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey
-                                                    .withOpacity(0.5),
-                                                spreadRadius: 2,
-                                                blurRadius: 5,
-                                                offset: Offset(0, 3),
-                                              ),
-                                            ],
+                                        MSHCheckbox(
+                                          size: 35,
+                                          value: isChecked,
+                                          isDisabled: isDisabled,
+                                          colorConfig: MSHColorConfig
+                                              .fromCheckedUncheckedDisabled(
+                                            checkedColor: Colors.redAccent,
                                           ),
-                                          child: Column(
-                                            children: [
-                                              SizedBox(height: 10.0),
-                                              Text(
-                                                product.name,
-                                                style: GoogleFonts.breeSerif(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.black,
-                                                  fontSize: 6.sp,
-                                                  letterSpacing: 1.0,
-                                                ),
-                                              ),
-                                              SizedBox(height: 5.0),
-                                              Text(
-                                                '\RM${product.price}',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 6.sp,
-                                                  color: Colors.blue,
-                                                ),
-                                              ),
-                                              // SizedBox(height: 10.0),
-                                              // Text(
-                                              //   product.summary,
-                                              //   style: TextStyle(
-                                              //     fontSize: 14.0,
-                                              //   ),
-                                              // ),
-                                            ],
+                                          style: style,
+                                          onChanged: (isReceipt) {
+                                            setState(() {
+                                              isChecked = isReceipt;
+                                            });
+                                          },
+                                        )
+                                      ],
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15, vertical: 15),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "Total",
+                                            style: GoogleFonts.aubrey(
+                                              fontWeight: FontWeight.w600,
+                                              color: kLabel,
+                                              fontSize: 11.sp,
+                                              letterSpacing: 1.0,
+                                            ),
+                                          ),
+                                          Text(
+                                            calculateTotal().toStringAsFixed(2),
+                                            style: GoogleFonts.breeSerif(
+                                              fontWeight: FontWeight.w500,
+                                              color: kTextColor,
+                                              fontSize: 11.sp,
+                                              letterSpacing: 1.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 2.h,
+                                    ),
+                                    Center(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(15),
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            if (searchResults.isNotEmpty) {
+                                              _onCheckoutButtonPressed();
+                                            } else {
+                                              showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: Text("No Items"),
+                                                    content: Text(
+                                                        "You must add items before proceeding."),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: Text("OK"),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            }
+                                          },
+                                          child: Text(
+                                            "CHECKOUT",
+                                            style: GoogleFonts.ubuntu(
+                                              fontSize: 14.sp,
+                                              letterSpacing: 1.0,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    )
-                                    .toList(),
-                              );
-                            }
-                          }
-                        },
-                      )
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  // FutureBuilder<List<String>>(
+                  //   future: fetchCategoryNames(),
+                  //   builder: (context, snapshot) {
+                  //     if (snapshot.hasError) {
+                  //       return Center(
+                  //         child: Text(
+                  //           'Error fetching categories: ${snapshot.error}',
+                  //           style: TextStyle(
+                  //             fontSize: 14.0,
+                  //             fontWeight: FontWeight.w500,
+                  //             color: kTextColor,
+                  //           ),
+                  //         ),
+                  //       );
+                  //     } else if (snapshot.hasData) {
+                  //       // Check if data is available
+                  //       List<String> categoryList =
+                  //           snapshot.data!; // Data is not null, use ! to access
+                  //       return Column(
+                  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  //         children: [
+                  //           AnimatedButtonBar(
+                  //             foregroundColor: Colors.blueGrey.shade400,
+                  //             radius: 10.0,
+                  //             padding: const EdgeInsets.all(16.0),
+                  //             invertedSelection: true,
+                  //             children: [
+                  //               for (var categoryName in categoryList)
+                  //                 ButtonBarEntry(
+                  //                   child: Align(
+                  //                     alignment: Alignment.center,
+                  //                     child: Text(
+                  //                       categoryName,
+                  //                       style: GoogleFonts.breeSerif(
+                  //                         fontWeight: FontWeight.w600,
+                  //                         color: kTextColor,
+                  //                         fontSize: 7.sp,
+                  //                         letterSpacing: 1.0,
+                  //                       ),
+                  //                     ),
+                  //                   ),
+                  //                   onTap: () {
+                  //                     setState(() {
+                  //                       selectedCategory = categoryName;
+                  //                     });
+                  //                   },
+                  //                 ),
+                  //             ],
+                  //           ),
+                  //         ],
+                  //       );
+                  //     } else {
+                  //       // Handle the case when snapshot.data is null
+                  //       return Center(
+                  //         child: Text(
+                  //           'No categories available',
+                  //           style: TextStyle(
+                  //             fontSize: 16.0,
+                  //             fontWeight: FontWeight.w500,
+                  //             color: kTextColor,
+                  //           ),
+                  //         ),
+                  //       );
+                  //     }
+                  //   },
+                  // ),
+                  // Container(
+                  //     height: 54.h,
+                  //     width: 200.w,
+                  //     margin: kMargin,
+                  //     padding: kPadding,
+                  //     decoration: BoxDecoration(
+                  //       color: kContainer,
+                  //       borderRadius: kRadius,
+                  //     ),
+                  //     child: FutureBuilder<List<Product>>(
+                  //       future: fetchProductsForCategory(selectedCategory),
+                  //       builder: (context, snapshot) {
+                  //         if (isLoading) {
+                  //           return Center(
+                  //             child: CircularProgressIndicator(
+                  //               color: Colors.white,
+                  //             ),
+                  //           );
+                  //         } else if (snapshot.hasError) {
+                  //           return Center(
+                  //             child: Text(
+                  //               'Error fetching products: ${snapshot.error}',
+                  //               style: TextStyle(
+                  //                 fontSize: 16.0,
+                  //                 fontWeight: FontWeight.w500,
+                  //                 color: kTextColor,
+                  //               ),
+                  //             ),
+                  //           );
+                  //         } else {
+                  //           List<Product> productList = snapshot.data ?? [];
+                  //           if (productList.isEmpty) {
+                  //             return Center(
+                  //               child: Text(
+                  //                 'No products available',
+                  //                 style: TextStyle(
+                  //                   fontSize: 16.0,
+                  //                   fontWeight: FontWeight.w500,
+                  //                   color: kTextColor,
+                  //                 ),
+                  //               ),
+                  //             );
+                  //           } else {
+                  //             return Wrap(
+                  //               alignment: WrapAlignment.start,
+                  //               children: productList
+                  //                   .map(
+                  //                     (product) => GestureDetector(
+                  //                       onTap: () {
+                  //                         addSelectedProduct(product);
+                  //                       },
+                  //                       child: Container(
+                  //                         width: 29.w,
+                  //                         height: 13.h,
+                  //                         alignment: Alignment.center,
+                  //                         margin: EdgeInsets.all(10.0),
+                  //                         padding: EdgeInsets.all(10.0),
+                  //                         decoration: BoxDecoration(
+                  //                           borderRadius:
+                  //                               BorderRadius.circular(12),
+                  //                           color: kProduct,
+                  //                           boxShadow: [
+                  //                             BoxShadow(
+                  //                               color: Colors.grey
+                  //                                   .withOpacity(0.5),
+                  //                               spreadRadius: 2,
+                  //                               blurRadius: 5,
+                  //                               offset: Offset(0, 3),
+                  //                             ),
+                  //                           ],
+                  //                         ),
+                  //                         child: Column(
+                  //                           children: [
+                  //                             SizedBox(height: 10.0),
+                  //                             Text(
+                  //                               product.name,
+                  //                               style: GoogleFonts.breeSerif(
+                  //                                 fontWeight: FontWeight.w600,
+                  //                                 color: Colors.black,
+                  //                                 fontSize: 6.sp,
+                  //                                 letterSpacing: 1.0,
+                  //                               ),
+                  //                             ),
+                  //                             SizedBox(height: 5.0),
+                  //                             Text(
+                  //                               '\RM${product.price}',
+                  //                               style: TextStyle(
+                  //                                 fontWeight: FontWeight.w600,
+                  //                                 fontSize: 6.sp,
+                  //                                 color: Colors.blue,
+                  //                               ),
+                  //                             ),
+                  //                             // SizedBox(height: 10.0),
+                  //                             // Text(
+                  //                             //   product.summary,
+                  //                             //   style: TextStyle(
+                  //                             //     fontSize: 14.0,
+                  //                             //   ),
+                  //                             // ),
+                  //                           ],
+                  //                         ),
+                  //                       ),
+                  //                     ),
+                  //                   )
+                  //                   .toList(),
+                  //             );
+                  //           }
+                  //         }
+                  //       },
+                  //     )),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        );
+      ),
+    );
   }
 }
