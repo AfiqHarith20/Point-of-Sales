@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 const Color kScaffoldColor = Color.fromARGB(255, 196, 224, 249);
+const Color kSign = Color.fromARGB(255, 185, 95, 137);
 const Color kPrimaryColor = Color.fromARGB(255, 255, 255, 255);
 const Color kSecondaryColor = Color.fromARGB(255,103, 170, 249);
 const Color kTextColor = Color.fromARGB(255, 0, 0, 0);
