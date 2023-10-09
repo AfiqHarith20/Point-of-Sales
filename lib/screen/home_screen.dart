@@ -733,7 +733,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 4,
+                          flex: 3,
                           child: Container(
                             height: 115.h,
                             // width: 200.w,
@@ -887,7 +887,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                           borderRadius:
                                                               BorderRadius
                                                                   .circular(12),
-                                                          color: kProduct,
+                                                          color: kSecondaryColor,
                                                           boxShadow: [
                                                             BoxShadow(
                                                               color: Colors.grey
@@ -928,7 +928,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                         .w600,
                                                                 fontSize: 6.sp,
                                                                 color:
-                                                                    Colors.blue,
+                                                                    kProduct,
                                                               ),
                                                             ),
                                                             // SizedBox(height: 10.0),
@@ -1707,7 +1707,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                 .breeSerif(
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .w500,
+                                                                      .w400,
                                                               color: kTextColor,
                                                               fontSize: 10.sp,
                                                               letterSpacing:
@@ -1727,7 +1727,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                 .breeSerif(
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .w500,
+                                                                      .w400,
                                                               color: kTextColor,
                                                               fontSize: 10.sp,
                                                               letterSpacing:
@@ -1748,7 +1748,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                 .breeSerif(
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .w500,
+                                                                      .w400,
                                                               color: kTextColor,
                                                               fontSize: 10.sp,
                                                               letterSpacing:
