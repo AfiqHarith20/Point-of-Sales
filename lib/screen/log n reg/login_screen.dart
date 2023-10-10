@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pointofsales/api/api.dart';
 import 'package:pointofsales/constant.dart';
 import 'package:pointofsales/screen/home_screen.dart';
+import 'package:pointofsales/widget/custom_background_painter.dart';
 import 'package:pointofsales/widget/login/login_textfield.dart';
 import 'package:pointofsales/widget/login/square_tile.dart';
 import 'package:pointofsales/widget/progressIndicator.dart';
@@ -95,215 +96,221 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kScaffoldColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-            SizedBox(
-              height: 5.h,
-            ),
-            Text(
-              "Cartsini Point of Sales",
-              style: GoogleFonts.inder(
-                fontSize: 14.sp,
-                letterSpacing: 1.0,
-                fontWeight: FontWeight.w500,
-                color: kTextColor,
+      body: CustomPaint(
+        // size: Size(150.h, 100.w), // Set the size you want
+        painter: CustomBackgroundPainter(
+          width: 150.w, // Set the desired width
+          height: 90.h, // Set the desired height
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+              SizedBox(
+                height: 5.h,
               ),
-            ),
-            SizedBox(
-              height: 3.h,
-            ),
-            Text(
-              "LOGIN",
-              style: GoogleFonts.inder(
-                fontSize: 16.sp,
-                letterSpacing: 1.0,
-                fontWeight: FontWeight.w600,
-                color: kTextColor,
+              Text(
+                "Cartsini Point of Sales",
+                style: GoogleFonts.inder(
+                  fontSize: 14.sp,
+                  letterSpacing: 1.0,
+                  fontWeight: FontWeight.w500,
+                  color: kTextColor,
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Container(
-                      width: 80.w,
-                      height: 42.h,
-                      alignment: Alignment.center,
-                      margin: const EdgeInsets.all(10.0),
-                      padding: const EdgeInsets.all(10.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: kSecondaryColor,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
+              SizedBox(
+                height: 3.h,
+              ),
+              Text(
+                "LOGIN",
+                style: GoogleFonts.inder(
+                  fontSize: 16.sp,
+                  letterSpacing: 1.0,
+                  fontWeight: FontWeight.w600,
+                  color: kTextColor,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: Container(
+                        width: 80.w,
+                        height: 42.h,
+                        alignment: Alignment.center,
+                        margin: const EdgeInsets.all(10.0),
+                        padding: const EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: kSecondaryColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(0),
+                              child: Text(
+                                "Email:",
+                                style: GoogleFonts.ubuntu(
+                                  fontSize: 14.sp,
+                                  letterSpacing: 1.0,
+                                  fontWeight: FontWeight.w500,
+                                  color: kTextColor,
+                                ),
+                              ),
+                            ),
+                            LoginTextfield(
+                              controller: emailController,
+                              hintText: 'Please Enter Email',
+                              obscureText: false,
+                            ),
+                            SizedBox(
+                              height: 1.h,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(0),
+                              child: Text(
+                                "Password:",
+                                style: GoogleFonts.ubuntu(
+                                  fontSize: 14.sp,
+                                  letterSpacing: 1.0,
+                                  fontWeight: FontWeight.w500,
+                                  color: kTextColor,
+                                ),
+                              ),
+                            ),
+                            PasswordTextField(
+                              controller: passwordController,
+                              hintText: 'Please Enter Password',
+                              obscureText: true,
+                            ),
+                            SizedBox(
+                              height: 1.h,
+                            ),
+                            SizedBox(
+                              height: 1.h,
+                            ),
+                            _loginButton(context),
+                            // LoginButton(
+                            //   onTap: userLogin,
+                            // ),
+                          ],
+                        ),
                       ),
+                    ),
+                    Expanded(
+                      flex: 3,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.all(0),
-                            child: Text(
-                              "Email:",
-                              style: GoogleFonts.ubuntu(
-                                fontSize: 14.sp,
-                                letterSpacing: 1.0,
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                              ),
-                            ),
-                          ),
-                          LoginTextfield(
-                            controller: emailController,
-                            hintText: 'Please Enter Email',
-                            obscureText: false,
-                          ),
-                          SizedBox(
-                            height: 1.h,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(0),
-                            child: Text(
-                              "Password:",
-                              style: GoogleFonts.ubuntu(
-                                fontSize: 14.sp,
-                                letterSpacing: 1.0,
-                                fontWeight: FontWeight.w500,
-                                color: kTextColor,
-                              ),
-                            ),
-                          ),
-                          PasswordTextField(
-                            controller: passwordController,
-                            hintText: 'Please Enter Password',
-                            obscureText: true,
-                          ),
-                          SizedBox(
-                            height: 1.h,
-                          ),
-                          SizedBox(
-                            height: 1.h,
-                          ),
-                          _loginButton(context),
-                          // LoginButton(
-                          //   onTap: userLogin,
-                          // ),
+                          Image.asset("assets/login.jpg"),
                         ],
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      children: [
-                        Image.asset("assets/login.jpg"),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            // SizedBox(
-            //   height: 5.h,
-            // ),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 15),
-            //   child: Row(
-            //     children: [
-            //       Expanded(
-            //         child: Divider(
-            //           thickness: 1.0,
-            //           color: Colors.grey[400],
-            //         ),
-            //       ),
-            //       Padding(
-            //         padding: const EdgeInsets.symmetric(horizontal: 15),
-            //         child: Text(
-            //           "Or Continue With",
-            //           style: GoogleFonts.ubuntu(
-            //             fontSize: 10.sp,
-            //             letterSpacing: 1.0,
-            //             fontWeight: FontWeight.w500,
-            //             color: kScaffoldColor,
-            //           ),
-            //         ),
-            //       ),
-            //       Expanded(
-            //         child: Divider(
-            //           thickness: 1.0,
-            //           color: Colors.grey[400],
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-            // SizedBox(
-            //   height: 3.h,
-            // ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     SquareTile(
-            //       imagePath: "assets/google.png",
-            //     ),
-            //     SizedBox(
-            //       width: 4.w,
-            //     ),
-            //     SquareTile(
-            //       imagePath: "assets/apple.png",
-            //     ),
-            //   ],
-            // ),
-            // SizedBox(
-            //   height: 2.h,
-            // ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     Text(
-            //       "Not a member?",
-            //       style: GoogleFonts.ubuntu(
-            //         fontSize: 14.sp,
-            //         letterSpacing: 1.0,
-            //         fontWeight: FontWeight.w500,
-            //         color: kTextColor,
-            //       ),
-            //     ),
-            //     SizedBox(
-            //       width: 2.w,
-            //     ),
-            //     GestureDetector(
-            //       onTap: () => {
-            //         // Navigator.push(
-            //         //   context,
-            //         //   MaterialPageRoute(
-            //         //     builder: (context) => RegisterScreen(),
-            //         //   ),
-            //         // ),
-            //       },
-            //       child: Text(
-            //         "Register now",
-            //         style: GoogleFonts.ubuntu(
-            //           fontSize: 14.sp,
-            //           letterSpacing: 1.0,
-            //           fontWeight: FontWeight.w500,
-            //           color: kPrimaryColor,
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
-          ]),
+              // SizedBox(
+              //   height: 5.h,
+              // ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 15),
+              //   child: Row(
+              //     children: [
+              //       Expanded(
+              //         child: Divider(
+              //           thickness: 1.0,
+              //           color: Colors.grey[400],
+              //         ),
+              //       ),
+              //       Padding(
+              //         padding: const EdgeInsets.symmetric(horizontal: 15),
+              //         child: Text(
+              //           "Or Continue With",
+              //           style: GoogleFonts.ubuntu(
+              //             fontSize: 10.sp,
+              //             letterSpacing: 1.0,
+              //             fontWeight: FontWeight.w500,
+              //             color: kScaffoldColor,
+              //           ),
+              //         ),
+              //       ),
+              //       Expanded(
+              //         child: Divider(
+              //           thickness: 1.0,
+              //           color: Colors.grey[400],
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              // SizedBox(
+              //   height: 3.h,
+              // ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     SquareTile(
+              //       imagePath: "assets/google.png",
+              //     ),
+              //     SizedBox(
+              //       width: 4.w,
+              //     ),
+              //     SquareTile(
+              //       imagePath: "assets/apple.png",
+              //     ),
+              //   ],
+              // ),
+              // SizedBox(
+              //   height: 2.h,
+              // ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     Text(
+              //       "Not a member?",
+              //       style: GoogleFonts.ubuntu(
+              //         fontSize: 14.sp,
+              //         letterSpacing: 1.0,
+              //         fontWeight: FontWeight.w500,
+              //         color: kTextColor,
+              //       ),
+              //     ),
+              //     SizedBox(
+              //       width: 2.w,
+              //     ),
+              //     GestureDetector(
+              //       onTap: () => {
+              //         // Navigator.push(
+              //         //   context,
+              //         //   MaterialPageRoute(
+              //         //     builder: (context) => RegisterScreen(),
+              //         //   ),
+              //         // ),
+              //       },
+              //       child: Text(
+              //         "Register now",
+              //         style: GoogleFonts.ubuntu(
+              //           fontSize: 14.sp,
+              //           letterSpacing: 1.0,
+              //           fontWeight: FontWeight.w500,
+              //           color: kPrimaryColor,
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+            ]),
+          ),
         ),
       ),
     );
