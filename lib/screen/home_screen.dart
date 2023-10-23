@@ -639,7 +639,7 @@ class _HomeScreenState extends State<HomeScreen> {
             fontSize: 16.sp,
             letterSpacing: 1.0,
             fontWeight: FontWeight.w500,
-            color: Colors.red.shade600,
+            color: kTextColor,
           ),
         ),
         // actions: <Widget>[
@@ -733,7 +733,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 3,
+                          flex: 4,
                           child: Container(
                             height: 115.h,
                             // width: 200.w,
@@ -820,7 +820,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 Container(
                                     height: 54.h,
-                                    width: 200.w,
+                                    width: 220.w,
                                     margin: kMargin,
                                     padding: kPadding,
                                     decoration: BoxDecoration(
@@ -854,10 +854,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                           if (productList.isEmpty) {
                                             return Center(
                                               child: Text(
-                                                'No products available',
+                                                'No Products Available',
                                                 style: TextStyle(
-                                                  fontSize: 16.0,
-                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 12.sp,
+                                                  fontWeight: FontWeight.w600,
                                                   color: kTextColor,
                                                 ),
                                               ),
@@ -874,7 +874,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             product);
                                                       },
                                                       child: Container(
-                                                        width: 20.w,
+                                                        width: 21.w,
                                                         height: 13.h,
                                                         alignment:
                                                             Alignment.center,
@@ -928,7 +928,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                         .w600,
                                                                 fontSize: 6.sp,
                                                                 color:
-                                                                    kProduct,
+                                                                    kPrimaryColor,
                                                               ),
                                                             ),
                                                             // SizedBox(height: 10.0),
@@ -1596,7 +1596,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   style: GoogleFonts.aubrey(
                                                     fontWeight: FontWeight.w600,
                                                     color: kLabel,
-                                                    fontSize: 8.sp,
+                                                    fontSize: 7.sp,
                                                     letterSpacing: 1.0,
                                                   ),
                                                 ),
@@ -1611,7 +1611,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   style: GoogleFonts.aubrey(
                                                     fontWeight: FontWeight.w600,
                                                     color: kLabel,
-                                                    fontSize: 8.sp,
+                                                    fontSize: 7.sp,
                                                     letterSpacing: 1.0,
                                                   ),
                                                 ),
@@ -1626,7 +1626,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   style: GoogleFonts.aubrey(
                                                     fontWeight: FontWeight.w600,
                                                     color: kLabel,
-                                                    fontSize: 8.sp,
+                                                    fontSize: 7.sp,
                                                     letterSpacing: 1.0,
                                                   ),
                                                 ),
@@ -1641,7 +1641,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   style: GoogleFonts.aubrey(
                                                     fontWeight: FontWeight.w600,
                                                     color: kLabel,
-                                                    fontSize: 8.sp,
+                                                    fontSize: 7.sp,
                                                     letterSpacing: 1.0,
                                                   ),
                                                 ),
@@ -1656,7 +1656,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   style: GoogleFonts.aubrey(
                                                     fontWeight: FontWeight.w600,
                                                     color: kLabel,
-                                                    fontSize: 8.sp,
+                                                    fontSize: 7.sp,
                                                     letterSpacing: 1.0,
                                                   ),
                                                 ),
@@ -1709,7 +1709,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                   FontWeight
                                                                       .w400,
                                                               color: kTextColor,
-                                                              fontSize: 10.sp,
+                                                              fontSize: 7.sp,
                                                               letterSpacing:
                                                                   1.0,
                                                             ),
@@ -1729,7 +1729,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                   FontWeight
                                                                       .w400,
                                                               color: kTextColor,
-                                                              fontSize: 10.sp,
+                                                              fontSize: 7.sp,
                                                               letterSpacing:
                                                                   1.0,
                                                             ),
@@ -1750,7 +1750,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                   FontWeight
                                                                       .w400,
                                                               color: kTextColor,
-                                                              fontSize: 10.sp,
+                                                              fontSize: 7.sp,
                                                               letterSpacing:
                                                                   1.0,
                                                             ),
@@ -1770,7 +1770,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                   FontWeight
                                                                       .w500,
                                                               color: kTextColor,
-                                                              fontSize: 10.sp,
+                                                              fontSize: 7.sp,
                                                               letterSpacing:
                                                                   1.0,
                                                             ),
@@ -1815,19 +1815,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                       children: [
                                         Text(
                                           "Discount",
-                                          style: GoogleFonts.aubrey(
+                                          style: GoogleFonts.inder(
                                             fontWeight: FontWeight.w600,
                                             color: kLabel,
-                                            fontSize: 11.sp,
+                                            fontSize: 9.sp,
                                             letterSpacing: 1.0,
                                           ),
                                         ),
                                         Text(
                                           "\RM${calculateDiscount().toStringAsFixed(2)}",
-                                          style: GoogleFonts.breeSerif(
+                                          style: GoogleFonts.inder(
                                             fontWeight: FontWeight.w500,
                                             color: kTextColor,
-                                            fontSize: 11.sp,
+                                            fontSize: 9.sp,
                                             letterSpacing: 1.0,
                                           ),
                                         ),
@@ -1839,10 +1839,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       children: [
                                         Text(
                                           "Tax",
-                                          style: GoogleFonts.aubrey(
+                                          style: GoogleFonts.inder(
                                             fontWeight: FontWeight.w600,
                                             color: kLabel,
-                                            fontSize: 11.sp,
+                                            fontSize: 9.sp,
                                             letterSpacing: 1.0,
                                           ),
                                         ),
@@ -1889,7 +1889,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       "Select Tax Type",
                                                       style: TextStyle(
                                                         color: kHint,
-                                                        fontSize: 6.5.sp,
+                                                        fontSize: 7.sp,
                                                         letterSpacing: 0.5,
                                                         fontWeight:
                                                             FontWeight.w500,
@@ -1908,7 +1908,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                     TextStyle(
                                                                   color: kForm,
                                                                   fontSize:
-                                                                      5.sp,
+                                                                      6.sp,
                                                                   letterSpacing:
                                                                       1.0,
                                                                   fontWeight:
@@ -1945,29 +1945,29 @@ class _HomeScreenState extends State<HomeScreen> {
                                       children: [
                                         Text(
                                           "Tax Amount",
-                                          style: GoogleFonts.aubrey(
+                                          style: GoogleFonts.inder(
                                             fontWeight: FontWeight.w600,
                                             color: kLabel,
-                                            fontSize: 11.sp,
+                                            fontSize: 9.sp,
                                             letterSpacing: 1.0,
                                           ),
                                         ),
                                         _selectedPaymentTax != null
                                             ? Text(
                                                 "${_selectedPaymentTax!.taxPercentage}%", // Access taxPercentage from _selectedPaymentTax
-                                                style: GoogleFonts.breeSerif(
+                                                style: GoogleFonts.inder(
                                                   fontWeight: FontWeight.w500,
                                                   color: kTextColor,
-                                                  fontSize: 11.sp,
+                                                  fontSize: 9.sp,
                                                   letterSpacing: 1.0,
                                                 ),
                                               )
                                             : Text(
                                                 "0", // Show this when no tax type is selected
-                                                style: GoogleFonts.breeSerif(
+                                                style: GoogleFonts.inder(
                                                   fontWeight: FontWeight.w500,
                                                   color: kTextColor,
-                                                  fontSize: 11.sp,
+                                                  fontSize: 9.sp,
                                                   letterSpacing: 1.0,
                                                 ),
                                               ),
@@ -1983,10 +1983,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Expanded(
                                           child: Text(
                                             "Payment",
-                                            style: GoogleFonts.aubrey(
+                                            style: GoogleFonts.inder(
                                               fontWeight: FontWeight.w600,
                                               color: kLabel,
-                                              fontSize: 11.sp,
+                                              fontSize: 9.sp,
                                               letterSpacing: 1.0,
                                             ),
                                           ),
@@ -2034,7 +2034,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       "Select Payment Type",
                                                       style: TextStyle(
                                                         color: kHint,
-                                                        fontSize: 6.5.sp,
+                                                        fontSize: 7.sp,
                                                         letterSpacing: 0.5,
                                                         fontWeight:
                                                             FontWeight.w500,
@@ -2053,7 +2053,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                     TextStyle(
                                                                   color: kForm,
                                                                   fontSize:
-                                                                      5.sp,
+                                                                      6.sp,
                                                                   letterSpacing:
                                                                       1.0,
                                                                   fontWeight:
@@ -2090,10 +2090,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       children: [
                                         Text(
                                           "Receipt",
-                                          style: GoogleFonts.aubrey(
+                                          style: GoogleFonts.inder(
                                             fontWeight: FontWeight.w600,
                                             color: kLabel,
-                                            fontSize: 11.sp,
+                                            fontSize: 9.sp,
                                             letterSpacing: 1.0,
                                           ),
                                         ),
@@ -2123,19 +2123,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                         children: [
                                           Text(
                                             "Total",
-                                            style: GoogleFonts.aubrey(
+                                            style: GoogleFonts.inder(
                                               fontWeight: FontWeight.w600,
                                               color: kLabel,
-                                              fontSize: 11.sp,
+                                              fontSize: 9.sp,
                                               letterSpacing: 1.0,
                                             ),
                                           ),
                                           Text(
                                             calculateTotal().toStringAsFixed(2),
-                                            style: GoogleFonts.breeSerif(
+                                            style: GoogleFonts.inder(
                                               fontWeight: FontWeight.w500,
                                               color: kTextColor,
-                                              fontSize: 11.sp,
+                                              fontSize: 9.sp,
                                               letterSpacing: 1.0,
                                             ),
                                           ),

@@ -145,6 +145,7 @@ Future<void> _refreshPage() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: kContainer,
         leading: Builder(
           builder: (context) {
             return IconButton(
@@ -161,7 +162,7 @@ Future<void> _refreshPage() async {
         centerTitle: true,
         title: Text(
           "INVOICE",
-          style: GoogleFonts.ubuntu(
+          style: GoogleFonts.poppins(
             fontSize: 16.sp,
             letterSpacing: 1.0,
             fontWeight: FontWeight.w500,
@@ -206,28 +207,28 @@ Future<void> _refreshPage() async {
                         children: [
                           Text(
                             "Order",
-                            style: GoogleFonts.aubrey(
+                            style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w600,
                               color: kLabel,
-                              fontSize: 16.sp,
+                              fontSize: 14.sp,
                               letterSpacing: 2.0,
                             ),
                           ),
                           Text(
                             "Date",
-                            style: GoogleFonts.aubrey(
+                            style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w600,
                               color: kLabel,
-                              fontSize: 16.sp,
+                              fontSize: 14.sp,
                               letterSpacing: 2.0,
                             ),
                           ),
                           Text(
                             "Customer",
-                            style: GoogleFonts.aubrey(
+                            style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w600,
                               color: kLabel,
-                              fontSize: 16.sp,
+                              fontSize: 14.sp,
                               letterSpacing: 2.0,
                             ),
                           ),
@@ -322,10 +323,10 @@ Future<void> _refreshPage() async {
                               padding: const EdgeInsets.all(6),
                               child: Text(
                                 "Product Name",
-                                style: GoogleFonts.aubrey(
+                                style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w600,
                                   color: kLabel,
-                                  fontSize: 14.sp,
+                                  fontSize: 12.sp,
                                   letterSpacing: 2.0,
                                 ),
                               ),
@@ -336,10 +337,10 @@ Future<void> _refreshPage() async {
                               padding: const EdgeInsets.all(6),
                               child: Text(
                                 "Price (MYR)",
-                                style: GoogleFonts.aubrey(
+                                style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w600,
                                   color: kLabel,
-                                  fontSize: 14.sp,
+                                  fontSize: 12.sp,
                                   letterSpacing: 2.0,
                                 ),
                               ),
@@ -350,10 +351,10 @@ Future<void> _refreshPage() async {
                               padding: const EdgeInsets.all(6),
                               child: Text(
                                 "Quantity",
-                                style: GoogleFonts.aubrey(
+                                style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w600,
                                   color: kLabel,
-                                  fontSize: 14.sp,
+                                  fontSize: 12.sp,
                                   letterSpacing: 2.0,
                                 ),
                               ),
@@ -385,7 +386,7 @@ Future<void> _refreshPage() async {
                                 style: GoogleFonts.breeSerif(
                                   fontWeight: FontWeight.w500,
                                   color: kTextColor,
-                                  fontSize: 12.sp,
+                                  fontSize: 10.sp,
                                   letterSpacing: 1.0,
                                 ),
                               ),
@@ -401,7 +402,7 @@ Future<void> _refreshPage() async {
                                 style: GoogleFonts.breeSerif(
                                   fontWeight: FontWeight.w500,
                                   color: kTextColor,
-                                  fontSize: 12.sp,
+                                  fontSize: 10.sp,
                                   letterSpacing: 1.0,
                                 ),
                               ),
@@ -415,7 +416,7 @@ Future<void> _refreshPage() async {
                                 style: GoogleFonts.breeSerif(
                                   fontWeight: FontWeight.w500,
                                   color: kTextColor,
-                                  fontSize: 12.sp,
+                                  fontSize: 10.sp,
                                   letterSpacing: 1.0,
                                 ),
                               ),
@@ -431,7 +432,7 @@ Future<void> _refreshPage() async {
                                 style: GoogleFonts.breeSerif(
                                   fontWeight: FontWeight.w500,
                                   color: kTextColor,
-                                  fontSize: 12.sp,
+                                  fontSize: 10.sp,
                                   letterSpacing: 1.0,
                                 ),
                               ),
@@ -541,10 +542,10 @@ Future<void> _refreshPage() async {
                     children: [
                       Text(
                         "Total",
-                        style: GoogleFonts.aubrey(
+                        style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w600,
                           color: kLabel,
-                          fontSize: 14.sp,
+                          fontSize: 12.sp,
                           letterSpacing: 2.0,
                         ),
                       ),
@@ -572,10 +573,10 @@ Future<void> _refreshPage() async {
                     children: [
                       Text(
                         "Payment",
-                        style: GoogleFonts.aubrey(
+                        style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w600,
                           color: kLabel,
-                          fontSize: 14.sp,
+                          fontSize: 12.sp,
                           letterSpacing: 2.0,
                         ),
                       ),

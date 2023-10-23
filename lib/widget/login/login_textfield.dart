@@ -100,7 +100,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
               child: FaIcon(
                 _obscureText ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
                 color: kHint,
-                size: 35,
+                size: 20,
               ),
             ),
           ),
