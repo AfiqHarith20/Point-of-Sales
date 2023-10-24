@@ -109,9 +109,11 @@ void initState() {
         children: <Widget>[
           DrawerHeader(
             child: Text(
-              'Welcome $userName',
-              style: GoogleFonts.aBeeZee(
-                fontSize: 14.sp,
+              userName != null && userName!.isNotEmpty
+                  ? 'Welcome $userName'
+                  : 'Welcome to Cartsini POS',
+              style: GoogleFonts.ubuntu(
+                fontSize: 12.sp,
                 color: kTextColor,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 1.0,
@@ -169,48 +171,48 @@ void initState() {
           //     ),
           //   },
           // ),
-          ListTile(
-              leading: FaIcon(
-                FontAwesomeIcons.clockRotateLeft,
-              ),
-              title: Text('History'),
-              onTap: () => {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HistoryScreen(),
-                      ),
-                    ),
-                  }),
-          ListTile(
-              leading: FaIcon(
-                FontAwesomeIcons.clipboardList,
-              ),
-              title: Text('Report'),
-              onTap: () => {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReportScreen(),
-                      ),
-                    ),
-                  }),
-          ListTile(
-              leading: FaIcon(FontAwesomeIcons.user),
-              title: Text('Profile'),
-              onTap: () => {Navigator.of(context).pop()}),
-          ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
-            onTap: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SettingScreen(),
-                ),
-              ),
-            },
-          ),
+          // ListTile(
+          //     leading: FaIcon(
+          //       FontAwesomeIcons.clockRotateLeft,
+          //     ),
+          //     title: Text('History'),
+          //     onTap: () => {
+          //           Navigator.push(
+          //             context,
+          //             MaterialPageRoute(
+          //               builder: (context) => HistoryScreen(),
+          //             ),
+          //           ),
+          //         }),
+          // ListTile(
+          //     leading: FaIcon(
+          //       FontAwesomeIcons.clipboardList,
+          //     ),
+          //     title: Text('Report'),
+          //     onTap: () => {
+          //           Navigator.push(
+          //             context,
+          //             MaterialPageRoute(
+          //               builder: (context) => ReportScreen(),
+          //             ),
+          //           ),
+          //         }),
+          // ListTile(
+          //     leading: FaIcon(FontAwesomeIcons.user),
+          //     title: Text('Profile'),
+          //     onTap: () => {Navigator.of(context).pop()}),
+          // ListTile(
+          //   leading: Icon(Icons.settings),
+          //   title: Text('Settings'),
+          //   onTap: () => {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => SettingScreen(),
+          //       ),
+          //     ),
+          //   },
+          // ),
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
