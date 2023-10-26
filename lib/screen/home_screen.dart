@@ -1793,7 +1793,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                     .trash,
                                                                 color: Colors
                                                                     .redAccent,
-                                                                size: 30),
+                                                                size: 9.sp,
+                                                                ),
                                                           ),
                                                         ),
                                                       ),

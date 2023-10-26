@@ -8,7 +8,6 @@ import 'package:pointofsales/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:sizer/sizer.dart';
-
 import '../../models/product_model.dart';
 class AddPoductDialogContent extends StatefulWidget {
   final int posId;
@@ -207,7 +206,7 @@ class _AddPoductDialogContentState extends State<AddPoductDialogContent> {
                       );
                     } else {
                       List<ProductElement> productList =
-                          (snapshot.data as List<ProductElement>) ?? [];
+                          (snapshot.data as List<ProductElement>);
                       if (productList.isEmpty) {
                         return Center(
                           child: Text(

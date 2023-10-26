@@ -278,7 +278,7 @@ Future<void> _refreshPage() async {
                                   ),
                                 ),
                                 Text(
-                                  custEmail ?? 'null',
+                                  custEmail ?? 'Loading',
                                   style: GoogleFonts.breeSerif(
                                     fontWeight: FontWeight.w500,
                                     color: kTextColor,
@@ -582,7 +582,7 @@ Future<void> _refreshPage() async {
                       ),
                       Text(
                         paymentType ??
-                            'null', // Use the paymentTypes variable directly
+                            'Loading', // Use the paymentTypes variable directly
                         style: GoogleFonts.breeSerif(
                           fontWeight: FontWeight.w500,
                           color: kTextColor,
