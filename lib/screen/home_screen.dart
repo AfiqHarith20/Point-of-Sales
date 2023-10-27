@@ -1682,7 +1682,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   TableCellVerticalAlignment
                                                       .middle,
                                               border: TableBorder.all(
-                                                  color: Colors.transparent),
+                                                color: Colors.transparent,
+                                              ),
                                               columnWidths: {
                                                 // 0: FlexColumnWidth(1),
                                                 0: FlexColumnWidth(4),
