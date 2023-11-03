@@ -173,7 +173,7 @@ Future<void> _refreshPage() async {
           IconButton(
             icon: FaIcon(
               FontAwesomeIcons.circleXmark,
-              color: Colors.white,
+              color: Colors.red,
             ),
             onPressed: () {
               Navigator.push(
